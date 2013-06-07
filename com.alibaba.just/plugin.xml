@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <extension
+         point="org.eclipse.ui.newWizards">
+      <category
+            id="justeclipse"
+            name="Just Eclipse">
+      </category>
+      <wizard
+            category="justeclipse"
+            class="com.alibaba.just.ui.wizards.ModuleNewWizard"
+            icon="icons/module.gif"
+            id="com.alibaba.just.ui.wizards.ModuleNewWizard"
+            name="New module file">
+      </wizard>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            class="com.alibaba.just.ui.editors.JavascriptEditor"
+            contributorClass="org.eclipse.ui.texteditor.BasicTextEditorActionContributor"
+            extensions="js"
+            icon="icons/sample.gif"
+            id="com.alibaba.just.ui.editors.JavascriptEditor"
+            name="Just Module Editor">
+      </editor>
+   </extension>
+   <extension
+         point="org.eclipse.ui.propertyPages">
+      <page
+            adaptable="true"
+            class="com.alibaba.just.ui.properties.ProjectPropertyPage"
+            icon="icons/sample.gif"
+            id="com.alibaba.just.ui.properties.ProjectPropertyPage"
+            name="Just Project Page"
+            objectClass="org.eclipse.core.resources.IProject">
+         <enabledWhen>
+            <adapt
+                  type="org.eclipse.core.resources.IProject">
+            </adapt>
+         </enabledWhen>
+      </page>
+   </extension>
+   <extension id="com.alibaba.just.ui.resources.ProjectPreferences" point="org.eclipse.core.runtime.preferences" name="Just Preferences">
+  <initializer
+        class="com.alibaba.just.ui.preferences.PreferenceInitializer">
+  </initializer>
+	</extension>
+   <extension
+         point="org.eclipse.ui.popupMenus">
+      <objectContribution
+            adaptable="false"
+            id="com.alibaba.just.contribution1"
+            objectClass="org.eclipse.core.resources.IResource">
+         <menu
+               icon="icons/sample.gif"
+               id="com.alibaba.just.menu"
+               label="Just Eclipse"
+               path="additions">
+            <separator
+                  name="just">
+            </separator>
+         </menu>
+         <visibility>
+            <or>
+               <objectClass
+                     name="org.eclipse.core.resources.IResource">
+               </objectClass>
+            </or>
+         </visibility>
+         <action
+               class="com.alibaba.just.ui.popup.actions.AddRootPathAction"
+               enablesFor="1"
+               id="com.alibaba.just.ui.popup.actions.AddRootPathAction"
+               label="Add To Root Path"
+               menubarPath="com.alibaba.just.menu/just">
+            <enablement>
+               <and>
+                  <objectClass
+                        name="org.eclipse.core.resources.IFolder">
+                  </objectClass>
+               </and>
+            </enablement>
+         </action>
+         <action
+               class="com.alibaba.just.ui.popup.actions.RemoveRootPathAction"
+               enablesFor="1"
+               id="com.alibaba.just.ui.popup.actions.RemoveRootPathAction"
+               label="Remove From Root Path"
+               menubarPath="com.alibaba.just.menu/just">
+            <enablement>
+               <and>
+                  <objectClass
+                        name="org.eclipse.core.resources.IFolder">
+                  </objectClass></and></enablement>
+         </action>
+         <action
+               class="com.alibaba.just.ui.popup.actions.ImportModulesAction"
+               enablesFor="1"
+               id="com.alibaba.just.newAction"
+               label="Import Modules"
+               menubarPath="com.alibaba.just.menu/just">
+            <enablement>
+               <or>
+                  <objectClass
+                        name="org.eclipse.core.resources.IFile">
+                  </objectClass>
+                  <objectState
+                        name="extension"
+                        value="*js">
+                  </objectState>
+               </or>
+            </enablement>
+         </action>
+         <action
+               class="com.alibaba.just.ui.popup.actions.NewModuleWizardAction"
+               enablesFor="1"
+               icon="icons/module.gif"
+               id="com.alibaba.just.ui.popup.actions.NewModuleWizardAction"
+               label="New Module File"
+               menubarPath="com.alibaba.just.menu/just">
+         </action>
+      </objectContribution>
+      <viewerContribution
+            targetID="#AbstractTextEditorContext"
+            id="com.alibaba.just.viewContribution1">
+         <menu
+               icon="icons/sample.gif"
+               id="com.alibaba.just.view.menu"
+               label="Just Eclipse"
+               path="additions">
+            <separator
+                  name="just">
+            </separator>
+         </menu>
+         <action
+               class="com.alibaba.just.ui.popup.actions.ImportModulesViewAction"
+               definitionId="com.alibaba.just.ui.commands.importModulesCommand"
+               id="com.alibaba.just.ui.popup.actions.ImportModuleViewAction"
+               label="Import Modules"
+               menubarPath="com.alibaba.just.view.menu/just">
+         </action>
+         <action
+               class="com.alibaba.just.ui.popup.actions.AddModuleViewAction"
+               definitionId="com.alibaba.just.ui.commands.addModuleCommand"
+               id="com.alibaba.just.ui.popup.actions.AddModuleViewAction"
+               label="Add Module"
+               menubarPath="com.alibaba.just.view.menu/just">
+         </action>
+      </viewerContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            class="com.alibaba.just.ui.preferences.PreferencePage"
+            id="com.alibaba.just.ui.preferences.PreferencePage"
+            name="Just Eclipse">
+      </page>
+      <page
+            category="com.alibaba.just.ui.preferences.PreferencePage"
+            class="com.alibaba.just.ui.preferences.FileTplPreferencePage"
+            id="com.alibaba.just.ui.preferences.TemplatePreferencePage"
+            name="Templates">
+      </page>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editors.templates">
+      <contextType
+            class="com.alibaba.just.ui.templates.FileTemplateContextType"
+            id="com.alibaba.just.ui.templates.FileTemplateContextType"
+            name="just eclipse">
+      </contextType>
+      <include
+            file="tpl/moduleTemplates.xml">
+      </include>
+   </extension>
+   <extension
+         point="org.eclipse.ui.bindings">
+      <key
+            commandId="com.alibaba.just.ui.commands.importModulesCommand"
+            contextId="org.eclipse.ui.contexts.window"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+M3+0">
+      </key>
+      <key
+            commandId="com.alibaba.just.ui.commands.addModuleCommand"
+            contextId="org.eclipse.ui.contexts.window"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+M3+9">
+      </key>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            categoryId="com.alibaba.just.ui.commands"
+            defaultHandler="com.alibaba.just.ui.handlers.ImportModulesViewHandler"
+            id="com.alibaba.just.ui.commands.importModulesCommand"
+            name="Import Modules">
+      </command>
+      <command
+            categoryId="com.alibaba.just.ui.commands"
+            defaultHandler="com.alibaba.just.ui.handlers.AddModuleViewHandler"
+            id="com.alibaba.just.ui.commands.addModuleCommand"
+            name="Add Module">
+      </command>
+      <category
+            id="com.alibaba.just.ui.commands"
+            name="just eclipse commands">
+      </category>
+   </extension>
+   <extension
+         point="org.eclipse.ui.views">
+      <category
+            id="com.alibaba.just"
+            name="Just Eclipse">
+      </category>
+      <view
+            category="com.alibaba.just"
+            class="com.alibaba.just.ui.views.ModuleView"
+            icon="icons/sample.gif"
+            id="com.alibaba.just.ui.views.ModuleView"
+            name="Module View">
+      </view>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension
+            targetID="org.eclipse.ui.resourcePerspective">
+         <view
+               id="com.alibaba.just.ui.views.ModuleView"
+               ratio="0.5"
+               relationship="right"
+               relative="org.eclipse.ui.views.TaskList">
+         </view>
+      </perspectiveExtension>
+   </extension>
+   <extension
+         point="org.eclipse.help.contexts">
+      <contexts
+            file="contexts.xml">
+      </contexts>
+   </extension>
+   <extension
+         point="org.eclipse.ui.decorators">
+      <decorator
+            adaptable="true"
+            class="com.alibaba.just.ui.decorators.RootPathDecorator"
+            id="com.alibaba.just.ui.decorators.RootPathDecorator"
+            label="Module Root Path Decorator"
+            lightweight="true"
+            state="true">
+         <enablement>
+            <objectClass name="org.eclipse.core.resources.IFolder">
+            </objectClass>
+         </enablement>
+      </decorator>
+   </extension>
+
+
+</plugin>
