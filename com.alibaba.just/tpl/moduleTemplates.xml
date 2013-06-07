@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<templates>
+
+    <template
+        id="com.alibaba.just.ui.templates.createModule"
+        name="Create Module"
+        autoinsert="false"
+        context="com.alibaba.just.ui.templates.FileTemplateContextType"
+        deleted="false"
+        description="Create Module"
+        enabled="true" >/**
+ * @fileOverview File description
+ * @author authorName
+ * @version ${dateTime}
+ */
+define('${moduleName}',
+		[${requiredModuleArrayStr}], 
+		function(${requiredModuleParamsStr}){
+		
+});</template>
+
+    <template
+        id="com.alibaba.just.ui.templates.createAnonymousModule"
+        name="Create Anonymous Module"
+        autoinsert="false"
+        context="com.alibaba.just.ui.templates.FileTemplateContextType"
+        deleted="false"
+        description="Create Anonymous Module"
+        enabled="true" >/**
+ * @fileOverview File description
+ * @author authorName
+ * @version ${dateTime}
+ */
+define([${requiredModuleArrayStr}], 
+	   function(${requiredModuleParamsStr}){
+		
+});</template>
+
+    <template
+        id="com.alibaba.just.ui.templates.createMerge"
+        name="Create Merge File"
+        autoinsert="false"
+        context="com.alibaba.just.ui.templates.FileTemplateContextType"
+        deleted="false"
+        description="Create Merge File"
+        enabled="true" >/*!
+ * 
+ * @author authorName
+ * @version ${dateTime}
+ * !!cmd:compress=true
+ * */
+ 
+/*merge start*/
+(function() {
+    ImportJavscript = {
+        url: function(url) {
+            document.write('&lt;script type="text/javascript" src="' + url + '"&gt;&lt;/scr' + 'ipt&gt;');
+        }
+    };
+})();
+/*merge end*/
+
+/*@module_merge_start*/
+/*@module_merge_end*/</template>
+
+    <template
+        id="com.alibaba.just.ui.templates.createMergeContent"
+        name="Create Merge Content"
+        autoinsert="false"
+        context="com.alibaba.just.ui.templates.FileTemplateContextType"
+        deleted="false"
+        description="Create Merge Content"
+        enabled="true" >#foreach($module in $requiredModules)
+#if(!$module.isAnonymous() &amp;&amp; $module.getName() != "jquery")
+ImportJavscript.url('http://style.china.alibaba.com/app/trade/js/${module.getName()}.js');
+#end
+#end        
+</template>
+</templates>
