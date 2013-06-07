@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         id="JSDTModuleCompletionProposalComputer"
+         name="Just Module Proposals"
+         point="org.eclipse.wst.jsdt.ui.javaCompletionProposalComputer">
+      <javaCompletionProposalComputer
+            activate="true"
+            categoryId="com.alibaba.just.jsdt.justModuleProposals"
+            class="com.alibaba.just.jsdt.editors.contentassist.JSDTModuleCompletionProposalComputer">
+         <partition
+               type="__java_string">
+         </partition>
+         <partition
+               type="__java_character">
+         </partition>
+      </javaCompletionProposalComputer>
+   </extension>
+   <extension
+         id="justModuleProposals"
+         name="Just Module Proposals"
+         point="org.eclipse.wst.jsdt.ui.javaCompletionProposalComputer">
+      <proposalCategory
+            icon="icons/sample.gif">
+      </proposalCategory>
+   </extension>
+</plugin>
