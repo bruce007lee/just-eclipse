@@ -72,7 +72,7 @@ define([${requiredModuleArrayStr}],
         description="Create Merge Content"
         enabled="true" >#foreach($module in $requiredModules)
 #if(!$module.isAnonymous() &amp;&amp; $module.getName() != "jquery")
-ImportJavscript.url('http://style.china.alibaba.com/app/trade/js/${module.getName()}.js');
+ImportJavscript.url('http://style.c.aliimg.com/app/trade/js/${module.getName()}.js');
 #end
 #end        
 </template>
