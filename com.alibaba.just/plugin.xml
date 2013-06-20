@@ -143,6 +143,13 @@
             </separator>
          </menu>
          <action
+               class="com.alibaba.just.ui.popup.actions.ImportFolderModulesViewAction"
+               definitionId="com.alibaba.just.ui.commands.importFolderModulesCommand"
+               id="com.alibaba.just.ui.popup.actions.ImportFolderModuleViewAction"
+               label="Import Folder Modules..."
+               menubarPath="com.alibaba.just.view.menu/just">
+         </action>
+         <action
                class="com.alibaba.just.ui.popup.actions.ImportModulesViewAction"
                definitionId="com.alibaba.just.ui.commands.importModulesCommand"
                id="com.alibaba.just.ui.popup.actions.ImportModuleViewAction"
@@ -197,9 +204,21 @@
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M1+M3+9">
       </key>
+      <key
+            commandId="com.alibaba.just.ui.commands.importFolderModulesCommand"
+            contextId="org.eclipse.ui.contexts.window"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+M3+8">
+      </key>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
+      <command
+            categoryId="com.alibaba.just.ui.commands"
+            defaultHandler="com.alibaba.just.ui.handlers.ImportFolderModulesViewHandler"
+            id="com.alibaba.just.ui.commands.importFolderModulesCommand"
+            name="Import Folder Modules">
+      </command>
       <command
             categoryId="com.alibaba.just.ui.commands"
             defaultHandler="com.alibaba.just.ui.handlers.ImportModulesViewHandler"

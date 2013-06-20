@@ -4,21 +4,16 @@
 package com.alibaba.just.ui.popup.actions;
 
 import java.util.List;
-import java.util.Vector;
 
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.internal.ide.IDEWorkbenchPlugin;
 
-import com.alibaba.just.PluginConstants;
 import com.alibaba.just.ui.decorators.RootPathDecorator;
 import com.alibaba.just.ui.util.PreferenceUtil;
 import com.alibaba.just.ui.util.UIUtil;
