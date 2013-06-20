@@ -468,14 +468,19 @@ public class ModuleView extends ViewPart {
 		TreeNode tp = new TreeNode("Used Modules...");
 		tp.setDesc(" - ("+size+")");
 		tp.setIconName(ImageManager.IMG_USED_LIST);
+		List<String> tmp = new ArrayList<String>();
 		if(moduleList!=null){
 			TreeNode um = null;
 			for(Module m:moduleList){
-				um = new TreeNode(m);
-				um.setIconName(ImageManager.IMG_MODULE_ICON);
-				tp.addChild(um);
+				if(m.getName()!=null && !tmp.contains(m.getName())){
+					tmp.add(m.getName());
+					um = new TreeNode(m);
+					um.setIconName(ImageManager.IMG_MODULE_ICON);
+					tp.addChild(um);
+				}
 			}
 		}
+		tmp.clear();
 		return tp;
 	}
 
@@ -612,7 +617,7 @@ public class ModuleView extends ViewPart {
 					List<Module> requires =  parser.getAllRequiredModules(module, moduleList);
 
 					if(!this.isStop() && !isDispose){
-						
+
 						final List<TreeNode> roots = new ArrayList<TreeNode>(2);	
 
 						clearView(false);
@@ -626,9 +631,9 @@ public class ModuleView extends ViewPart {
 							root.addChild(getRequiredModulesTree(module, requires));
 							root.setIconName(ImageManager.IMG_HIERARCHICAL_LAYOUT);
 						}
-						
+
 						roots.add(root);
-						
+
 						if(isShowUsedList()){
 							List<Module> usedList = parser.getUsedModules(module, moduleList);
 							final TreeNode usedRoot = getUsedTree(usedList);
@@ -756,7 +761,7 @@ public class ModuleView extends ViewPart {
 		};
 		action_refresh.setToolTipText("Refresh View");
 		action_refresh.setImageDescriptor(ImageDescriptor.createFromImage(ImageManager.getImage(ImageManager.IMG_REFRESH)));
-		
+
 		/*是否显示被引用模块列表*/
 		action_used_list = new Action("Show Used Module List",Action.AS_CHECK_BOX) {
 			public void run() {
@@ -766,7 +771,7 @@ public class ModuleView extends ViewPart {
 		action_used_list.setToolTipText("Show Used Module List");
 		action_used_list.setImageDescriptor(ImageDescriptor.createFromImage(ImageManager.getImage(ImageManager.IMG_USED_LIST)));
 		action_used_list.setChecked(isShowUsedList());
-		
+
 		/*单层展示按钮*/
 		action_flat = new Action("Flat",Action.AS_RADIO_BUTTON) {
 			public void run() {
@@ -811,11 +816,11 @@ public class ModuleView extends ViewPart {
 			}
 		}
 	}
-	
+
 	private Boolean isShowUsedList(){
 		return PreferenceUtil.getPluginPreferenceStore().getBoolean(PreferenceConstants.MODULE_VIEW_SHOW_USED_LIST);
 	}
-	
+
 	private void showUsedList(boolean isShow){
 		try {
 			PreferenceUtil.getPluginPreferenceStore().setValue(PreferenceConstants.MODULE_VIEW_SHOW_USED_LIST,isShow);
