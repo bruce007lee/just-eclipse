@@ -57,6 +57,10 @@ public class ListSelectDialog extends Dialog {
 			return;
 		}
 		viewList.removeAll();
+		this.setItems(listItems);
+	}
+	
+	private void setItems(List<String> listItems){
 		if(listItems!=null && listItems.size()>0){
 			viewList.setItems(listItems.toArray(new String[0]));
 			viewList.select(0);
@@ -89,6 +93,10 @@ public class ListSelectDialog extends Dialog {
 			shell.setText(title);
 		}
 	}
+	
+	protected boolean isResizable() {
+		return true;
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -107,17 +115,15 @@ public class ListSelectDialog extends Dialog {
 		}
 		listLabelStr= null;
 
-		gd = new GridData(GridData.FILL_HORIZONTAL);
+		gd = new GridData(GridData.FILL_BOTH);
 		gd.horizontalSpan = 1;
 		gd.widthHint=200;
 		gd.heightHint=200;
 		viewList = new org.eclipse.swt.widgets.List(composite, SWT.BORDER | SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL);
 		viewList.setLayoutData(gd);
 
-		if(this.listItems!=null && listItems.size()>0){
-			viewList.setItems(listItems.toArray(new String[0]));
-			viewList.select(0);
-		}
+		this.setItems(listItems);
+		
 		this.listItems = null;
 		return composite;
 	}

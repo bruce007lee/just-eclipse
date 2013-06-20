@@ -19,6 +19,7 @@ public class ImageManager {
 	public static final String IMG_FLAT_LAYOUT = "img_flat_layout";
 	public static final String IMG_HIERARCHICAL_LAYOUT = "img_hierarchical_layout";
 	public static final String IMG_REFRESH = "img_refresh";
+	public static final String IMG_USED_LIST = "img_used_list";
 	
 	private static ImageRegistry imageRegistry = null;
 	private static URL baseURL = null;
@@ -36,6 +37,7 @@ public class ImageManager {
 		ImageManager.putImage(IMG_FLAT_LAYOUT, "icons/flatLayout.gif");
 		ImageManager.putImage(IMG_HIERARCHICAL_LAYOUT, "icons/hierarchicalLayout.gif");
 		ImageManager.putImage(IMG_REFRESH, "icons/refresh.gif");
+		ImageManager.putImage(IMG_USED_LIST, "icons/usedList.gif");
 	}
 	
 	public static void dispose(){

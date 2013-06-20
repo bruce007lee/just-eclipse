@@ -99,7 +99,7 @@
          <action
                class="com.alibaba.just.ui.popup.actions.ImportModulesAction"
                enablesFor="1"
-               id="com.alibaba.just.newAction"
+               id="com.alibaba.just.ui.popup.actions.ImportModulesAction"
                label="Import Modules"
                menubarPath="com.alibaba.just.menu/just">
             <enablement>
@@ -120,6 +120,13 @@
                icon="icons/module.gif"
                id="com.alibaba.just.ui.popup.actions.NewModuleWizardAction"
                label="New Module File"
+               menubarPath="com.alibaba.just.menu/just">
+         </action>
+         <action
+               class="com.alibaba.just.ui.popup.actions.ImportFolderModulesAction"
+               enablesFor="1"
+               id="com.alibaba.just.ui.popup.actions.ImportFolderModulesActionrt Folder Modules..."
+               label="Import Folder Modules..."
                menubarPath="com.alibaba.just.menu/just">
          </action>
       </objectContribution>

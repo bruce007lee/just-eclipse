@@ -71,7 +71,9 @@ define([${requiredModuleArrayStr}],
         deleted="false"
         description="Create Merge Content"
         enabled="true" >#foreach($module in $requiredModules)
-#if(!$module.isAnonymous() &amp;&amp; $module.getName() != "jquery")
+#if($module.isAnonymous())
+ImportJavscript.url('http://style.c.aliimg.com/app/trade/js${templateUtil.getModulePath($rootPath,$module)}');
+#elseif(!$module.isAnonymous() &amp;&amp; $module.getName() != "jquery")
 ImportJavscript.url('http://style.c.aliimg.com/app/trade/js/${module.getName()}.js');
 #end
 #end        

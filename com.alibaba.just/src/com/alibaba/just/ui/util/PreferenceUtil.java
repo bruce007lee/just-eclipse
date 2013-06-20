@@ -3,6 +3,7 @@ package com.alibaba.just.ui.util;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -134,6 +135,30 @@ public class PreferenceUtil {
 			}
 		}
 		return list;
+	}
+	
+	/**
+	 * 得到默认的container对应的rootpath,如没有设置返回<code>null</code>
+	 * @param container
+	 * @return
+	 */
+	public static IPath getCurrentRootPath(IContainer container){
+		if(container==null){
+			return null;
+		}
+		IContainer parent = container;
+		IProject project = container.getProject();
+		List<String> pathList = PreferenceUtil.getProjectRootPathList(project);
+		while(parent!=null){
+			String path = parent.getFullPath().toString();
+			path = PreferenceUtil.getRootPathByIPath(project, path);			
+			if(pathList.contains(path)){
+				return parent.getFullPath();
+			}
+			parent = parent.getParent();
+		}
+
+		return null;
 	}
 
 	/**

@@ -15,6 +15,8 @@ public class ViewItem implements IAdaptable{
 	private Object obj;
 	private String iconName;
 	private String label;
+	private boolean isChecked = false;
+	private boolean isGray = false;
 	
 	/**
 	 * @param obj
@@ -75,6 +77,22 @@ public class ViewItem implements IAdaptable{
 
 	public Object getAdapter(Class adapter) {
 		return null;
+	}
+
+	public boolean isChecked() {
+		return isChecked;
+	}
+
+	public void setChecked(boolean isChecked) {
+		this.isChecked = isChecked;
+	}
+
+	public boolean isGray() {
+		return isGray;
+	}
+
+	public void setGray(boolean isGray) {
+		this.isGray = isGray;
 	}
 
 

@@ -1,12 +1,18 @@
 package com.alibaba.just.ui.util;
 
+import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.osgi.framework.Bundle;
 
@@ -65,4 +71,55 @@ public class PluginResourceUtil {
 			list.addAll(parser.getAllModules(resource.getLocation().toFile().getAbsolutePath()));
 		}
 	}
+	
+
+	/**
+	 * 根据所在project的lib库去获取所有js模块
+	 * @param project
+	 * @return
+	 */
+	public static List<Module> getAllModulesByProject(IProject project){
+		List<String> libs = PreferenceUtil.getProjectLibsList(project);	
+		List<Module> moduleList = new ArrayList<Module>();
+		ModuleParser parser = new ModuleParser(PreferenceUtil.getFileCharset());
+		IWorkspaceRoot  wRoot = ResourcesPlugin.getWorkspace().getRoot();
+
+		for(String lib:libs){
+			String lb = lib.trim();
+			if(lb.length()>0){
+
+				String folderPath = null;
+				String type = PreferenceUtil.getProjectLibType(lb);
+				if(PreferenceUtil.LIB_TYPE_WORKSPACE_FOLDER.equals(type) ||
+						PreferenceUtil.LIB_TYPE_SELF.equals(type)){
+					if(PreferenceUtil.LIB_TYPE_SELF.equals(type)){
+						lb = project.getFullPath().toString();
+					}else{
+						lb = PreferenceUtil.getProjectLibPath(lb);
+					}
+					IPath rootPath = wRoot.getFullPath();
+					IResource res = wRoot.findMember(rootPath.append(lb));
+					if(res!=null && res.isAccessible()){
+						try{
+							PluginResourceUtil.getModulesByResource(res,moduleList,parser);
+						}catch(Exception e){
+							e.printStackTrace();
+						}
+					}
+
+				}else if(PreferenceUtil.LIB_TYPE_EXTERNAL_FOLDER.equals(type)){
+					lb = PreferenceUtil.getProjectLibPath(lb);
+					File f = new File(lb);
+					if(f.exists() && f.isDirectory()){
+						folderPath = f.getAbsolutePath();
+						moduleList.addAll(parser.getAllModules(folderPath));
+					}
+				}
+
+			}
+
+		}		
+		return moduleList;
+	}
+
 }

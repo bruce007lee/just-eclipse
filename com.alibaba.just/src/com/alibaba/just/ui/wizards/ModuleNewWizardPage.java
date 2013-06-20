@@ -344,7 +344,7 @@ public class ModuleNewWizardPage extends WizardPage {
 				else
 					container = ((IResource) obj).getParent();
 
-				IPath rootPath = getCurrentRootPath(container);
+				IPath rootPath = PreferenceUtil.getCurrentRootPath(container);
 				if(rootPath!=null){
 					containerText.setText(rootPath.toString());
 					parentCt = getRelativeRootPath(container.getFullPath().toString(),rootPath.toString());
@@ -369,22 +369,6 @@ public class ModuleNewWizardPage extends WizardPage {
 		if(containerPath.indexOf(rootPath)==0){
 			return containerPath.substring(rootPath.length());
 		}		
-		return null;
-	}
-
-	private IPath getCurrentRootPath(IContainer container){
-		IContainer parent = container;
-		IProject project = container.getProject();
-		java.util.List<String> pathList = PreferenceUtil.getProjectRootPathList(project);
-		while(parent!=null){
-			String path = parent.getFullPath().toString();
-			path = PreferenceUtil.getRootPathByIPath(project, path);			
-			if(pathList.contains(path)){
-				return parent.getFullPath();
-			}
-			parent = parent.getParent();
-		}
-
 		return null;
 	}
 

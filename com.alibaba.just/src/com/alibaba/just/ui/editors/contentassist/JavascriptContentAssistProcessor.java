@@ -8,6 +8,8 @@ import java.util.Vector;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.text.BadLocationException;
@@ -31,6 +33,7 @@ import com.alibaba.just.PluginConstants;
 import com.alibaba.just.api.bean.Module;
 import com.alibaba.just.api.parser.ModuleParser;
 import com.alibaba.just.ui.util.ImageManager;
+import com.alibaba.just.ui.util.PluginResourceUtil;
 import com.alibaba.just.ui.util.PreferenceUtil;
 
 
@@ -96,58 +99,19 @@ IContentAssistProcessor,ICompletionListener {
 
 		//System.out.println("currentText:"+currentText);
 		//System.out.println("offset:"+offset);
-		List proposals = new Vector() ;
-		
+		List<String> proposals = new Vector<String>() ;
+
 		//缓存结果
 		if(listCache==null){
-		
-		String libsStr = PreferenceUtil.getProjectProperty(project, PluginConstants.LIBS_PROPERTY_KEY);
 
-		if(libsStr!=null){
-
-			String[] libs = libsStr.split("[\n]");
-			ModuleParser parser = new ModuleParser(PreferenceUtil.getFileCharset());
-			for(String lib:libs){
-				String lb = lib.trim();
-				if(lb.length()>0){
-
-					String folderPath = null;
-
-					if(lb.indexOf("@")==0){
-						File f = null;								
-						IPath ipath = ResourcesPlugin.getWorkspace().getRoot().getLocation();								
-						if(ipath!=null){
-							f = ipath.toFile();
-						}
-
-						f = new File(f.getAbsolutePath()+lb.substring(1));
-						if(f.exists() && f.isDirectory()){
-							folderPath = f.getAbsolutePath();
-						}
-
-					}else{
-
-						File f = new File(lb);
-						if(f.exists() && f.isDirectory()){
-							folderPath = f.getAbsolutePath();
-						}
-					}
-
-					if(folderPath==null){
-						continue;
-					}
-
-					List li= parser.getAllModules(folderPath);
-
-					for (Iterator iter = li.iterator(); iter.hasNext();) {
-						proposals.add(((Module)iter.next()).getName());
-					}
-
-				}
+			List<Module> moduleList = PluginResourceUtil.getAllModulesByProject(project);
+			
+			//转化为proposals
+			for (Iterator<Module> iter = moduleList.iterator(); iter.hasNext();) {
+				proposals.add(iter.next().getName());
 			}
-		}
-		
-        listCache = proposals;
+
+			listCache = proposals;
 		}else{
 			proposals = listCache;//如果有cache取cache
 		}

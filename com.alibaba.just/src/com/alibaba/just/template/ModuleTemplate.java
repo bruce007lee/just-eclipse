@@ -12,6 +12,7 @@ import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
 
 import com.alibaba.just.api.bean.Module;
+import com.alibaba.just.ui.util.TemplateUtil;
 
 /**
  * 
@@ -145,10 +146,10 @@ public class ModuleTemplate {
 			context.put("requiredModules", requiredModules);
 			context.put("requiredModuleArrayStr", getRequiredModuleArrayStr(requiredModules));
 			context.put("requiredModuleParamsStr", getRequiredModuleParamsStr(requiredModules));
-
+			context.put("templateUtil", TemplateUtil.getTemplateUtil());
 
 			if(props!=null){
-				Iterator iter = props.entrySet().iterator();
+				Iterator iter = props.keySet().iterator();
 
 				String key = null;
 				while(iter.hasNext()){

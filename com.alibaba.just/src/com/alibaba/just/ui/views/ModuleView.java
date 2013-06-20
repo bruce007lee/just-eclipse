@@ -94,7 +94,8 @@ public class ModuleView extends ViewPart {
 
 	private IAction action_flat;
 	private IAction action_hier;
-	private Action action_refresh;
+	private IAction action_refresh;
+	private IAction action_used_list;
 
 
 	/*
@@ -103,6 +104,9 @@ public class ModuleView extends ViewPart {
 	class TreeNode implements IAdaptable {
 		private Object obj;
 		private String iconName;
+
+		private String desc;
+
 		public String getIconName() {
 			return this.iconName;
 		}
@@ -187,6 +191,12 @@ public class ModuleView extends ViewPart {
 			}
 			this.children = null;
 		}
+		public String getDesc() {
+			return desc;
+		}
+		public void setDesc(String desc) {
+			this.desc = desc;
+		}
 
 	}
 
@@ -248,6 +258,10 @@ public class ModuleView extends ViewPart {
 				cell.setImage(ImageManager.getImage(node.getIconName()));
 
 				text.append(node.getName());
+
+				if(node.getDesc()!=null){
+					text.append(node.getDesc(), StyledString.QUALIFIER_STYLER);
+				}
 
 				Object nodeData = node.getObject();
 				if(Module.class.isInstance(nodeData)){
@@ -337,7 +351,7 @@ public class ModuleView extends ViewPart {
 					currentFilePath = null;
 					FileEditorInput fileInput = (FileEditorInput)input;
 					IFile ff = fileInput.getFile();
-					
+
 					//没变化不刷新
 					if(currentFile!=null && ff.equals(currentFile) && 
 							currentFileTimeStamp != 0L && ff.getModificationStamp() == currentFileTimeStamp){
@@ -441,6 +455,28 @@ public class ModuleView extends ViewPart {
 		String path = ifile.getLocation().toFile().getAbsolutePath();
 		IProject project = ifile.getProject();
 		this.loadModuleRequires(path, project,isAsyncExec);
+	}
+
+	/**
+	 * 得到使用指定模块的父模块列表树
+	 * @param module
+	 * @param allImported
+	 * @return
+	 */
+	private TreeNode getUsedTree(List<Module> moduleList){
+		int size = moduleList==null?0:moduleList.size();
+		TreeNode tp = new TreeNode("Used Modules...");
+		tp.setDesc(" - ("+size+")");
+		tp.setIconName(ImageManager.IMG_USED_LIST);
+		if(moduleList!=null){
+			TreeNode um = null;
+			for(Module m:moduleList){
+				um = new TreeNode(m);
+				um.setIconName(ImageManager.IMG_MODULE_ICON);
+				tp.addChild(um);
+			}
+		}
+		return tp;
 	}
 
 	/**
@@ -575,14 +611,12 @@ public class ModuleView extends ViewPart {
 
 					List<Module> requires =  parser.getAllRequiredModules(module, moduleList);
 
-					//add self
-					//requires.add(module);
-					//List<Module> rList = this.getRequiredModules(module, requires);
-
 					if(!this.isStop() && !isDispose){
+						
+						final List<TreeNode> roots = new ArrayList<TreeNode>(2);	
 
 						clearView(false);
-						final TreeNode root = new TreeNode("Required Modules...");
+						TreeNode root = new TreeNode("Required Modules...");
 
 						String showType = getShowType();
 						if(SHOW_TYPE_FLAT.equalsIgnoreCase(showType)){
@@ -592,13 +626,21 @@ public class ModuleView extends ViewPart {
 							root.addChild(getRequiredModulesTree(module, requires));
 							root.setIconName(ImageManager.IMG_HIERARCHICAL_LAYOUT);
 						}
+						
+						roots.add(root);
+						
+						if(isShowUsedList()){
+							List<Module> usedList = parser.getUsedModules(module, moduleList);
+							final TreeNode usedRoot = getUsedTree(usedList);
+							roots.add(usedRoot);
+						}
 
 						//同步ui显示
 						Display.getDefault().syncExec(new Runnable(){
 							public void run() {		
 								ModuleView self = ModuleView.this;
 								clearView(false);									
-								self.vcp.invisibleRoot.addChild(root);									
+								self.vcp.invisibleRoot.addChildren(roots);
 								self.viewer.refresh();
 								self.viewer.expandAll();
 							}								
@@ -687,6 +729,8 @@ public class ModuleView extends ViewPart {
 
 	private void fillContextMenu(IMenuManager manager) {
 		manager.add(action_refresh);
+		manager.add(new Separator());		
+		manager.add(action_used_list);
 		manager.add(new Separator());
 		manager.add(action_flat);
 		manager.add(action_hier);
@@ -695,6 +739,8 @@ public class ModuleView extends ViewPart {
 
 	private void fillLocalToolBar(IToolBarManager manager) {
 		manager.add(action_refresh);
+		manager.add(new Separator());
+		manager.add(action_used_list);
 		manager.add(new Separator());
 		manager.add(action_flat);
 		manager.add(action_hier);
@@ -710,7 +756,17 @@ public class ModuleView extends ViewPart {
 		};
 		action_refresh.setToolTipText("Refresh View");
 		action_refresh.setImageDescriptor(ImageDescriptor.createFromImage(ImageManager.getImage(ImageManager.IMG_REFRESH)));
-
+		
+		/*是否显示被引用模块列表*/
+		action_used_list = new Action("Show Used Module List",Action.AS_CHECK_BOX) {
+			public void run() {
+				showUsedList(!isShowUsedList());
+			}
+		};
+		action_used_list.setToolTipText("Show Used Module List");
+		action_used_list.setImageDescriptor(ImageDescriptor.createFromImage(ImageManager.getImage(ImageManager.IMG_USED_LIST)));
+		action_used_list.setChecked(isShowUsedList());
+		
 		/*单层展示按钮*/
 		action_flat = new Action("Flat",Action.AS_RADIO_BUTTON) {
 			public void run() {
@@ -753,6 +809,19 @@ public class ModuleView extends ViewPart {
 			} catch (Exception e) {
 				//e.printStackTrace();
 			}
+		}
+	}
+	
+	private Boolean isShowUsedList(){
+		return PreferenceUtil.getPluginPreferenceStore().getBoolean(PreferenceConstants.MODULE_VIEW_SHOW_USED_LIST);
+	}
+	
+	private void showUsedList(boolean isShow){
+		try {
+			PreferenceUtil.getPluginPreferenceStore().setValue(PreferenceConstants.MODULE_VIEW_SHOW_USED_LIST,isShow);
+			changeShowType(getShowType());
+		} catch (Exception e) {
+			//e.printStackTrace();
 		}
 	}
 

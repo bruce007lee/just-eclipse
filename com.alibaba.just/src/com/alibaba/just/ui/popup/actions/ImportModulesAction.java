@@ -5,9 +5,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
@@ -20,6 +22,7 @@ import org.eclipse.ui.IWorkbenchPart;
 import com.alibaba.just.PluginConstants;
 import com.alibaba.just.api.bean.Module;
 import com.alibaba.just.api.parser.ModuleParser;
+import com.alibaba.just.ui.util.PluginResourceUtil;
 import com.alibaba.just.ui.util.PreferenceUtil;
 import com.alibaba.just.ui.util.UIUtil;
 
@@ -42,7 +45,7 @@ public class ImportModulesAction extends ImportModulesViewAction{
 	 * @see IObjectActionDelegate#setActivePart(IAction, IWorkbenchPart)
 	 */
 	public void setActivePart(IAction action, IWorkbenchPart targetPart) {
-		
+
 	}
 
 	/**
@@ -74,69 +77,25 @@ public class ImportModulesAction extends ImportModulesViewAction{
 				return;
 			}
 
-			List<Module> allModule = new ArrayList<Module>();
+			List<Module> moduleList = PluginResourceUtil.getAllModulesByProject(ifile.getProject());			
+			List<Module> requires =  parser.getAllRequiredModules(module, moduleList);
 
+			//add self
+			requires.add(module);
 
-			String libsStr = ifile.getProject().getPersistentProperty(
-					new QualifiedName(PluginConstants.QUALIFIED_NAME, PluginConstants.LIBS_PROPERTY_KEY));
+			//IFile file = ifile.getParent().getFile(new Path("merge.js"));
 
-			if(libsStr!=null){
+			List<IFile>  fList = this.getMergeFileList(ifile.getParent());
 
-				String[] libs = libsStr.split("[\n]");
-				for(String lib:libs){
-					String lb = lib.trim();
-					if(lb.length()>0){
-
-						String folderPath = null;
-
-						if(lb.indexOf("@")==0){
-							File f = null;								
-							IPath ipath = ResourcesPlugin.getWorkspace().getRoot().getLocation();								
-							if(ipath!=null){
-								f = ipath.toFile();
-							}
-
-							f = new File(f.getAbsolutePath()+lb.substring(1));
-							if(f.exists() && f.isDirectory()){
-								folderPath = f.getAbsolutePath();
-							}
-
-						}else{
-
-							File f = new File(lb);
-							if(f.exists() && f.isDirectory()){
-								folderPath = f.getAbsolutePath();
-							}
-						}
-
-						if(folderPath==null){
-							continue;
-						}
-
-						allModule.addAll(parser.getAllModules(folderPath));
-
-					}
-				}
-
-				List<Module> requires =  parser.getAllRequiredModules(module, allModule);
-
-				//add self
-				requires.add(module);
-
-				//IFile file = ifile.getParent().getFile(new Path("merge.js"));
-
-				List<IFile>  fList = this.getMergeFileList(ifile.getParent());
-
-				if(fList.size()==0){
-					showCreateMergeFileDlg(shell,ifile.getParent(), requires);
-				}else if(fList.size()==1){
-					createMergeFile(fList.get(0), requires);
-				}else{
-					showSelectMergeFileDlg(shell,fList,requires);
-				}
-
-				//this.createMergeFile(file, requires);
+			if(fList.size()==0){
+				showCreateMergeFileDlg(shell,ifile.getParent(), requires);
+			}else if(fList.size()==1){
+				createMergeFile(fList.get(0), requires);
+			}else{
+				showSelectMergeFileDlg(shell,fList,requires);
 			}
+
+			//this.createMergeFile(file, requires);
 
 		} catch (Exception e) {
 			String error = e.getMessage();
@@ -150,7 +109,7 @@ public class ImportModulesAction extends ImportModulesViewAction{
 		} 
 
 	}
-
+	
 	/**
 	 * @see IActionDelegate#selectionChanged(IAction, ISelection)
 	 */

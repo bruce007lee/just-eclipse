@@ -45,7 +45,7 @@ public class ModuleParser {
 	public ModuleParser(String charset){
 		this.charset = charset;		
 	}
-	
+
 	public ModuleParser(){}
 
 	/**
@@ -104,7 +104,7 @@ public class ModuleParser {
 		return list;
 	}
 
-	
+
 	/**
 	 * 模块是否在列表中重复
 	 * @param module
@@ -148,18 +148,18 @@ public class ModuleParser {
 
 			if(subMod!=null){
 				if(!isDuplicate(subMod, newList)){
-				  newList.add(subMod);
+					newList.add(subMod);
 				}
-				
+
 				//检测是否有循环引用的情况
 				if(isDuplicate(module, moduleTree)){
 					throw new ModuleParseException("Import loop with module:[name:"+module.getName()+" file:"+module.getFilePath()+"]");
 				}
-				
+
 				List<Module> tree =  new ArrayList<Module>();
 				tree.addAll(moduleTree);
 				tree.add(module);
-				
+
 				getAllRequiredModules(subMod, tree , newList, list);
 				tree.clear();
 			}
@@ -179,6 +179,28 @@ public class ModuleParser {
 		return getAllRequiredModules(module,new ArrayList<Module>(), new ArrayList<Module>() ,list);
 	}
 
+	
+	/**
+	 * 得到引用指定模块的父模块
+	 * @param module
+	 * @param list
+	 * @return
+	 * @throws ModuleParseException
+	 */
+	public List<Module> getUsedModules(Module module,List<Module> list) throws ModuleParseException{
+		List<String> subModNames = null;
+		List<Module> rsList = new ArrayList<Module>();
+		for(Module m : list){
+			subModNames = m.getRequiredModuleNames();
+			for(String subName : subModNames){
+				if(module.getName() != null && module.getName().equals(subName)){
+					rsList.add(m);
+					break;
+				}
+			}
+		}
+		return rsList;
+	}
 
 	/**
 	 * 
@@ -359,7 +381,7 @@ public class ModuleParser {
 		return moduleList;
 	}
 
-	
+
 	/**
 	 * only for test
 	 * @param args
@@ -392,7 +414,7 @@ public class ModuleParser {
 		System.out.println("Root Folder:"+folderPath);
 
 		File  file = new File(path);
-		
+
 		ModuleParser parser =new ModuleParser();
 
 		List<Module> list= parser.getAllModules(folderPath);
@@ -418,5 +440,13 @@ public class ModuleParser {
 
 	}
 	//}
+
+	public String getCharset() {
+		return charset;
+	}
+
+	public void setCharset(String charset) {
+		this.charset = charset;
+	}
 
 }

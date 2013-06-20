@@ -111,49 +111,12 @@ public class JSDTModuleCompletionProposalComputer implements IJavaCompletionProp
 
 		//System.out.println("currentText:"+currentText);
 		//System.out.println("offset:"+offset);
-		List<String> proposals = new Vector<String>() ;
+		List<String> proposals = new Vector<String>();
 
 		//缓存结果
 		if(listCache==null){
-
-			List<String> libs = PreferenceUtil.getProjectLibsList(project);	
-			List<Module> moduleList = new ArrayList<Module>();
-			ModuleParser parser = new ModuleParser(PreferenceUtil.getFileCharset());
-			IWorkspaceRoot  wRoot = ResourcesPlugin.getWorkspace().getRoot();
-			for(String lib:libs){
-				String lb = lib.trim();
-				if(lb.length()>0){
-
-					String folderPath = null;
-					String type = PreferenceUtil.getProjectLibType(lb);
-					if(PreferenceUtil.LIB_TYPE_WORKSPACE_FOLDER.equals(type) ||
-							PreferenceUtil.LIB_TYPE_SELF.equals(type)){
-						if(PreferenceUtil.LIB_TYPE_SELF.equals(type)){
-							lb = project.getFullPath().toString();
-						}else{
-							lb = PreferenceUtil.getProjectLibPath(lb);
-						}
-						IPath rootPath = wRoot.getFullPath();
-						IResource res = wRoot.findMember(rootPath.append(lb));
-						if(res!=null && res.isAccessible()){
-							try{
-								PluginResourceUtil.getModulesByResource(res,moduleList,parser);
-							}catch(Exception e){
-								e.printStackTrace();
-							}
-						}
-
-					}else if(PreferenceUtil.LIB_TYPE_EXTERNAL_FOLDER.equals(type)){
-						lb = PreferenceUtil.getProjectLibPath(lb);
-						File f = new File(lb);
-						if(f.exists() && f.isDirectory()){
-							folderPath = f.getAbsolutePath();
-							moduleList.addAll(parser.getAllModules(folderPath));
-						}
-					}
-
-				}
-			}
+			
+			List<Module> moduleList = PluginResourceUtil.getAllModulesByProject(project);
 
 			//转化为proposals
 			for (Iterator<Module> iter = moduleList.iterator(); iter.hasNext();) {
