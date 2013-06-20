@@ -464,9 +464,7 @@ public class ModuleView extends ViewPart {
 	 * @return
 	 */
 	private TreeNode getUsedTree(List<Module> moduleList){
-		int size = moduleList==null?0:moduleList.size();
 		TreeNode tp = new TreeNode("Used Modules...");
-		tp.setDesc(" - ("+size+")");
 		tp.setIconName(ImageManager.IMG_USED_LIST);
 		List<String> tmp = new ArrayList<String>();
 		if(moduleList!=null){
@@ -480,6 +478,7 @@ public class ModuleView extends ViewPart {
 				}
 			}
 		}
+		tp.setDesc(" - ("+tmp.size()+")");
 		tmp.clear();
 		return tp;
 	}
