@@ -35,4 +35,5 @@ Just eclipse为基于eclipse的module define开发插件(目前主要基于交�
  * 其他有待以后补充......
  
 ## Change Log
+  [2013-06-20]: 升级版本到1.0.6，1，修改Module View展示，增加被引用的模块列表。2，添加一种merge文件生成方式。3，bugfix
   [2013-05-15]: 升级版本到1.0.5，优化UI，修改项目中module js导入存储格式，升级后请重新设置项目中lib路径
