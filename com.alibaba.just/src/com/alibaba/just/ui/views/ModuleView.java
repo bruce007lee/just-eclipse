@@ -463,16 +463,24 @@ public class ModuleView extends ViewPart {
 	 * @param allImported
 	 * @return
 	 */
-	private TreeNode getUsedTree(List<Module> moduleList){
+ 	private TreeNode getUsedTree(List<Module> moduleList){
 		TreeNode tp = new TreeNode("Used Modules...");
 		tp.setIconName(ImageManager.IMG_USED_LIST);
 		List<String> tmp = new ArrayList<String>();
 		if(moduleList!=null){
 			TreeNode um = null;
+			String key = null;
 			for(Module m:moduleList){
-				if(m.getName()!=null && !tmp.contains(m.getName())){
-					tmp.add(m.getName());
+				key = m.getName();
+				if(m.isAnonymous() && m.getFilePath()!=null){
+					key = m.getFilePath();
+				}
+				if(key!=null && !tmp.contains(key)){
+					tmp.add(key);
 					um = new TreeNode(m);
+					if(m.isAnonymous() && m.getFilePath()!=null){
+						um.setDesc(" - ["+m.getFilePath()+"]");
+					}
 					um.setIconName(ImageManager.IMG_MODULE_ICON);
 					tp.addChild(um);
 				}
@@ -599,7 +607,7 @@ public class ModuleView extends ViewPart {
 								IPath rootPath = wRoot.getFullPath();
 								IResource res = wRoot.findMember(rootPath.append(lb));
 								if(res!=null && res.isAccessible()){
-									PluginResourceUtil.getModulesByResource(res,moduleList,parser);
+									PluginResourceUtil.getModulesByResource(res,moduleList,parser,ModuleParser.MODULE_TYPE_ALL);
 								}
 							}else{
 								lb = PreferenceUtil.getProjectLibPath(lb);

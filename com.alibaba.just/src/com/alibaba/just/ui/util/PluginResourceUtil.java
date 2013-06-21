@@ -52,6 +52,10 @@ public class PluginResourceUtil {
 			throw e;
 		}
 	}
+	
+	public static void getModulesByResource(IResource resource,List<Module> list,ModuleParser parser) throws CoreException{
+		getModulesByResource(resource,list,parser,ModuleParser.MODULE_TYPE_NORMAL);
+	}
 
 	/**
 	 * 根据指定的resource获取所有的js模块
@@ -60,25 +64,30 @@ public class PluginResourceUtil {
 	 * @param parser
 	 * @throws CoreException
 	 */
-	public static void getModulesByResource(IResource resource,List<Module> list,ModuleParser parser) throws CoreException{
+	public static void getModulesByResource(IResource resource,List<Module> list,ModuleParser parser,int moduleType) throws CoreException{
 		if(IContainer.class.isInstance(resource)){
 			IContainer pro = (IContainer)resource;
 			IResource[] members = pro.members();
 			for(int i=0,l=members.length;i<l;i++){
-				PluginResourceUtil.getModulesByResource(members[i],list,parser);
+				PluginResourceUtil.getModulesByResource(members[i],list,parser,moduleType);
 			}
 		}else{
-			list.addAll(parser.getAllModules(resource.getLocation().toFile().getAbsolutePath()));
+			list.addAll(parser.getAllModules(resource.getLocation().toFile().getAbsolutePath(),moduleType));
 		}
 	}
 	
+	
+	public static List<Module> getAllModulesByProject(IProject project){
+		return getAllModulesByProject(project,ModuleParser.MODULE_TYPE_NORMAL);
+	}
 
 	/**
 	 * 根据所在project的lib库去获取所有js模块
 	 * @param project
+	 * @param moduleType
 	 * @return
 	 */
-	public static List<Module> getAllModulesByProject(IProject project){
+	public static List<Module> getAllModulesByProject(IProject project,int moduleType){
 		List<String> libs = PreferenceUtil.getProjectLibsList(project);	
 		List<Module> moduleList = new ArrayList<Module>();
 		ModuleParser parser = new ModuleParser(PreferenceUtil.getFileCharset());
@@ -101,7 +110,7 @@ public class PluginResourceUtil {
 					IResource res = wRoot.findMember(rootPath.append(lb));
 					if(res!=null && res.isAccessible()){
 						try{
-							PluginResourceUtil.getModulesByResource(res,moduleList,parser);
+							PluginResourceUtil.getModulesByResource(res,moduleList,parser,moduleType);
 						}catch(Exception e){
 							e.printStackTrace();
 						}
