@@ -16,6 +16,7 @@ import org.mozilla.javascript.ast.AstRoot;
 import org.mozilla.javascript.ast.ExpressionStatement;
 import org.mozilla.javascript.ast.FunctionCall;
 import org.mozilla.javascript.ast.FunctionNode;
+import org.mozilla.javascript.ast.PropertyGet;
 import org.mozilla.javascript.ast.StringLiteral;
 
 import com.alibaba.just.api.bean.Module;
@@ -316,6 +317,25 @@ public class ModuleParser {
 	public List<Module> getModules(File file){
 		return getModules(file,MODULE_TYPE_NORMAL);
 	}
+	
+	/**
+	 * Fix 如：define(['jquery'],function($){}).register();之类的用法
+	 * TODO：以后去掉对非AMD标准匿名模块的支持
+	 * @param funcall
+	 * @return
+	 */
+	private FunctionCall getFirstFunctionCall(FunctionCall funcall){
+		AstNode target = funcall.getTarget();
+		if(PropertyGet.class.isInstance(target)){
+			AstNode left = ((PropertyGet)target).getLeft();
+			if(FunctionCall.class.isInstance(left)){
+				return getFirstFunctionCall((FunctionCall)left);
+			}else{
+				return funcall;
+			}
+		}		
+		return funcall;
+	}
 
 	/**
 	 * 由文件获取指定类型的模块
@@ -352,6 +372,7 @@ public class ModuleParser {
 					AstNode astNode = es.getExpression();
 					if(FunctionCall.class.isInstance(astNode)){
 						FunctionCall fc = (FunctionCall)astNode;
+						fc = this.getFirstFunctionCall(fc);
 						AstNode nameNode = fc.getTarget();
 						//System.out.println("NAME:"+n.getIdentifier());	
 						if(Pattern.matches(DEFINE_KEY_REG,nameNode.toSource().trim())){
