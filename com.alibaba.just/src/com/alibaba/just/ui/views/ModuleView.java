@@ -673,10 +673,6 @@ public class ModuleView extends ViewPart {
 
 				} catch (Exception e) {
 					//e.printStackTrace();
-					String error = e.getMessage();
-					if(error==null || error.trim().length()==0){
-						error = e.toString();
-					}
 					showException(e);					
 				} 
 

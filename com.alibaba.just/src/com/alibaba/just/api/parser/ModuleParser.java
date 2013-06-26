@@ -201,9 +201,8 @@ public class ModuleParser {
 	 * @param module
 	 * @param list
 	 * @return
-	 * @throws ModuleParseException
 	 */
-	public List<Module> getUsedModules(Module module,List<Module> list) throws ModuleParseException{
+	public List<Module> getUsedModules(Module module,List<Module> list){
 		List<String> subModNames = null;
 		List<Module> rsList = new ArrayList<Module>();
 		for(Module m : list){
@@ -290,7 +289,7 @@ public class ModuleParser {
 	/**
 	 * 得到当前模块文件的默认模块(默认返回文件中的第一个模块)
 	 * @param filePath
-	 * @return
+	 * @return 
 	 */
 	public Module getModule(String filePath,int moduleType){
 		List<Module> modules =  getModules(filePath,moduleType);
@@ -344,10 +343,9 @@ public class ModuleParser {
 	 * @return
 	 */
 	public List<Module> getModules(File file,int moduleType){
-
-		List<Module> moduleList = new ArrayList<Module>();
-
+		List<Module> moduleList = new ArrayList<Module>();		
 		String absPath = file.getAbsolutePath();
+		try{
 		if(!isDispose && file.exists() && (filter==null || (filter!=null && filter.accept(file)))){
 			String content = null;
 			try {
@@ -360,8 +358,8 @@ public class ModuleParser {
 			/*CompilerEnvirons ce = new CompilerEnvirons();
 			ce.setRecordingLocalJsDocComments(true);
 			ce.setRecordingComments(true);
-			Parser  parser = new  Parser(ce);
-			 */
+			Parser  parser = new  Parser(ce);*/	
+					
 			Parser  parser = new Parser();
 			AstRoot astRoot = parser.parse(content, null, 0);
 			Node node = astRoot.getFirstChild();
@@ -417,6 +415,12 @@ public class ModuleParser {
 				node = node.getNext();
 			}
 		}	
+		
+		}catch(Exception e){
+			//文件解析异常暂时不处理
+			//throw new ModuleParseException("Failed to parse file ["+absPath+"]:"+(e.getMessage()==null?e.toString():e.getMessage()),e);
+		}
+		
 		return moduleList;
 	}
 
