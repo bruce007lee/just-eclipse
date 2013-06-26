@@ -57,6 +57,7 @@ import com.alibaba.just.ui.preferences.PreferenceConstants;
 import com.alibaba.just.ui.util.ImageManager;
 import com.alibaba.just.ui.util.PluginResourceUtil;
 import com.alibaba.just.ui.util.PreferenceUtil;
+import com.alibaba.just.ui.util.UIUtil;
 
 /**
  * Module view UI
@@ -96,7 +97,6 @@ public class ModuleView extends ViewPart {
 	private IAction action_hier;
 	private IAction action_refresh;
 	private IAction action_used_list;
-
 
 	/*
 	 * tree node
@@ -294,12 +294,24 @@ public class ModuleView extends ViewPart {
 	 */
 	abstract class DefaultRunner extends Thread{
 		private boolean isStop=false;
+		protected ModuleParser parser = null;
 		public void stopRunner(){
 			this.isStop = true;
+			if(parser!=null){
+				parser.dispose();
+			}
 		}
 
 		public boolean isStop(){
 			return this.isStop;
+		}
+
+		public ModuleParser getParser() {
+			return parser;
+		}
+
+		public void setParser(ModuleParser parser) {
+			this.parser = parser;
 		}
 	}
 
@@ -573,14 +585,14 @@ public class ModuleView extends ViewPart {
 		}
 
 		runner = new DefaultRunner(){
-
 			/*
 			 * (non-Javadoc)
 			 * @see java.lang.Thread#run()
 			 */
 			public void run(){
 				try {
-					ModuleParser parser = new ModuleParser(PreferenceUtil.getFileCharset());
+					parser = new ModuleParser(PreferenceUtil.getFileCharset());
+					parser.setThreadPool(UIUtil.getThreadPool());
 					Module module = parser.getModule(filepath,ModuleParser.MODULE_TYPE_ALL);
 
 					if(module==null || project==null){
@@ -660,6 +672,7 @@ public class ModuleView extends ViewPart {
 					}
 
 				} catch (Exception e) {
+					//e.printStackTrace();
 					String error = e.getMessage();
 					if(error==null || error.trim().length()==0){
 						error = e.toString();
@@ -667,6 +680,7 @@ public class ModuleView extends ViewPart {
 					showException(e);					
 				} 
 
+				parser = null;//clear
 			}
 
 

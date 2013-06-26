@@ -91,6 +91,7 @@ public class PluginResourceUtil {
 		List<String> libs = PreferenceUtil.getProjectLibsList(project);	
 		List<Module> moduleList = new ArrayList<Module>();
 		ModuleParser parser = new ModuleParser(PreferenceUtil.getFileCharset());
+		parser.setThreadPool(UIUtil.getThreadPool());
 		IWorkspaceRoot  wRoot = ResourcesPlugin.getWorkspace().getRoot();
 
 		for(String lib:libs){

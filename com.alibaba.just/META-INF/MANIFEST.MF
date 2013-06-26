@@ -29,5 +29,6 @@ Bundle-ClassPath: .,
  lib/log4j-1.2.12.jar,
  lib/oro-2.0.8.jar,
  lib/velocity-1.6.2.jar,
- lib/werken-xpath-0.9.4.jar
+ lib/werken-xpath-0.9.4.jar,
+ lib/js.jar
 Bundle-Vendor: Alibaba

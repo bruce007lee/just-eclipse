@@ -22,7 +22,6 @@ import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelP
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.StyledString;
-import org.eclipse.jface.viewers.StyledString.Styler;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -35,6 +34,7 @@ import com.alibaba.just.api.parser.ModuleParser;
 import com.alibaba.just.ui.util.ImageManager;
 import com.alibaba.just.ui.util.PluginResourceUtil;
 import com.alibaba.just.ui.util.PreferenceUtil;
+import com.alibaba.just.ui.util.UIUtil;
 
 public class ModuleSelectionDialog extends FilteredItemsSelectionDialog {
 
@@ -213,6 +213,7 @@ public class ModuleSelectionDialog extends FilteredItemsSelectionDialog {
 				List<String> libs = PreferenceUtil.getProjectLibsList(project);					
 				List<Module> moduleList = new ArrayList<Module>();
 				ModuleParser parser = new ModuleParser(PreferenceUtil.getFileCharset());
+				parser.setThreadPool(UIUtil.getThreadPool());
 				IWorkspaceRoot  wRoot = ResourcesPlugin.getWorkspace().getRoot();
 				progressMonitor.beginTask(SEARCH_LABEL, libs.size()); //$NON-NLS-1$
 				for(String lib:libs){

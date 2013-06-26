@@ -1,9 +1,22 @@
 package com.alibaba.just.api.parser;
 import java.io.File;
+import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
+import java.util.Vector;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
 import java.util.regex.Pattern;
+
+import org.mozilla.javascript.Node;
+import org.mozilla.javascript.Parser;
+import org.mozilla.javascript.ast.ArrayLiteral;
+import org.mozilla.javascript.ast.AstNode;
+import org.mozilla.javascript.ast.AstRoot;
+import org.mozilla.javascript.ast.ExpressionStatement;
+import org.mozilla.javascript.ast.FunctionCall;
+import org.mozilla.javascript.ast.FunctionNode;
+import org.mozilla.javascript.ast.StringLiteral;
 
 import com.alibaba.just.api.bean.Module;
 import com.alibaba.just.api.exception.ModuleParseException;
@@ -15,32 +28,38 @@ import com.alibaba.just.util.FileUtil;
  * @author bruce.liz
  */
 public class ModuleParser {
+	private ExecutorService threadPool = null;
 
 	public static final String DEFAULT_CHARSET = "GBK";	
 	private String charset = DEFAULT_CHARSET;
-
-	/**
-	 * 普通模块正则
-	 */
-	private static final String MODULE_REGEX ="define[\\s]*\\(" +
-	"[\\s]*('[\\s]*[^\\(\\)]*'|\"[^\\(\\)]*\")[\\s]*" +
-	"," +
-	"[\\s]*(\\[[^\\[\\]]*\\])[\\s]*" +
-	"," +
-	"[\\s]*(function[\\s]*[\\s\\S]*)[\\s]*";
-
-	/**
-	 * 匿名模块正则
-	 */
-	private static final String ANONYMOUS_MODULE_REGEX ="define[\\s]*\\(" +
-	"[\\s]*(\\[[^\\[\\]]*\\])[\\s]*" +
-	"," +
-	"[\\s]*(function[\\s]*[\\s\\S]*)[\\s]*";
-
+	private static final String DEFINE_KEY_REG = "^(\\w+\\.)*define$";
 
 	public static final int MODULE_TYPE_NORMAL = 0;
 	public static final int MODULE_TYPE_ANONYMOUS = 1;
 	public static final int MODULE_TYPE_ALL = 2;
+
+	private boolean isDispose = false;
+
+	/**
+	 * 默认的js文件filter
+	 */
+	public static final FileFilter DEFAULT_FILE_FILTER = new FileFilter(){
+		public boolean accept(File file) {
+			if(file.isFile()){
+				String name = file.getName().toLowerCase();
+				if(name.endsWith(".js") && !name.endsWith("-min.js")){
+					return true;
+				}else{
+					return false;
+				}
+			}else if(file.isDirectory() && file.isHidden() ){
+				return false;
+			}
+			return true;
+		}			
+	};
+
+	protected FileFilter filter = DEFAULT_FILE_FILTER; 
 
 	public ModuleParser(String charset){
 		this.charset = charset;		
@@ -49,61 +68,57 @@ public class ModuleParser {
 	public ModuleParser(){}
 
 	/**
-	 * 
-	 * @param module
+	 * 处理folder中文件
+	 * @param file
+	 * @param list
+	 * @param moduleType
 	 * @return
 	 */
-	private List<String> getRequiredModules(String module){
-		List<String> list = new ArrayList<String>();
-		String str = module.trim();
-
-		str = str.substring(1);
-		str =  str.substring(0, str.length()-1);
-
-		String[] modules = str.split("[,]");
-
-		for(int i=0,l=modules.length;i<l;i++){
-			modules[i] = modules[i].trim();
-			if(modules[i].length()>2){
-				modules[i] = modules[i].substring(1);
-				modules[i] = modules[i].substring(0, modules[i].length()-1);
-				list.add(modules[i]);
-			}
+	private List<Module> processFolder(File file,final List<Module> list,final int moduleType){
+		List<Callable<Object>> tasks = new ArrayList<Callable<Object>>();
+		this.processFolder(file, list, moduleType,tasks);
+		if(threadPool!=null){
+			try {
+				threadPool.invokeAll(tasks);
+				tasks.clear();
+				tasks=null;
+			} catch (InterruptedException e) {}
 		}
-
 		return list;
 	}
 
-
-	/**
-	 * 是否是要加载的文件
-	 * (去掉min文件)
-	 * @param absolutePath
-	 * @return
-	 */
-	private boolean isProcessFile(String absolutePath) {
-		if(absolutePath.endsWith(".js") && !absolutePath.endsWith("-min.js")){
-			return true;
-		}
-		return false;
-	}
-
-	private List<Module> processFolder(File file,List<Module> list,int moduleType){
-
-		if(!file.exists() || !file.isDirectory()){return list;}
-		File[]  flist  = file.listFiles();
-
-		for(File f:flist){
-			if(f.isFile()){
-				list.addAll(getModules(f,moduleType));
-			}else if(f.isDirectory()){
-				processFolder(f,list,moduleType);
+	private List<Module> processFolder(File file,final List<Module> list,final int moduleType,List<Callable<Object>> tasks){
+		if(isDispose && !file.exists() || !file.isDirectory()){return list;}
+		File[]  flist  = file.listFiles(filter);		
+		if(threadPool!=null){
+			/*当使用线程池时*/
+			for(final File f:flist){
+				if(f.isFile()){
+					tasks.add(new Callable<Object>(){
+						public Object call() throws Exception {
+							list.addAll(getModules(f,moduleType));
+							return null;
+						}					
+					});
+				}else if(f.isDirectory()){
+					processFolder(f,list,moduleType,tasks);
+				}
 			}
-		}
+		}else{
+			/*当不使用线程池时*/
+			for(File f:flist){
+				if(f.isFile()){
 
+					list.addAll(getModules(f,moduleType));
+
+				}else if(f.isDirectory()){
+					processFolder(f,list,moduleType);
+				}
+			}
+
+		}
 		return list;
 	}
-
 
 	/**
 	 * 模块是否在列表中重复
@@ -179,7 +194,7 @@ public class ModuleParser {
 		return getAllRequiredModules(module,new ArrayList<Module>(), new ArrayList<Module>() ,list);
 	}
 
-	
+
 	/**
 	 * 得到引用指定模块的父模块
 	 * @param module
@@ -233,15 +248,17 @@ public class ModuleParser {
 	 * @return
 	 */
 	public List<Module> getAllModules(String path,int moduleType){
-		List<Module> moduleList = new ArrayList<Module>();
+		List<Module> moduleList = new Vector<Module>();
 
 		File  file = new File(path);
 
-		if(file.exists()){
-			if(file.isDirectory()){
-				processFolder(file, moduleList,moduleType);
-			}else if(file.isFile()){
-				moduleList.addAll(getModules(file,moduleType));
+		if(!isDispose){
+			if(file.exists()){
+				if(file.isDirectory()){
+					processFolder(file, moduleList,moduleType);
+				}else if(file.isFile()){
+					moduleList.addAll(getModules(file,moduleType));
+				}
 			}
 		}
 
@@ -311,7 +328,7 @@ public class ModuleParser {
 		List<Module> moduleList = new ArrayList<Module>();
 
 		String absPath = file.getAbsolutePath();
-		if(file.exists() && isProcessFile(absPath)){
+		if(!isDispose && file.exists() && (filter==null || (filter!=null && filter.accept(file)))){
 			String content = null;
 			try {
 				content = FileUtil.getFileContent(file, charset);
@@ -319,127 +336,92 @@ public class ModuleParser {
 
 			if(content==null){return null ;}
 
-			//去除注释
-			content = JavaScriptCompressor.compress(content);		
 
-			/*处理匿名模块*/
-			if(moduleType == MODULE_TYPE_ALL || moduleType == MODULE_TYPE_ANONYMOUS){
-				//只侦测标准形式define(["required1","required2"...],function(){...});
+			/*CompilerEnvirons ce = new CompilerEnvirons();
+			ce.setRecordingLocalJsDocComments(true);
+			ce.setRecordingComments(true);
+			Parser  parser = new  Parser(ce);
+			 */
+			Parser  parser = new Parser();
+			AstRoot astRoot = parser.parse(content, null, 0);
+			Node node = astRoot.getFirstChild();
+			while(node!=null){
+				//System.out.println(node.getClass().getName());
+				if(ExpressionStatement.class.isInstance(node)){
+					ExpressionStatement es = (ExpressionStatement)node;
+					AstNode astNode = es.getExpression();
+					if(FunctionCall.class.isInstance(astNode)){
+						FunctionCall fc = (FunctionCall)astNode;
+						AstNode nameNode = fc.getTarget();
+						//System.out.println("NAME:"+n.getIdentifier());	
+						if(Pattern.matches(DEFINE_KEY_REG,nameNode.toSource().trim())){
 
-				Pattern p = Pattern.compile(ANONYMOUS_MODULE_REGEX,Pattern.MULTILINE);
-				Matcher m = p.matcher(content);
-				Module module = null;
-				String tmp = null;
-				while (m.find()) {
-					module = new Module();
+							List<AstNode> args = fc.getArguments();
+							//校验普通模块
+							if(args.size()==3 && (moduleType == MODULE_TYPE_ALL || moduleType == MODULE_TYPE_NORMAL)){
+								AstNode stringNode = args.get(0);
+								AstNode arrayNode = args.get(1);
+								AstNode funNode = args.get(2);
 
-					module.setAnonymous(true);
+								if(StringLiteral.class.isInstance(stringNode) &&
+										ArrayLiteral.class.isInstance(arrayNode) &&
+										FunctionNode.class.isInstance(funNode)){
+									Module module = new Module();
+									module.setAnonymous(false);
+									module.setName(((StringLiteral)stringNode).getValue(false));
+									module.getRequiredModuleNames().addAll(getRequiredModules((ArrayLiteral)arrayNode));
+									module.setFilePath(absPath);
+									moduleList.add(module);
+								}
+							}
 
-					//模块依赖的子模块
-					tmp = m.group(1);
-					List<String> list = getRequiredModules(tmp);
-					module.getRequiredModuleNames().addAll(list);
+							//校验匿名模块
+							if(args.size()==2 && (moduleType == MODULE_TYPE_ALL || moduleType == MODULE_TYPE_ANONYMOUS)){
+								AstNode arrayNode = args.get(0);
+								AstNode funNode = args.get(1);
+								if(ArrayLiteral.class.isInstance(arrayNode) &&
+										FunctionNode.class.isInstance(funNode)){
+									Module module = new Module();
+									module.setAnonymous(true);
+									module.getRequiredModuleNames().addAll(getRequiredModules((ArrayLiteral)arrayNode));
+									module.setFilePath(absPath);
+									moduleList.add(module);
+								}
+							}
 
-					module.setFilePath(absPath);
-					moduleList.add(module);
+						}
+
+					}
 				}
+				node = node.getNext();
 			}
-
-
-			/*处理普通模块*/
-			if(moduleType == MODULE_TYPE_ALL || moduleType == MODULE_TYPE_NORMAL){
-				//只侦测标准形式define("module",["required1","required2"...],function(){...});
-
-				Pattern p = Pattern.compile(MODULE_REGEX,Pattern.MULTILINE);
-				Matcher m = p.matcher(content);
-				Module module = null;
-				String tmp = null;
-				while (m.find()) {
-					module = new Module();
-
-					module.setAnonymous(false);
-
-					//模块名
-					tmp = m.group(1);
-					tmp = tmp.trim().substring(1);
-					tmp =  tmp.substring(0, tmp.length()-1);				
-					module.setName(tmp);
-
-					//模块依赖的子模块
-					tmp = m.group(2);
-					List<String> list = getRequiredModules(tmp);
-					module.getRequiredModuleNames().addAll(list);
-
-					//tmp = m.group(3);
-
-					module.setFilePath(absPath);
-					moduleList.add(module);
-				}
-			}
-
 		}	
 		return moduleList;
 	}
 
+	/**
+	 * 
+	 * @param module
+	 * @return
+	 */
+	private List<String> getRequiredModules(ArrayLiteral array){
+		List<String> list = new ArrayList<String>();
+		List<AstNode> strList = array.getElements();		
+		for(AstNode strNode:strList){
+			if(StringLiteral.class.isInstance(strNode)){
+				list.add(((StringLiteral)strNode).getValue(false));
+			}
+		}
+		return list;
+	}
 
 	/**
-	 * only for test
-	 * @param args
+	 * 释放资源
 	 */
-	public static void main(String[] args){
-
-		//String spath = "E:/MyEclipse/workspace/trade_new/WebRoot/stage_make/app/trade/js/widget/ui/stage-min.js";
-
-		//Module mm = ModuleUtil.getModules(spath).get(0);
-
-		//System.out.println(mm);
-
-		//if(args!=null && args.length>1){
-
-		//String path = args[0].trim();
-
-		String path="E:/MyEclipse/workspace/trade_new/WebRoot/rate_rb/app/trade/js/judge/page/rateeditframe/rate-edit-frame.js";
-
-		path="E:/test_brach/rate_rb_20130122/app/trade/js/just/core/compatible-may.js";
-
-		//String folderPath = args[1].trim();
-
-		String folderPath="E:/MyEclipse/workspace/trade_new/WebRoot/rate_rb/app";
-
-		folderPath = "E:/test_brach/rate_rb_20130122/app/trade/js";
-
-		System.out.println("---------------------------------");
-		System.out.println("File:"+path);
-		System.out.println("---------------------------------");
-		System.out.println("Root Folder:"+folderPath);
-
-		File  file = new File(path);
-
-		ModuleParser parser =new ModuleParser();
-
-		List<Module> list= parser.getAllModules(folderPath);
-
-		Module m = parser.getModules(file).get(0);
-
-		System.out.println("---------------------------------");
-		System.out.println(m);
-
-		System.out.println("---------------------------------");
-
-		try {
-			list = parser.getAllRequiredModules(m, list);
-		} catch (ModuleParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		for(Module module:list){
-			System.out.println(module.getName());
-		}		
-		System.out.println("\nAll required mod:"+list.size());
-
+	public void dispose(){
+		this.isDispose = true;
+		this.threadPool = null;
 	}
-	//}
 
 	public String getCharset() {
 		return charset;
@@ -447,6 +429,23 @@ public class ModuleParser {
 
 	public void setCharset(String charset) {
 		this.charset = charset;
+	}
+
+	public FileFilter getFilter() {
+		return filter;
+	}
+
+	public void setFilter(FileFilter filter) {
+		this.filter = filter;
+	}
+
+
+	public ExecutorService getThreadPool() {
+		return threadPool;
+	}
+
+	public void setThreadPool(ExecutorService threadPool) {
+		this.threadPool = threadPool;
 	}
 
 }

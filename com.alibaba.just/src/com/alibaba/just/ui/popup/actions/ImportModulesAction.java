@@ -59,6 +59,7 @@ public class ImportModulesAction extends ImportModulesViewAction{
 			}
 
 			ModuleParser parser = new ModuleParser(PreferenceUtil.getFileCharset());
+			parser.setThreadPool(UIUtil.getThreadPool());
 			Module module = parser.getModule(path,ModuleParser.MODULE_TYPE_ALL);
 
 			if(module==null){
