@@ -31,6 +31,7 @@ import org.eclipse.ui.dialogs.FilteredItemsSelectionDialog;
 
 import com.alibaba.just.api.bean.Module;
 import com.alibaba.just.api.parser.ModuleParser;
+import com.alibaba.just.api.parser.ParserFactory;
 import com.alibaba.just.ui.util.ImageManager;
 import com.alibaba.just.ui.util.PluginResourceUtil;
 import com.alibaba.just.ui.util.PreferenceUtil;
@@ -212,7 +213,7 @@ public class ModuleSelectionDialog extends FilteredItemsSelectionDialog {
 			try {
 				List<String> libs = PreferenceUtil.getProjectLibsList(project);					
 				List<Module> moduleList = new ArrayList<Module>();
-				ModuleParser parser = new ModuleParser(PreferenceUtil.getFileCharset());
+				ModuleParser parser = ParserFactory.getModuleParser(PreferenceUtil.getFileCharset());
 				parser.setThreadPool(UIUtil.getThreadPool());
 				IWorkspaceRoot  wRoot = ResourcesPlugin.getWorkspace().getRoot();
 				progressMonitor.beginTask(SEARCH_LABEL, libs.size()); //$NON-NLS-1$

@@ -31,7 +31,7 @@ import org.eclipse.ui.PlatformUI;
 
 import com.alibaba.just.PluginConstants;
 import com.alibaba.just.api.bean.Module;
-import com.alibaba.just.api.parser.ModuleParser;
+import com.alibaba.just.api.parser.SimpleModuleParser;
 import com.alibaba.just.ui.util.ImageManager;
 import com.alibaba.just.ui.util.PluginResourceUtil;
 import com.alibaba.just.ui.util.PreferenceUtil;

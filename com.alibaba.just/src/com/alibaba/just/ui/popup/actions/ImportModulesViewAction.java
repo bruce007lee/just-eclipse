@@ -32,6 +32,7 @@ import org.eclipse.ui.part.FileEditorInput;
 
 import com.alibaba.just.api.bean.Module;
 import com.alibaba.just.api.parser.ModuleParser;
+import com.alibaba.just.api.parser.ParserFactory;
 import com.alibaba.just.template.ModuleTemplate;
 import com.alibaba.just.ui.dialogs.ListSelectDialog;
 import com.alibaba.just.ui.templates.TemplateConstants;
@@ -85,7 +86,7 @@ public class ImportModulesViewAction implements IEditorActionDelegate,IObjectAct
 					return;
 				}
 
-				ModuleParser parser = new ModuleParser(PreferenceUtil.getFileCharset());
+				ModuleParser parser = ParserFactory.getModuleParser(PreferenceUtil.getFileCharset());
 				parser.setThreadPool(UIUtil.getThreadPool());
 				Module module = parser.getModule(path,ModuleParser.MODULE_TYPE_ALL);
 

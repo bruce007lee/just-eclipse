@@ -2,6 +2,7 @@ package com.alibaba.just.ui.views;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.eclipse.core.filesystem.EFS;
@@ -53,6 +54,7 @@ import org.eclipse.ui.part.ViewPart;
 import com.alibaba.just.Activator;
 import com.alibaba.just.api.bean.Module;
 import com.alibaba.just.api.parser.ModuleParser;
+import com.alibaba.just.api.parser.ParserFactory;
 import com.alibaba.just.ui.preferences.PreferenceConstants;
 import com.alibaba.just.ui.util.ImageManager;
 import com.alibaba.just.ui.util.PluginResourceUtil;
@@ -591,7 +593,7 @@ public class ModuleView extends ViewPart {
 			 */
 			public void run(){
 				try {
-					parser = new ModuleParser(PreferenceUtil.getFileCharset());
+					parser = ParserFactory.getModuleParser(PreferenceUtil.getFileCharset());
 					parser.setThreadPool(UIUtil.getThreadPool());
 					Module module = parser.getModule(filepath,ModuleParser.MODULE_TYPE_ALL);
 

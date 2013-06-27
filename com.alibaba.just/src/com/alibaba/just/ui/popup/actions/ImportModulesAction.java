@@ -14,6 +14,7 @@ import org.eclipse.ui.IWorkbenchPart;
 
 import com.alibaba.just.api.bean.Module;
 import com.alibaba.just.api.parser.ModuleParser;
+import com.alibaba.just.api.parser.ParserFactory;
 import com.alibaba.just.ui.util.PluginResourceUtil;
 import com.alibaba.just.ui.util.PreferenceUtil;
 import com.alibaba.just.ui.util.UIUtil;
@@ -58,7 +59,7 @@ public class ImportModulesAction extends ImportModulesViewAction{
 				return;
 			}
 
-			ModuleParser parser = new ModuleParser(PreferenceUtil.getFileCharset());
+			ModuleParser parser = ParserFactory.getModuleParser(PreferenceUtil.getFileCharset());
 			parser.setThreadPool(UIUtil.getThreadPool());
 			Module module = parser.getModule(path,ModuleParser.MODULE_TYPE_ALL);
 

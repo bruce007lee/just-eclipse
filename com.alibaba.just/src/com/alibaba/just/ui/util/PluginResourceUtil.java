@@ -3,6 +3,7 @@ package com.alibaba.just.ui.util;
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.eclipse.core.resources.IContainer;
@@ -19,6 +20,8 @@ import org.osgi.framework.Bundle;
 import com.alibaba.just.Activator;
 import com.alibaba.just.api.bean.Module;
 import com.alibaba.just.api.parser.ModuleParser;
+import com.alibaba.just.api.parser.ParserFactory;
+import com.alibaba.just.api.parser.SimpleModuleParser;
 import com.alibaba.just.util.FileUtil;
 
 /**
@@ -65,7 +68,7 @@ public class PluginResourceUtil {
 	 * @throws CoreException
 	 */
 	public static void getModulesByResource(IResource resource,List<Module> list,ModuleParser parser,int moduleType) throws CoreException{
-		if(IContainer.class.isInstance(resource)){
+		/*if(IContainer.class.isInstance(resource)){
 			IContainer pro = (IContainer)resource;
 			IResource[] members = pro.members();
 			for(int i=0,l=members.length;i<l;i++){
@@ -73,6 +76,32 @@ public class PluginResourceUtil {
 			}
 		}else{
 			list.addAll(parser.getAllModules(resource.getLocation().toFile().getAbsolutePath(),moduleType));
+		}*/
+		List<String> paths = new ArrayList<String>();
+		getModulePathsByResource(resource,paths,parser,moduleType);
+		list.addAll(parser.getAllModules(paths,moduleType));
+	}
+	
+	/**
+	 * 根据指定的resource获取所有的js模块路径
+	 * @param resource
+	 * @param paths
+	 * @param parser
+	 * @throws CoreException
+	 */
+	private static void getModulePathsByResource(IResource resource,List<String> paths,ModuleParser parser,int moduleType) throws CoreException{
+		if(IContainer.class.isInstance(resource)){
+			IContainer pro = (IContainer)resource;
+			IResource[] members = pro.members();
+			for(int i=0,l=members.length;i<l;i++){
+				PluginResourceUtil.getModulePathsByResource(members[i],paths,parser,moduleType);
+			}
+		}else{
+			if(parser.getFilter()!=null && parser.getFilter().accept(resource.getLocation().toFile())){
+				paths.add(resource.getLocation().toFile().getAbsolutePath());
+			}else{
+			    paths.add(resource.getLocation().toFile().getAbsolutePath());
+			}
 		}
 	}
 	
@@ -90,7 +119,7 @@ public class PluginResourceUtil {
 	public static List<Module> getAllModulesByProject(IProject project,int moduleType){
 		List<String> libs = PreferenceUtil.getProjectLibsList(project);	
 		List<Module> moduleList = new ArrayList<Module>();
-		ModuleParser parser = new ModuleParser(PreferenceUtil.getFileCharset());
+		ModuleParser parser = ParserFactory.getModuleParser(PreferenceUtil.getFileCharset());
 		parser.setThreadPool(UIUtil.getThreadPool());
 		IWorkspaceRoot  wRoot = ResourcesPlugin.getWorkspace().getRoot();
 
