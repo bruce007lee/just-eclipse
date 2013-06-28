@@ -65,9 +65,10 @@ public class PluginResourceUtil {
 	 * @param resource
 	 * @param list
 	 * @param parser
+	 * @return
 	 * @throws CoreException
 	 */
-	public static void getModulesByResource(IResource resource,List<Module> list,ModuleParser parser,int moduleType) throws CoreException{
+	public static List<Module> getModulesByResource(IResource resource,List<Module> list,ModuleParser parser,int moduleType) throws CoreException{
 		/*if(IContainer.class.isInstance(resource)){
 			IContainer pro = (IContainer)resource;
 			IResource[] members = pro.members();
@@ -77,32 +78,44 @@ public class PluginResourceUtil {
 		}else{
 			list.addAll(parser.getAllModules(resource.getLocation().toFile().getAbsolutePath(),moduleType));
 		}*/
+		if(list==null){list = new ArrayList<Module>();}
 		List<String> paths = new ArrayList<String>();
-		getModulePathsByResource(resource,paths,parser,moduleType);
-		list.addAll(parser.getAllModules(paths,moduleType));
+		internalFindModules(resource,list,paths,parser,moduleType);
+		list.addAll(parser.getAllModules(paths, moduleType));
+		return list;
 	}
 	
 	/**
 	 * 根据指定的resource获取所有的js模块路径
 	 * @param resource
+	 * @param moduleList
 	 * @param paths
 	 * @param parser
+	 * @param moduleType
+	 * @return
 	 * @throws CoreException
 	 */
-	private static void getModulePathsByResource(IResource resource,List<String> paths,ModuleParser parser,int moduleType) throws CoreException{
+	private static List<Module> internalFindModules(IResource resource,List<Module> moduleList,List<String> paths,ModuleParser parser,int moduleType) throws CoreException{
+		//如果达到限制(10w)条先执行，防止内存消耗过多
+		if(paths.size()>100000){
+			moduleList.addAll(parser.getAllModules(paths, moduleType));
+			paths.clear();
+		}
+		
+		if(parser.getFilter()!=null && !parser.getFilter().accept(resource.getLocation().toFile())){
+			return moduleList;
+		}
+		
 		if(IContainer.class.isInstance(resource)){
 			IContainer pro = (IContainer)resource;
 			IResource[] members = pro.members();
 			for(int i=0,l=members.length;i<l;i++){
-				PluginResourceUtil.getModulePathsByResource(members[i],paths,parser,moduleType);
+				PluginResourceUtil.internalFindModules(members[i],moduleList,paths,parser,moduleType);
 			}
 		}else{
-			if(parser.getFilter()!=null && parser.getFilter().accept(resource.getLocation().toFile())){
-				paths.add(resource.getLocation().toFile().getAbsolutePath());
-			}else{
-			    paths.add(resource.getLocation().toFile().getAbsolutePath());
-			}
+			paths.add(resource.getLocation().toFile().getAbsolutePath());
 		}
+		return moduleList;
 	}
 	
 	

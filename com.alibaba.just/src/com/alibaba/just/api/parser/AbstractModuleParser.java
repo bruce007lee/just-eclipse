@@ -16,6 +16,7 @@ public abstract class AbstractModuleParser implements ModuleParser{
 	protected String charset = DEFAULT_CHARSET;
 	protected boolean isDispose = false;
 	protected FileFilter filter = DEFAULT_FILE_FILTER; 
+	private int TASK_LIMT = 100000;//用线程池时限制10w个task一次
 
 	public AbstractModuleParser(String charset){
 		this.charset = charset;		
@@ -59,6 +60,13 @@ public abstract class AbstractModuleParser implements ModuleParser{
 							return null;
 						}					
 					});
+					//超过限制先执行释放资源
+					if(tasks.size()>TASK_LIMT){
+						try {
+							threadPool.invokeAll(tasks);
+							tasks.clear();
+						} catch (InterruptedException e) {}
+					}
 				}else{
 					/*当不使用线程池时*/
 					list.addAll(getModules(f,moduleType));
@@ -215,6 +223,14 @@ public abstract class AbstractModuleParser implements ModuleParser{
 									return null;
 								}					
 							});
+							//超过限制先执行释放资源
+							if(tasks.size()>TASK_LIMT){
+								try {
+									threadPool.invokeAll(tasks);
+									tasks.clear();
+								} catch (InterruptedException e) {}
+							}
+
 						}else{
 							moduleList.addAll(getModules(file,moduleType));
 						}
