@@ -7,6 +7,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -29,33 +30,39 @@ public class OpenModuleAction implements IWorkbenchWindowActionDelegate {
 	 * @see org.eclipse.ui.IActionDelegate#run(org.eclipse.jface.action.IAction)
 	 */
 	public void run(IAction action) {
+		IEditorPart part = UIUtil.getCurrentActiveEditor();		    
+		if(part==null){return;}
 
-		    IEditorPart part = UIUtil.getCurrentActiveEditor();
-		    
-		    if(part==null){return;}
-		    IEditorInput input = part.getEditorInput();
+		String selectText = null;
+		if(TextSelection.class.isInstance(this.selection)){
+			selectText = ((TextSelection)this.selection).getText();
+		}
 
-			if(FileEditorInput.class.isInstance(input)){
-				FileEditorInput fileInput = (FileEditorInput)input;
-				try {
-					IFile ifile = fileInput.getFile();
-					IProject project = ifile.getProject();
-					OpenModuleDialog dlg = new OpenModuleDialog(UIUtil.getShell());
-					dlg.setProject(project);
-					dlg.open();
+		IEditorInput input = part.getEditorInput();
+		if(FileEditorInput.class.isInstance(input)){
+			FileEditorInput fileInput = (FileEditorInput)input;
+			try {
+				IFile ifile = fileInput.getFile();
+				IProject project = ifile.getProject();
+				OpenModuleDialog dlg = new OpenModuleDialog(UIUtil.getShell());
+				dlg.setProject(project);
+				if(selectText!=null){
+					dlg.setInitialPattern(selectText);
+				}
+				dlg.open();
 
-				} catch (Exception e) {
-					String error = e.getMessage();
-					if(error==null || error.trim().length()==0){
-						error = e.toString();
-					}
-					MessageDialog.openInformation(
-							UIUtil.getShell(),
-							"Error",
-							error);  
-				} 		
-			}
-		    
+			} catch (Exception e) {
+				String error = e.getMessage();
+				if(error==null || error.trim().length()==0){
+					error = e.toString();
+				}
+				MessageDialog.openInformation(
+						UIUtil.getShell(),
+						"Error",
+						error);  
+			} 		
+		}
+
 	}
 
 	/* (non-Javadoc)

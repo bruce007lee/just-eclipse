@@ -57,7 +57,6 @@ public class OpenModuleDialog extends ModuleSelectionDialog {
 
 	protected void okPressed() {
 		Object module = this.getSelectedResult();
-
 		if(Module.class.isInstance(module)){
 			final String filePath = ((Module)module).getFilePath();
 			Display.getDefault().asyncExec(new Runnable() {
