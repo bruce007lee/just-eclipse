@@ -45,11 +45,12 @@ public class ModuleSelectionDialog extends FilteredItemsSelectionDialog {
 	private static final String DIALOG_WIDTH = "DIALOG_WIDTH"; //$NON-NLS-1$
 	private static final String DIALOG_SETTINGS = "FilteredResourcesSelectionDialogExampleSettings";
 	private static final String SEARCH_LABEL = "Searching"; //$NON-NLS-1$
+	private static final String DLG_TITLE = "Select Module";
 	
 	private static final String SEP = " - ";
 
-	private Button addSelectedModBtn = null;
-	private Button addTextModBtn = null;
+	protected Button addSelectedModBtn = null;
+	protected Button addTextModBtn = null;
 
 
 	private IProject project = null;
@@ -87,7 +88,7 @@ public class ModuleSelectionDialog extends FilteredItemsSelectionDialog {
 	}
 
 	protected Control createDialogArea(Composite parent){
-		this.getShell().setText("Select Module");
+		this.getShell().setText(DLG_TITLE);
 		Control control = super.createDialogArea(parent);
 
 		setListLabelProvider(new StyledLabelProvider());

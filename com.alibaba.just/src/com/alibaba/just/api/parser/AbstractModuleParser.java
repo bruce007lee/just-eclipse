@@ -16,7 +16,7 @@ public abstract class AbstractModuleParser implements ModuleParser{
 	protected String charset = DEFAULT_CHARSET;
 	protected boolean isDispose = false;
 	protected FileFilter filter = DEFAULT_FILE_FILTER; 
-	private int TASK_LIMT = 100000;//用线程池时限制10w个task一次
+	private static final int TASK_LIMT = 100000;//用线程池时限制10w个task一次
 
 	public AbstractModuleParser(String charset){
 		this.charset = charset;		

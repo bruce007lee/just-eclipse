@@ -52,7 +52,7 @@
          point="org.eclipse.ui.popupMenus">
       <objectContribution
             adaptable="false"
-            id="com.alibaba.just.contribution1"
+            id="com.alibaba.just.contribution"
             objectClass="org.eclipse.core.resources.IResource">
          <menu
                icon="icons/sample.gif"
@@ -132,7 +132,7 @@
       </objectContribution>
       <viewerContribution
             targetID="#AbstractTextEditorContext"
-            id="com.alibaba.just.viewContribution1">
+            id="com.alibaba.just.viewContribution">
          <menu
                icon="icons/sample.gif"
                id="com.alibaba.just.view.menu"
@@ -210,6 +210,12 @@
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M1+M3+8">
       </key>
+      <key
+            commandId="com.alibaba.just.ui.commands.openModule"
+            contextId="org.eclipse.ui.contexts.window"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+M3+7">
+      </key>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
@@ -235,6 +241,11 @@
             id="com.alibaba.just.ui.commands"
             name="just eclipse commands">
       </category>
+      <command
+            categoryId="com.alibaba.just.ui.commands"
+            id="com.alibaba.just.ui.commands.openModule"
+            name="Open Module">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.views">
@@ -282,6 +293,34 @@
             </objectClass>
          </enablement>
       </decorator>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectives">
+      <perspective
+            class="com.alibaba.just.ui.perspectives.JustPerspective"
+            icon="icons/sample.gif"
+            id="com.alibaba.just.ui.perspectives.JustPerspective"
+            name="Just Perspective">
+      </perspective>
+   </extension>
+   <extension
+         point="org.eclipse.ui.actionSets">
+      <actionSet
+            id="com.alibaba.just.ui.actionSet"
+            label="Just eclipse ActionSet"
+            visible="true">
+         <action
+               class="com.alibaba.just.ui.popup.actions.OpenModuleAction"
+               definitionId="com.alibaba.just.ui.commands.openModule"
+               icon="icons/open_module.gif"
+               id="com.alibaba.just.action1"
+               label="Open Module"
+               menubarPath="navigate/open.ext2"
+               style="push"
+               toolbarPath="org.eclipse.search.searchActionSet/Search"
+               tooltip="Open Javascript Module">
+         </action>
+      </actionSet>
    </extension>
 
 

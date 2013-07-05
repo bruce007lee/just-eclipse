@@ -11,7 +11,9 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.jface.text,
  org.eclipse.ui.editors,
  org.eclipse.ui.workbench.texteditor,
- org.eclipse.core.filesystem
+ org.eclipse.core.filesystem,
+ org.eclipse.ui.console,
+ org.eclipse.jdt.ui
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Export-Package: com.alibaba.just;uses:="org.eclipse.ui.plugin",
