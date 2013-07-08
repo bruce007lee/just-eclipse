@@ -18,10 +18,16 @@ public class FileTemplateContextType extends TemplateContextType {
 	}
 
 	public FileTemplateContextType() {
-		 addResolver(createResolver("moduleName",""));
-		 addResolver(createResolver("requiredModules",""));
+		 addResolver(createResolver("dateTime","Current Date & Time. e.g:2012-02-10"));
+		 addResolver(createResolver("moduleName","Current module name."));
+		 addResolver(createResolver("requiredModules","Required modules in current module."));
 		 addResolver(createResolver("requiredModuleArrayStr",""));
 		 addResolver(createResolver("requiredModuleParamsStr",""));
+		 addResolver(createResolver("templateUtil.getModulePath($rootPath,$module)","Get module path in merge file."));
+		 addResolver(createResolver("templateUtil.toCamelPath($path)","Convert to camel case path."));
+		 addResolver(createResolver("templateUtil.toCamel($str)","Convert to camel case string."));
+		 addResolver(createResolver("templateUtil.toHorLine($path)",""));
+		 addResolver(createResolver("templateUtil.toHorLinePath($str)",""));
 	}
 
 	/*
