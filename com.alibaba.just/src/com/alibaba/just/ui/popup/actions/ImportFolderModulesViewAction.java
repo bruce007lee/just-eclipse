@@ -221,6 +221,9 @@ public class ImportFolderModulesViewAction extends ImportModulesViewAction{
 		ModuleParser parser = ParserFactory.getModuleParser(PreferenceUtil.getFileCharset());
 		parser.setThreadPool(UIUtil.getThreadPool());
 		Module module = parser.getModule(path,ModuleParser.MODULE_TYPE_ALL);
+		if(module==null){
+			return new ArrayList<Module>(0);
+		}
 		List<Module> modules = parser.getAllRequiredModules(module, moduleList);
 		modules.add(module);
 		return modules;
