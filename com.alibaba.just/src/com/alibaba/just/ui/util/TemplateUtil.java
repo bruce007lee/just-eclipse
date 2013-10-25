@@ -193,7 +193,7 @@ public class TemplateUtil {
 			if(rootPath !=null && module.getFilePath()!=null){
 				String mp = module.getFilePath().replace('\\', '/');
 				int idx = mp.indexOf(rootPath.replace('\\', '/'));
-				if(idx>0){
+				if(idx>=0){
 				  return mp.substring(idx + rootPath.length(),mp.length());
 				}
 			}

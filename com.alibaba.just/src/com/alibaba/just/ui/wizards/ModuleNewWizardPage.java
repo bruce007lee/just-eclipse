@@ -344,10 +344,11 @@ public class ModuleNewWizardPage extends WizardPage {
 				else
 					container = ((IResource) obj).getParent();
 
-				IPath rootPath = PreferenceUtil.getCurrentRootPath(container);
-				if(rootPath!=null){
-					containerText.setText(rootPath.toString());
-					parentCt = getRelativeRootPath(container.getFullPath().toString(),rootPath.toString());
+				IContainer root = PreferenceUtil.getCurrentRoot(container);
+				if(root!=null && root.getFullPath()!=null){
+					String rootPath = root.getFullPath().toString();
+					containerText.setText(rootPath);
+					parentCt = getRelativeRootPath(container.getFullPath().toString(),rootPath);
 				}else{
 					containerText.setText(container.getFullPath().toString());	
 				}

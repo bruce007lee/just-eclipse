@@ -14,7 +14,6 @@ import java.util.regex.Pattern;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.IInputValidator;
@@ -331,9 +330,9 @@ public class ImportModulesViewAction implements IEditorActionDelegate,IObjectAct
 
 			Map map = new HashMap();
 			String path = null;
-			IPath p = PreferenceUtil.getCurrentRootPath(ifile.getParent());
-			if(p!=null){
-				path = p.toString();
+			IContainer p = PreferenceUtil.getCurrentRoot(ifile.getParent());
+			if(p!=null && p.getRawLocation()!=null){
+				path = p.getRawLocation().toString();
 			}
 			map.put("rootPath", path);
 			String libsStr = mtpl.getParseContent(map);

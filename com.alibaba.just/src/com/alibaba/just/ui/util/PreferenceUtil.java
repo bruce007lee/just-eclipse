@@ -138,11 +138,11 @@ public class PreferenceUtil {
 	}
 	
 	/**
-	 * 得到默认的container对应的rootpath,如没有设置返回<code>null</code>
+	 * 得到默认的container对应的rootpath文件夹,如没有设置返回<code>null</code>
 	 * @param container
 	 * @return
 	 */
-	public static IPath getCurrentRootPath(IContainer container){
+	public static IContainer getCurrentRoot(IContainer container){
 		if(container==null){
 			return null;
 		}
@@ -153,7 +153,7 @@ public class PreferenceUtil {
 			String path = parent.getFullPath().toString();
 			path = PreferenceUtil.getRootPathByIPath(project, path);			
 			if(pathList.contains(path)){
-				return parent.getFullPath();
+				return parent;
 			}
 			parent = parent.getParent();
 		}

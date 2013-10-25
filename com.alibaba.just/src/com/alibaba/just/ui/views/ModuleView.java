@@ -598,7 +598,6 @@ public class ModuleView extends ViewPart {
 					Module module = parser.getModule(filepath,ModuleParser.MODULE_TYPE_ALL);
 
 					if(module==null || project==null){
-
 						return;
 					}
 
