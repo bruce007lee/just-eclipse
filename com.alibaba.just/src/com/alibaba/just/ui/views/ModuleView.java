@@ -2,7 +2,6 @@ package com.alibaba.just.ui.views;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import org.eclipse.core.filesystem.EFS;
@@ -10,10 +9,12 @@ import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.resources.IResourceChangeEvent;
+import org.eclipse.core.resources.IResourceChangeListener;
+import org.eclipse.core.resources.IResourceDelta;
+import org.eclipse.core.resources.IResourceDeltaVisitor;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuListener;
@@ -45,6 +46,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IPartListener;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.FileStoreEditorInput;
 import org.eclipse.ui.ide.IDE;
@@ -52,6 +54,7 @@ import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.part.ViewPart;
 
 import com.alibaba.just.Activator;
+import com.alibaba.just.PluginConstants;
 import com.alibaba.just.api.bean.Module;
 import com.alibaba.just.api.parser.ModuleParser;
 import com.alibaba.just.api.parser.ParserFactory;
@@ -73,16 +76,15 @@ public class ModuleView extends ViewPart {
 	 */
 	public static final String ID = "com.alibaba.just.ui.views.ModuleView";
 
-	private static final String TREE_LABEL_FILE_NOT_FOUND = " - [Not Found]";
+	private static final String TREE_LABEL_FILE_MISSING = " - [Missing]";
 	private static final String SHOW_TYPE_FLAT = "flat";
 	private static final String SHOW_TYPE_HIER = "hier";
 
+	private static final int TYPE_IMP_ALIAS = 1;
+	private static final int TYPE_IMP_ORI = 0;
+
 	private TreeViewer viewer;
 	private ViewContentProvider vcp;
-	//private DrillDownAdapter drillDownAdapter;
-	//private Action action1;
-	//private Action action2;
-	//private Action doubleClickAction;
 
 	private DefaultRunner  runner;
 
@@ -94,6 +96,7 @@ public class ModuleView extends ViewPart {
 	private boolean isDispose = false;
 
 	private IPartListener partListener = null;
+	private IResourceChangeListener resourceChangeListener = null;
 
 	private IAction action_flat;
 	private IAction action_hier;
@@ -106,6 +109,7 @@ public class ModuleView extends ViewPart {
 	class TreeNode implements IAdaptable {
 		private Object obj;
 		private String iconName;
+		private int type = TYPE_IMP_ORI;
 
 		private String desc;
 
@@ -129,7 +133,11 @@ public class ModuleView extends ViewPart {
 				if(m.isAnonymous()){
 					return "<anonymous module>";
 				}else{
-					return ((Module)obj).getName();
+					if(((Module)obj).getAlias()!=null && type==TYPE_IMP_ALIAS){
+						return ((Module)obj).getAlias();
+					}else{
+						return ((Module)obj).getName();
+					}
 				}
 			}
 			return obj.toString();
@@ -199,6 +207,12 @@ public class ModuleView extends ViewPart {
 		public void setDesc(String desc) {
 			this.desc = desc;
 		}
+		public int getType() {
+			return type;
+		}
+		public void setType(int type) {
+			this.type = type;
+		}
 
 	}
 
@@ -257,6 +271,10 @@ public class ModuleView extends ViewPart {
 			if(TreeNode.class.isInstance(obj)){				
 				StyledString text = new StyledString();				
 				node = (TreeNode)obj;
+				if(Module.class.isInstance(node.getObject())){
+					m = (Module)node.getObject();
+				}
+
 				cell.setImage(ImageManager.getImage(node.getIconName()));
 
 				text.append(node.getName());
@@ -265,16 +283,21 @@ public class ModuleView extends ViewPart {
 					text.append(node.getDesc(), StyledString.QUALIFIER_STYLER);
 				}
 
-				Object nodeData = node.getObject();
-				if(Module.class.isInstance(nodeData)){
-					m = (Module)nodeData;
-
+				if(m!=null){
 					if(node.getChildren()!=null && node.getChildren().length>0){
 						text.append(" - (" + node.getChildren().length +")", StyledString.QUALIFIER_STYLER);
 					}
 
+					if(m!=null && m.getAlias()!=null){
+						if(node.getType()==TYPE_IMP_ALIAS){
+							text.append(" - source:<"+m.getName()+">", StyledString.DECORATIONS_STYLER);
+						}else{
+							text.append(" - alias:<"+m.getAlias()+">", StyledString.DECORATIONS_STYLER);
+						}
+					}
+
 					if(m.getFilePath()==null){
-						text.append(TREE_LABEL_FILE_NOT_FOUND, StyledString.QUALIFIER_STYLER);
+						text.append(TREE_LABEL_FILE_MISSING, StyledString.QUALIFIER_STYLER);
 					}
 				}
 
@@ -347,14 +370,6 @@ public class ModuleView extends ViewPart {
 
 	/**
 	 * 
-	 */
-	private void removeListener(){
-		Activator.getDefault().getWorkbench().getActiveWorkbenchWindow().getPartService().removePartListener(partListener);
-		partListener = null;
-	}
-
-	/**
-	 * 
 	 * @param part
 	 */
 	private void updateView(IWorkbenchPart part){
@@ -407,8 +422,20 @@ public class ModuleView extends ViewPart {
 
 	}
 
+
 	/**
-	 * 
+	 * clear workbenchwindow bind events 
+	 */
+	private void removeListener(){
+		Activator.getDefault().getWorkbench().getActiveWorkbenchWindow().getPartService().removePartListener(partListener);
+		partListener = null;
+		PluginResourceUtil.getWorkspace().removeResourceChangeListener(resourceChangeListener);
+		resourceChangeListener=null;
+	}
+
+
+	/**
+	 * register workbenchwindow events
 	 */
 	private void initListener(){
 		partListener = new IPartListener(){
@@ -432,11 +459,43 @@ public class ModuleView extends ViewPart {
 				// TODO Auto-generated method stub
 
 			}
+		};
+		
+		final IResourceDeltaVisitor vistor = new IResourceDeltaVisitor(){
+			public boolean visit(IResourceDelta delta)
+					throws CoreException {
+				//System.out.println(delta +" "+ delta.getKind());
+				if((delta.getKind()==IResourceDelta.CHANGED) 
+						&& delta.getResource()!=null
+						&& IResource.FILE==delta.getResource().getType()
+						&& PluginConstants.JAVASCRIPT_EXT.equalsIgnoreCase(delta.getResource().getFileExtension()) ){
+					//System.out.println("remove cache file:"+ PluginResourceUtil.getResourceCacheKey( delta.getResource()));
+					IWorkbenchWindow win = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+					if(win!=null){
+						IWorkbenchPage page  = win.getActivePage();
+						if(page!=null){
+							updateView(page.getActivePart());
+						}
+					}					
+				}
+				return true;
+			}			
+		};
 
+		resourceChangeListener = new IResourceChangeListener(){
+			public void resourceChanged(IResourceChangeEvent event) {
+				try {
+					event.getDelta().accept(vistor);
+				} catch (CoreException e) {
+					e.printStackTrace();
+				}
+				//System.out.println("type:"+event.getType()+" resource:"+event.getResource()+" source:"+event.getSource());
+			}
 
 		};
 
 		Activator.getDefault().getWorkbench().getActiveWorkbenchWindow().getPartService().addPartListener(partListener);
+		PluginResourceUtil.getWorkspace().addResourceChangeListener(resourceChangeListener,IResourceChangeEvent.POST_CHANGE);
 	}
 
 	public void clearView(boolean isRefresh){
@@ -477,7 +536,7 @@ public class ModuleView extends ViewPart {
 	 * @param allImported
 	 * @return
 	 */
- 	private TreeNode getUsedTree(List<Module> moduleList){
+	private TreeNode getUsedTree(List<Module> moduleList){
 		TreeNode tp = new TreeNode("Used Modules...");
 		tp.setIconName(ImageManager.IMG_USED_LIST);
 		List<String> tmp = new ArrayList<String>();
@@ -495,7 +554,7 @@ public class ModuleView extends ViewPart {
 					if(m.isAnonymous() && m.getFilePath()!=null){
 						um.setDesc(" - ["+m.getFilePath()+"]");
 					}
-					um.setIconName(ImageManager.IMG_MODULE_ICON);
+					um.setIconName(m.getAlias()==null?ImageManager.IMG_MODULE_ICON:ImageManager.IMG_ALIAS_MODULE_ICON);
 					tp.addChild(um);
 				}
 			}
@@ -515,10 +574,16 @@ public class ModuleView extends ViewPart {
 		TreeNode tp = new TreeNode(module);
 		tp.setIconName(ImageManager.IMG_MODULE_ICON);//set icon
 		List<String> names = module.getRequiredModuleNames();
+		TreeNode tmp = null;
 		for(String name:names){
 			for(Module impModule:allImported){
-				if(name.equals(impModule.getName())){
-					tp.addChild(getRequiredModulesTree(impModule,allImported));
+				if(name.equals(impModule.getName()) || name.equals(impModule.getAlias())){
+					tmp = getRequiredModulesTree(impModule,allImported);
+					if(name.equals(impModule.getAlias())){
+						tmp.setType(TYPE_IMP_ALIAS);
+						tmp.setIconName(ImageManager.IMG_ALIAS_MODULE_ICON);
+					}
+					tp.addChild(tmp);
 					break;
 				}
 			}
@@ -532,11 +597,17 @@ public class ModuleView extends ViewPart {
 	 * @param allImported
 	 * @return
 	 */
-	private List<TreeNode> getRequiredModulesList(List<TreeNode> list,Module module,List<Module> allImported,boolean isStartModule){
+	private List<TreeNode> getRequiredModulesList(List<TreeNode> list,Module module,List<Module> allImported,boolean isImpAlias,boolean isStartModule){
 		List<TreeNode> l = list==null ? new ArrayList<TreeNode>() : list;
 		TreeNode tp = new TreeNode(module);
-		tp.setIconName(ImageManager.IMG_MODULE_ICON);//set icon
-		if(!isExist(tp,l)){
+		if(isImpAlias){
+			tp.setType(TYPE_IMP_ALIAS);
+			tp.setIconName(ImageManager.IMG_ALIAS_MODULE_ICON);
+		}else{
+			tp.setIconName(ImageManager.IMG_MODULE_ICON);//set icon
+		}
+		TreeNode exist = getExist(tp,l);
+		if(exist==null){
 			l.add(tp);
 			List<String> names = module.getRequiredModuleNames();
 			List<TreeNode> tmp = l;
@@ -545,8 +616,8 @@ public class ModuleView extends ViewPart {
 			}
 			for(String name:names){
 				for(Module impModule:allImported){
-					if(name.equals(impModule.getName())){
-						getRequiredModulesList(tmp,impModule,allImported,false);
+					if(name.equals(impModule.getName()) || name.equals(impModule.getAlias())){
+						getRequiredModulesList(tmp,impModule,allImported,name.equals(impModule.getAlias()),false);
 						break;
 					}
 				}
@@ -554,20 +625,25 @@ public class ModuleView extends ViewPart {
 			if(isStartModule){
 				tp.addChildren(tmp);
 			}
-		}		
+		}else{
+			if(isImpAlias){
+				exist.setType(TYPE_IMP_ALIAS);
+				exist.setIconName(ImageManager.IMG_ALIAS_MODULE_ICON);
+			}
+		}
 		return l;
 	}
 
-	private boolean isExist(TreeNode checkNode,List<TreeNode> list){
+	private TreeNode getExist(TreeNode checkNode,List<TreeNode> list){
 		for(TreeNode node:list){
 			if(checkNode!=null &&  
 					node.getObject()!=null &&  
 					checkNode.getObject()!=null &&  
 					node.getObject().equals(checkNode.getObject())){
-				return true;
+				return node;
 			}
 		}
-		return false;
+		return null;
 	}
 
 	/**
@@ -595,6 +671,7 @@ public class ModuleView extends ViewPart {
 				try {
 					parser = ParserFactory.getModuleParser(PreferenceUtil.getFileCharset());
 					parser.setThreadPool(UIUtil.getThreadPool());
+					parser.setAliasList(PluginResourceUtil.getProjectAliasInfo(project));
 					Module module = parser.getModule(filepath,ModuleParser.MODULE_TYPE_ALL);
 
 					if(module==null || project==null){
@@ -602,9 +679,10 @@ public class ModuleView extends ViewPart {
 					}
 
 					showLoading(true);
-					List<String> libs = PreferenceUtil.getProjectLibsList(project);	
+					/*
+					List<String> libs = PreferenceUtil.getProjectLibsList(project);							
 					List<Module> moduleList = new ArrayList<Module>();
-					IWorkspaceRoot  wRoot = ResourcesPlugin.getWorkspace().getRoot();
+				   IWorkspaceRoot  wRoot = ResourcesPlugin.getWorkspace().getRoot();
 					for(String lib:libs){
 						String lb = lib.trim();
 						if(lb.length()>0){
@@ -624,7 +702,10 @@ public class ModuleView extends ViewPart {
 								}
 							}else{
 								lb = PreferenceUtil.getProjectLibPath(lb);
-								File f = new File(lb);
+								File f = new File(lb);								
+								try {
+									PluginResourceUtil.getModulesByLibPath(project,f,moduleList,parser);
+								} catch (Exception e) {}								
 								if(f.exists() && f.isDirectory()){
 									folderPath = f.getAbsolutePath();
 									moduleList.addAll(parser.getAllModules(folderPath));
@@ -633,6 +714,10 @@ public class ModuleView extends ViewPart {
 
 						}
 					}
+
+					PluginResourceUtil.updataLibPathCacheStatus(project);*/
+
+					List<Module> moduleList = PluginResourceUtil.getAllModulesByProject(parser,project,ModuleParser.MODULE_TYPE_ALL);
 
 					List<Module> requires =  parser.getAllRequiredModules(module, moduleList);
 
@@ -645,7 +730,7 @@ public class ModuleView extends ViewPart {
 
 						String showType = getShowType();
 						if(SHOW_TYPE_FLAT.equalsIgnoreCase(showType)){
-							root.addChildren(getRequiredModulesList(new ArrayList<TreeNode>(),module, requires,true));
+							root.addChildren(getRequiredModulesList(new ArrayList<TreeNode>(),module, requires,false,true));
 							root.setIconName(ImageManager.IMG_FLAT_LAYOUT);
 						}else{
 							root.addChild(getRequiredModulesTree(module, requires));
@@ -676,7 +761,7 @@ public class ModuleView extends ViewPart {
 					//e.printStackTrace();
 					showException(e);					
 				} 
-
+				parser.dispose();
 				parser = null;//clear
 			}
 

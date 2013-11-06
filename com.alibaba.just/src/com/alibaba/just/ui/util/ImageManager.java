@@ -11,6 +11,7 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 public class ImageManager {
 	
 	public static final String IMG_MODULE_ICON = "img_module_icon";
+	public static final String IMG_ALIAS_MODULE_ICON = "img_alias_module_icon";
 	public static final String IMG_LIB = "img_lib_icon";
 	public static final String IMG_LIB_FOLDER = "img_lib_folder_icon";
 	public static final String IMG_LIB_PROJECT = "img_lib_project_icon";
@@ -29,6 +30,7 @@ public class ImageManager {
 		baseURL = plugin.getBundle().getEntry("/");
 		imageRegistry = plugin.getImageRegistry();
 		ImageManager.putImage(IMG_MODULE_ICON, "icons/module.gif");
+		ImageManager.putImage(IMG_ALIAS_MODULE_ICON, "icons/alias_module.gif");
 		ImageManager.putImage(IMG_LIB, "icons/lib.gif");
 		ImageManager.putImage(IMG_LIB_FOLDER, "icons/lib_f.gif");
 		ImageManager.putImage(IMG_LIB_PROJECT, "icons/lib_p.gif");

@@ -331,8 +331,8 @@ public class ImportModulesViewAction implements IEditorActionDelegate,IObjectAct
 			Map map = new HashMap();
 			String path = null;
 			IContainer p = PreferenceUtil.getCurrentRoot(ifile.getParent());
-			if(p!=null && p.getRawLocation()!=null){
-				path = p.getRawLocation().toString();
+			if(p!=null && p.getLocation()!=null){
+				path = p.getLocation().toFile().getAbsolutePath();
 			}
 			map.put("rootPath", path);
 			String libsStr = mtpl.getParseContent(map);

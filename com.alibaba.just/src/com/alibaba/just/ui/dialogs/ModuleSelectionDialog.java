@@ -1,17 +1,13 @@
 package com.alibaba.just.ui.dialogs;
 
-import java.io.File;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -31,11 +27,9 @@ import org.eclipse.ui.dialogs.FilteredItemsSelectionDialog;
 
 import com.alibaba.just.api.bean.Module;
 import com.alibaba.just.api.parser.ModuleParser;
-import com.alibaba.just.api.parser.ParserFactory;
 import com.alibaba.just.ui.util.ImageManager;
 import com.alibaba.just.ui.util.PluginResourceUtil;
-import com.alibaba.just.ui.util.PreferenceUtil;
-import com.alibaba.just.ui.util.UIUtil;
+import com.alibaba.just.ui.viewmodel.ViewItem;
 
 public class ModuleSelectionDialog extends FilteredItemsSelectionDialog {
 
@@ -44,9 +38,8 @@ public class ModuleSelectionDialog extends FilteredItemsSelectionDialog {
 	private static final String DIALOG_HEIGHT = "DIALOG_HEIGHT"; //$NON-NLS-1$
 	private static final String DIALOG_WIDTH = "DIALOG_WIDTH"; //$NON-NLS-1$
 	private static final String DIALOG_SETTINGS = "FilteredResourcesSelectionDialogExampleSettings";
-	private static final String SEARCH_LABEL = "Searching"; //$NON-NLS-1$
 	private static final String DLG_TITLE = "Select Module";
-	
+
 	private static final String SEP = " - ";
 
 	protected Button addSelectedModBtn = null;
@@ -87,6 +80,15 @@ public class ModuleSelectionDialog extends FilteredItemsSelectionDialog {
 		return this.getFirstResult();
 	}
 
+	public Object getFirstResult() {
+		Object obj = super.getFirstResult();
+		//convert to module
+		if(ViewItem.class.isInstance(obj)){
+			obj = ((ViewItem)obj).getObj();
+		}
+		return obj;
+	}
+
 	protected Control createDialogArea(Composite parent){
 		this.getShell().setText(DLG_TITLE);
 		Control control = super.createDialogArea(parent);
@@ -114,7 +116,12 @@ public class ModuleSelectionDialog extends FilteredItemsSelectionDialog {
 			public String getText(Object element) {
 				if(Module.class.isInstance(element)){
 					return((Module)element).getFilePath();
-				}				
+				}else if(ViewItem.class.isInstance(element)){
+					ViewItem vi = (ViewItem)element;
+					if(Module.class.isInstance(vi.getObj())){
+						return ((Module)vi.getObj()).getFilePath();
+					}
+				}
 				return null;
 			}
 
@@ -175,8 +182,11 @@ public class ModuleSelectionDialog extends FilteredItemsSelectionDialog {
 		return new ItemsFilter() {
 			public boolean matchItem(Object item) {
 				if(Module.class.isInstance(item)){
-					return matches(((Module)item).getName());
-				}				
+					return ((Module)item).getName()!=null && matches(((Module)item).getName());
+				}else if(ViewItem.class.isInstance(item)){
+					return((ViewItem)item).getLabel()!=null && matches(((ViewItem)item).getLabel());
+				}	
+
 				return false;
 			}
 			public boolean isConsistentItem(Object item) {
@@ -192,8 +202,20 @@ public class ModuleSelectionDialog extends FilteredItemsSelectionDialog {
 	protected Comparator getItemsComparator() {
 		return new Comparator() {
 			public int compare(Object arg0, Object arg1) {
-				if(Module.class.isInstance(arg0) && Module.class.isInstance(arg1)){
-					return ((Module)arg0).getName().compareTo(((Module)arg1).getName());
+				if(ViewItem.class.isInstance(arg0)){
+					arg0 = ((ViewItem)arg0).getLabel();
+					
+				}else if(Module.class.isInstance(arg0)){
+					arg0 =  ((Module)arg0).getName();
+				}
+				if(ViewItem.class.isInstance(arg1)){
+					arg1 = ((ViewItem)arg1).getLabel();
+					
+				}else if(Module.class.isInstance(arg1)){
+					arg1 =  ((Module)arg1).getName();
+				}
+				if(String.class.isInstance(arg0) && String.class.isInstance(arg1)){
+					return ((String)arg0).compareTo((String)arg1);
 				}else{
 					return 0;
 				}
@@ -207,17 +229,33 @@ public class ModuleSelectionDialog extends FilteredItemsSelectionDialog {
 	 */
 	protected void fillContentProvider(AbstractContentProvider contentProvider,
 			ItemsFilter itemsFilter, IProgressMonitor progressMonitor)
-	throws CoreException {  
+	throws CoreException { 
+		if(this.project==null){
+			IWorkspaceRoot  wRoot = ResourcesPlugin.getWorkspace().getRoot();
+			IProject[] projects = wRoot.getProjects();
+			for(IProject p:projects){
+				fillProjectContentProvider(p,contentProvider,itemsFilter,  progressMonitor);
+			}
+		}else{
+			fillProjectContentProvider( this.project,contentProvider,itemsFilter,  progressMonitor);
+		}
+	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog#fillContentProvider(org.eclipse.ui.dialogs.FilteredItemsSelectionDialog.AbstractContentProvider, org.eclipse.ui.dialogs.FilteredItemsSelectionDialog.ItemsFilter, org.eclipse.core.runtime.IProgressMonitor)
+	 */
+	private void fillProjectContentProvider(IProject project,AbstractContentProvider contentProvider,
+			ItemsFilter itemsFilter, IProgressMonitor progressMonitor)
+	throws CoreException { 
 		if(project!=null){
 			// Populate libs
 			try {
-				List<String> libs = PreferenceUtil.getProjectLibsList(project);					
-				List<Module> moduleList = new ArrayList<Module>();
-				ModuleParser parser = ParserFactory.getModuleParser(PreferenceUtil.getFileCharset());
-				parser.setThreadPool(UIUtil.getThreadPool());
-				IWorkspaceRoot  wRoot = ResourcesPlugin.getWorkspace().getRoot();
-				progressMonitor.beginTask(SEARCH_LABEL, libs.size()); //$NON-NLS-1$
+				//List<String> libs = PreferenceUtil.getProjectLibsList(project);					
+				//List<Module> moduleList = new ArrayList<Module>();
+				//ModuleParser parser = ParserFactory.getModuleParser(PreferenceUtil.getFileCharset());
+				//parser.setThreadPool(UIUtil.getThreadPool());
+				/*
 				for(String lib:libs){
 					progressMonitor.worked(1);
 					String lb = lib.trim();
@@ -226,7 +264,7 @@ public class ModuleSelectionDialog extends FilteredItemsSelectionDialog {
 						String type = PreferenceUtil.getProjectLibType(lb);
 						if(PreferenceUtil.LIB_TYPE_WORKSPACE_FOLDER.equals(type) ||
 								PreferenceUtil.LIB_TYPE_SELF.equals(type)){
-							/*如果是workspace里的目录*/
+							如果是workspace里的目录
 							if(PreferenceUtil.LIB_TYPE_SELF.equals(type)){
 							   lb = project.getFullPath().toString();
 							}else{
@@ -239,10 +277,15 @@ public class ModuleSelectionDialog extends FilteredItemsSelectionDialog {
 								PluginResourceUtil.getModulesByResource(res,moduleList,parser);
 							}
 						}else if(PreferenceUtil.LIB_TYPE_EXTERNAL_FOLDER.equals(type)){
-							/*如果是workspace外的目录*/
+							如果是workspace外的目录
 							lb = PreferenceUtil.getProjectLibPath(lb);
 							progressMonitor.setTaskName(SEARCH_LABEL+"["+lb+"]");
 							File f = new File(lb);
+
+							try {
+								PluginResourceUtil.getModulesByLibPath(project,f,moduleList,parser);
+							} catch (Exception e) {}
+
 							if(f.exists() && f.isDirectory()){
 								folderPath = f.getAbsolutePath();
 								moduleList.addAll(parser.getAllModules(folderPath));
@@ -250,12 +293,26 @@ public class ModuleSelectionDialog extends FilteredItemsSelectionDialog {
 						}
 					}
 				}
+
+				PluginResourceUtil.updataLibPathCacheStatus(project);
+				 */
+
+				List<Module> moduleList = PluginResourceUtil.getAllModulesByProject(project,ModuleParser.MODULE_TYPE_NORMAL,progressMonitor);
+
+				Module tmp = null;
+				ViewItem vi = null;
 				for (Iterator<Module> iter = moduleList.iterator(); iter.hasNext();) {
-					contentProvider.add(iter.next(), itemsFilter);
+					tmp = iter.next();
+					if(tmp.getAlias()!=null){
+						vi = new ViewItem(tmp,tmp.getAlias());
+						vi.setIconName(ImageManager.IMG_ALIAS_MODULE_ICON);
+						contentProvider.add(vi, itemsFilter);
+					}
+					contentProvider.add(tmp, itemsFilter);
 				}
-				progressMonitor.done();
 
 			} catch (Exception e) {
+				e.printStackTrace();
 			}
 
 		}
@@ -268,6 +325,8 @@ public class ModuleSelectionDialog extends FilteredItemsSelectionDialog {
 	public String getElementName(Object item) {
 		if(Module.class.isInstance(item)){
 			return ((Module)item).getName();
+		}else if(ViewItem.class.isInstance(item)){
+			return((ViewItem)item).getLabel();
 		}
 		return null;
 	}
@@ -289,28 +348,34 @@ public class ModuleSelectionDialog extends FilteredItemsSelectionDialog {
 		}
 		return rs;
 	}
-	
+
 	private class StyledLabelProvider implements IStyledLabelProvider,ILabelProvider{
-		
+
 		public Image getImage(Object element) {
-			return ImageManager.getImage(ImageManager.IMG_MODULE_ICON);
+			if(ViewItem.class.isInstance(element)&& ((ViewItem)element).getIconName()!=null){
+				return ImageManager.getImage(((ViewItem)element).getIconName());
+			}else{
+				return ImageManager.getImage(ImageManager.IMG_MODULE_ICON);
+			}
 		}
 
 		public String getText(Object element) {
 			if(Module.class.isInstance(element)){
 				return((Module)element).getName();
-			}				
+			}else if(ViewItem.class.isInstance(element)){
+				return((ViewItem)element).getLabel();
+			}
 			return null;
 		}
 
 		public void addListener(ILabelProviderListener listener) {
 			// TODO Auto-generated method stub
-			
+
 		}
 
 		public void dispose() {
 			// TODO Auto-generated method stub
-			
+
 		}
 
 		public boolean isLabelProperty(Object element, String property) {
@@ -320,7 +385,7 @@ public class ModuleSelectionDialog extends FilteredItemsSelectionDialog {
 
 		public void removeListener(ILabelProviderListener listener) {
 			// TODO Auto-generated method stub
-			
+
 		}
 
 		public StyledString getStyledText(Object element) {
@@ -332,7 +397,21 @@ public class ModuleSelectionDialog extends FilteredItemsSelectionDialog {
 					ss.append(new StyledString(SEP + path,StyledString.QUALIFIER_STYLER));
 				}
 				return ss;
-			}				
+			}if(ViewItem.class.isInstance(element)){				
+				ViewItem vi = (ViewItem)element;
+				if(Module.class.isInstance(vi.getObj())){
+					Module m = (Module)vi.getObj();
+					String name = vi.getLabel();
+					String path = m.getFilePath();
+					StyledString ss = new StyledString(name);
+					if(path!=null){
+						ss.append(new StyledString(SEP + path,StyledString.QUALIFIER_STYLER));
+					}
+					return ss;					
+				}
+
+
+			}					
 			return new StyledString();
 		}
 

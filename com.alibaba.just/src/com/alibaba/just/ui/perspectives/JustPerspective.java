@@ -6,8 +6,6 @@ package com.alibaba.just.ui.perspectives;
 import org.eclipse.ui.IFolderLayout;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
-import org.eclipse.ui.console.IConsoleConstants;
-import org.eclipse.jdt.ui.JavaUI;
 
 /**
  * 
@@ -37,8 +35,7 @@ public class JustPerspective implements IPerspectiveFactory {
 				IPageLayout.BOTTOM,
 				0.75f,
 				factory.getEditorArea());
-		bottom.addView(IPageLayout.ID_PROBLEM_VIEW);		
-		bottom.addPlaceholder(IConsoleConstants.ID_CONSOLE_VIEW);
+		bottom.addView(IPageLayout.ID_PROBLEM_VIEW);
 
 		IFolderLayout topLeft =
 			factory.createFolder(

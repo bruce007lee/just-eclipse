@@ -36,10 +36,11 @@ public class RhinoModuleParser extends AbstractModuleParser {
 
 	private static final String DEFINE_KEY_REG = "^(\\w+\\.)*define$";
 
+
 	/* (non-Javadoc)
 	 * @see com.alibaba.just.api.parser.ModuleParser#getModules(java.io.File, int)
 	 */
-	public List<Module> getModules(File file,int moduleType){
+	public List<Module> getModules(File file,int moduleType,ParserEvent event){
 		List<Module> moduleList = new ArrayList<Module>();		
 		String absPath = file.getAbsolutePath();
 		try{
@@ -87,6 +88,7 @@ public class RhinoModuleParser extends AbstractModuleParser {
 										module.setName(((StringLiteral)stringNode).getValue(false));
 										module.getRequiredModuleNames().addAll(getRequiredModules((ArrayLiteral)arrayNode));
 										module.setFilePath(absPath);
+										updateAlias(module,this.getAliasList());//update module alias
 										moduleList.add(module);
 									}
 								}
@@ -111,16 +113,23 @@ public class RhinoModuleParser extends AbstractModuleParser {
 					}
 					node = node.getNext();
 				}
+				if(event!=null){
+					event.onEnd(this,file,moduleList);
+				}
 			}	
 
 		}catch(Exception e){
 			//文件解析异常暂时不处理
 			//throw new ModuleParseException("Failed to parse file ["+absPath+"]:"+(e.getMessage()==null?e.toString():e.getMessage()),e);
 		}
+		
+		if(event!=null){
+			event.onDispose(this);
+		}
 
 		return moduleList;
 	}
-	
+
 	/**
 	 * Fix 如：define(['jquery'],function($){}).register();之类的用法
 	 * TODO：以后去掉对非AMD标准匿名模块的支持
@@ -139,7 +148,7 @@ public class RhinoModuleParser extends AbstractModuleParser {
 		}		
 		return funcall;
 	}
-	
+
 	/**
 	 * 
 	 * @param module
@@ -155,5 +164,5 @@ public class RhinoModuleParser extends AbstractModuleParser {
 		}
 		return list;
 	}
-	
+
 }

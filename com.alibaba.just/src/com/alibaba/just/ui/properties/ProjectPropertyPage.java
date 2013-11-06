@@ -1,13 +1,12 @@
 package com.alibaba.just.ui.properties;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -30,14 +29,15 @@ import org.eclipse.ui.dialogs.PropertyPage;
 import com.alibaba.just.PluginConstants;
 import com.alibaba.just.ui.decorators.RootPathDecorator;
 import com.alibaba.just.ui.util.ImageManager;
+import com.alibaba.just.ui.util.PluginResourceUtil;
 import com.alibaba.just.ui.util.PreferenceUtil;
-import com.alibaba.just.ui.view.ViewContentProvider;
-import com.alibaba.just.ui.view.ViewItem;
-import com.alibaba.just.ui.view.ViewLabelProvider;
+import com.alibaba.just.ui.viewmodel.ViewContentProvider;
+import com.alibaba.just.ui.viewmodel.ViewItem;
+import com.alibaba.just.ui.viewmodel.ViewLabelProvider;
 
 public class ProjectPropertyPage extends PropertyPage {
 
-	private static final String QUALIFIED_NAME = PluginConstants.QUALIFIED_NAME;
+	//private static final String QUALIFIED_NAME = PluginConstants.QUALIFIED_NAME;
 	private static final String LIBS_PROPERTY_KEY = PluginConstants.LIBS_PROPERTY_KEY;
 	private static final String ROOT_PATH_PROPERTY_KEY = PluginConstants.ROOT_PATH_PROPERTY_KEY;
 
@@ -486,30 +486,61 @@ public class ProjectPropertyPage extends PropertyPage {
 		return sb.toString();
 	}
 
+	/**
+	 * 
+	 * @param before
+	 * @param after
+	 * @return
+	 */
+	private void clearLibPathCache(IProject project,List<String> before,List<String> after){
+		List<String> list = new ArrayList<String>(5);
+		if(before!=null && after!=null){
+			String tmp = null;
+			boolean isRemove = true;
+			for(int i=0,l=before.size();i<l;i++){
+				tmp = before.get(i);
+				isRemove = true;
+				for(int j=0,ll=after.size();j<ll;j++){
+					if(tmp.equals(after.get(j))){
+						isRemove = false;
+						break;
+					}
+				}
+				if(isRemove){
+					list.add(tmp);
+				}
+			}
+		}
+		PluginResourceUtil.removeProjectLibPathCache(project,list);
+	}
 
 	public boolean performOk() {
 		// store the value in the owner text field
 		try {
 
 			IProject project = (IProject) getElement();
-			project.setPersistentProperty(
+			/*project.setPersistentProperty(
 					new QualifiedName(QUALIFIED_NAME, LIBS_PROPERTY_KEY),
 					this.getToSaveStr(libPathList));
 
 			project.setPersistentProperty(
 					new QualifiedName(QUALIFIED_NAME, ROOT_PATH_PROPERTY_KEY),
-					this.getToSaveStr(rootPathList));
-
+					this.getToSaveStr(rootPathList));*/
+			
+			List<String> before = PluginResourceUtil.getLibPathList(project);	
+			
+			PreferenceUtil.setProjectProperty(project, LIBS_PROPERTY_KEY, this.getToSaveStr(libPathList));
+			PreferenceUtil.setProjectProperty(project, ROOT_PATH_PROPERTY_KEY, this.getToSaveStr(rootPathList));
+			
+			List<String> after = PluginResourceUtil.getLibPathList(project);	
+			
+			clearLibPathCache(project,before,after);
+			
 			RootPathDecorator.refresh();
-		} catch (CoreException e) {
+		} catch (Exception e) {
 			return false;
 		}
 		return true;
 	}
-
-	class viewItem{
-
-	}
-
 
 }

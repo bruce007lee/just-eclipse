@@ -1,14 +1,28 @@
 package com.alibaba.just.ui.util;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import com.alibaba.just.Activator;
 import com.alibaba.just.PluginConstants;
@@ -17,14 +31,21 @@ import com.alibaba.just.ui.preferences.PreferenceConstants;
 public class PreferenceUtil {	
 
 	private static final String SEP_REG = "[\n]";
-	
+
 	private static final String LIB_SEP= "|";
 
 	public static final String LIB_TYPE_SELF = "s|";
 	public static final String LIB_TYPE_EXTERNAL_FOLDER = "e|";
 	public static final String LIB_TYPE_WORKSPACE_FOLDER = "w|";
-	
+
 	public static final String SELF_LIB_STR = LIB_TYPE_SELF + "<PROJECT>";
+
+	public static final String CONFIG_FILE = ".justeclipse/project-cfg.xml";
+	public static final String CONFIG_ROOT_NAME = "config";
+	public static final String PROPERTY_NAME = "property";
+	public static final String ATTR_NAME = "name";
+
+	public static final QualifiedName CONFIG_QUALIFIEDNAME = new QualifiedName(PluginConstants.QUALIFIED_NAME, CONFIG_ROOT_NAME);
 
 	private PreferenceUtil(){}
 
@@ -34,12 +55,154 @@ public class PreferenceUtil {
 	 * @param key
 	 * @return
 	 */
-	public static String getProjectProperty(IProject project,String key){		
+	public static String getProjectProperty(IProject project,String key){	
+		if(project==null || project.getLocation()==null){
+			return null;
+		}
 		String val = null;		
 		try {
-			val = project.getPersistentProperty(new QualifiedName(PluginConstants.QUALIFIED_NAME, key));
-		} catch (CoreException e) {}		
+			Object obj = project.getSessionProperty(CONFIG_QUALIFIEDNAME);
+			Document doc = null;
+			if(Document.class.isInstance(obj)){
+				doc = (Document)obj;
+			}else{
+				//val = project.getPersistentProperty(new QualifiedName(PluginConstants.QUALIFIED_NAME, key));
+				doc = loadConfig(getProjectConfigPath(project));
+				if(doc==null){
+					return null;
+				}
+				project.setSessionProperty(CONFIG_QUALIFIEDNAME,doc);
+			}
+			Node rootNode = doc.getDocumentElement();
+			if(rootNode!=null){
+				Element el = getPropertyValue(rootNode,key);
+				if(el!=null){
+					return el.getTextContent();
+				}
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}		
 		return val;
+	}
+
+	private static String getProjectConfigPath(IProject project){
+		if(project.getLocation()==null){
+			return null;
+		}
+		return formatPath(project.getLocation().toFile().getAbsolutePath().replace('\\', '/'))+CONFIG_FILE;
+	}
+
+	private static String formatPath(String path){
+		if(path!=null){
+			path = path.replace('\\', '/');
+			if(!path.endsWith("/")){
+				path = path+"/";
+			}
+		}		
+		return path;
+	}
+
+	/**
+	 * 
+	 * @param parent
+	 * @param tagName
+	 * @return
+	 */
+	private static List<Node> getChildNode(Node parent,String tagName){
+		List<Node> list = new ArrayList<Node>();
+		NodeList  nList =  parent.getChildNodes();
+		for(int i=0,l=nList.getLength();i<l;i++){
+			if(nList.item(i).getNodeName().equals(tagName)){
+				list.add(nList.item(i));
+			}
+		}
+		return list;
+	}
+
+	/**
+	 * 
+	 * @param parent
+	 * @param propertyName
+	 * @return
+	 */
+	private static Element getPropertyValue(Node parent,String propertyName){
+		List<Node> list = getChildNode(parent,PROPERTY_NAME);
+		Element el = null;
+		for(Node n:list){
+			if(Element.class.isInstance(n)){
+				el = (Element)n;
+				if(propertyName.equals(el.getAttribute(ATTR_NAME))){
+					return el;
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * 保存配置
+	 * @param path
+	 * @throws Exception 
+	 */
+	private static void saveConfig(String path,Document doc) throws Exception{
+		File file = new File(path);
+
+		FileOutputStream fos =null;
+
+		try {
+			if(!file.exists()){
+				if(!file.getParentFile().exists()){
+					file.getParentFile().mkdirs();
+				}
+				file.createNewFile();
+			}
+
+			doc.setXmlStandalone(true);
+			Transformer tf = TransformerFactory.newInstance().newTransformer();				
+			tf.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
+			tf.setOutputProperty(OutputKeys.METHOD, "xml");
+			tf.setOutputProperty(OutputKeys.INDENT, "yes");
+			tf.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+
+			fos = new FileOutputStream(file);				
+			tf.transform(new DOMSource(doc), new StreamResult(fos));   
+
+		} catch (Exception e) {
+			throw new Exception("Save config ["+path+"] error!",e);
+		}finally{
+			if(fos!=null){
+				try {fos.close();} catch (Exception e) {}
+			}
+		}
+	}
+
+	/**
+	 * 保存配置
+	 * @param path
+	 * @throws Exception 
+	 */
+	private static Document loadConfig(String path) throws Exception{    	
+		File file = new File(path);
+		if(!file.exists()){
+			return null;
+		}
+		try {
+			DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+			Document doc =null;
+			if(file.exists()){
+				try{
+					doc = builder.parse(new FileInputStream(file));	
+				}catch(Exception e){
+					doc = null;
+				}
+			}	
+
+			return doc;
+		} catch (Exception e) {
+			throw new Exception("Load config ["+path+"] error!",e);
+		} 
 	}
 
 
@@ -51,9 +214,43 @@ public class PreferenceUtil {
 	 * @return
 	 */
 	public static void setProjectProperty(IProject project,String key,String value){	
+		if(project==null || project.getLocation()==null){
+			return;
+		}
 		try {
-			project.setPersistentProperty(new QualifiedName(PluginConstants.QUALIFIED_NAME, key),value);
-		} catch (CoreException e) {
+
+			String path = getProjectConfigPath(project);
+			Object obj = project.getSessionProperty(CONFIG_QUALIFIEDNAME);
+			Document doc = null;
+			if(Document.class.isInstance(obj)){
+				doc = (Document)obj;
+			}else{
+				//project.setPersistentProperty(new QualifiedName(PluginConstants.QUALIFIED_NAME, key),value);
+				doc = loadConfig(path);
+				if(doc==null){
+					DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+					doc = builder.newDocument();
+				}
+				project.setSessionProperty(CONFIG_QUALIFIEDNAME,doc);
+			}
+
+			Element root = doc.getDocumentElement();
+			if(root==null){
+				root = doc.createElement(CONFIG_ROOT_NAME);
+				doc.appendChild(root);
+			}
+			Element el = getPropertyValue(root,key);
+			if(el==null){
+				el = doc.createElement(PROPERTY_NAME);
+				root.appendChild(el);
+				el.setAttribute(ATTR_NAME, key);
+			}			
+			el.setTextContent(value);
+
+			saveConfig(path,doc);//save
+
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -99,7 +296,7 @@ public class PreferenceUtil {
 			return null;
 		}
 	}
-	
+
 	/**
 	 * 根据lib数据获取当前path的类型
 	 * @param libStr
@@ -124,7 +321,7 @@ public class PreferenceUtil {
 	 */
 	public static List<String> getProjectRootPathList(IProject project){
 		List<String> list = new ArrayList<String>();
-		String pathStr = PreferenceUtil.getProjectProperty(project,PluginConstants.ROOT_PATH_PROPERTY_KEY);
+		String pathStr = getProjectProperty(project,PluginConstants.ROOT_PATH_PROPERTY_KEY);
 		if(pathStr!=null){
 			String[] libs = pathStr.split(SEP_REG);
 			for(String lib:libs){
@@ -136,7 +333,7 @@ public class PreferenceUtil {
 		}
 		return list;
 	}
-	
+
 	/**
 	 * 得到默认的container对应的rootpath文件夹,如没有设置返回<code>null</code>
 	 * @param container
@@ -203,7 +400,7 @@ public class PreferenceUtil {
 					sb.append(list.get(i));
 				}
 			}
-			PreferenceUtil.setProjectProperty(project,PluginConstants.ROOT_PATH_PROPERTY_KEY, sb.toString());
+			setProjectProperty(project,PluginConstants.ROOT_PATH_PROPERTY_KEY, sb.toString());
 		}		
 	}
 

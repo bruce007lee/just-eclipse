@@ -26,7 +26,7 @@ import com.alibaba.just.ui.dialogs.ListSelectDialog;
 import com.alibaba.just.ui.util.PluginResourceUtil;
 import com.alibaba.just.ui.util.PreferenceUtil;
 import com.alibaba.just.ui.util.UIUtil;
-import com.alibaba.just.ui.view.ViewItem;
+import com.alibaba.just.ui.viewmodel.ViewItem;
 import com.alibaba.just.util.FileUtil;
 
 /**

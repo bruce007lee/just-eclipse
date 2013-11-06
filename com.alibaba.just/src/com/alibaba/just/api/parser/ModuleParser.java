@@ -5,6 +5,7 @@ import java.io.FileFilter;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 
+import com.alibaba.just.api.bean.AliasInfo;
 import com.alibaba.just.api.bean.Module;
 import com.alibaba.just.api.exception.ModuleParseException;
 
@@ -70,10 +71,18 @@ public interface ModuleParser {
 	 * 获取指定路径下的所有指定类型的模块
 	 * @param paths
 	 * @param moduleType
+	 * @param event
 	 * @return
 	 */
-	public List<Module> getAllModules(List<String> paths,
-			final int moduleType);
+	public List<Module> getAllModules(List<String> paths,final int moduleType,ParserEvent event);
+
+	/**
+	 * 获取指定路径下的所有指定类型的模块
+	 * @param paths
+	 * @param moduleType
+	 * @return
+	 */
+	public List<Module> getAllModules(List<String> paths,final int moduleType);
 
 	/**
 	 * 得到当前模块文件的所有模块
@@ -131,6 +140,10 @@ public interface ModuleParser {
 	public FileFilter getFilter();
 
 	public void setFilter(FileFilter filter);
+
+	public List<AliasInfo> getAliasList();
+
+	public void setAliasList(List<AliasInfo> aliasList);
 
 	public ExecutorService getThreadPool();
 

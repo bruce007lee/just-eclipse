@@ -17,8 +17,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableColumn;
 
-import com.alibaba.just.ui.view.ViewContentProvider;
-import com.alibaba.just.ui.view.ViewItem;
+import com.alibaba.just.ui.viewmodel.ViewContentProvider;
+import com.alibaba.just.ui.viewmodel.ViewItem;
 
 
 public class ListMultiSelectDialog extends Dialog {

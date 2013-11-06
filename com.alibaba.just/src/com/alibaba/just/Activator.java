@@ -1,10 +1,19 @@
 package com.alibaba.just;
 
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceChangeEvent;
+import org.eclipse.core.resources.IResourceChangeListener;
+import org.eclipse.core.resources.IResourceDelta;
+import org.eclipse.core.resources.IResourceDeltaVisitor;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
+import com.alibaba.just.ui.cache.ResourceCacheManager;
+import com.alibaba.just.ui.listener.CacheRemoveListener;
 import com.alibaba.just.ui.util.ImageManager;
+import com.alibaba.just.ui.util.PluginResourceUtil;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -19,6 +28,8 @@ public class Activator extends AbstractUIPlugin {
 	
 	private static InstanceScope is;
 	
+	private CacheRemoveListener cacheRemoveListener = null;
+		
 	/**
 	 * The constructor
 	 */
@@ -32,7 +43,9 @@ public class Activator extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
-		ImageManager.init(this);
+		ImageManager.init(this);	
+		cacheRemoveListener = new CacheRemoveListener();		
+		PluginResourceUtil.getWorkspace().addResourceChangeListener(cacheRemoveListener);
 	}
 
 	/*
@@ -40,6 +53,9 @@ public class Activator extends AbstractUIPlugin {
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
 	 */
 	public void stop(BundleContext context) throws Exception {
+		PluginResourceUtil.getWorkspace().removeResourceChangeListener(cacheRemoveListener);
+		cacheRemoveListener = null;
+		ResourceCacheManager.shutdown();
 		plugin = null;
 		ImageManager.dispose();
 		super.stop(context);

@@ -29,10 +29,12 @@ public class JSDTModuleCompletionProposalComputer implements IJavaCompletionProp
 
 	private static final String SEP_REG = "[\n]";
 
+	private static final String PROPOSALS_ALIAS_TYPE = "alias";
+
 	private boolean isStart = false;
 	private int startOffset = -1;
 
-	private List<String> listCache = null;
+	private List<String[]> listCache = null;
 
 	public void sessionStarted() {
 		//System.out.println("sessionStarted");
@@ -103,16 +105,21 @@ public class JSDTModuleCompletionProposalComputer implements IJavaCompletionProp
 
 		//System.out.println("currentText:"+currentText);
 		//System.out.println("offset:"+offset);
-		List<String> proposals = new Vector<String>();
+		List<String[]> proposals = new Vector<String[]>();
 
 		//缓存结果
 		if(listCache==null){
-			
+
 			List<Module> moduleList = PluginResourceUtil.getAllModulesByProject(project);
 
 			//转化为proposals
+			Module tmp = null;
 			for (Iterator<Module> iter = moduleList.iterator(); iter.hasNext();) {
-				proposals.add(iter.next().getName());
+				tmp = iter.next();
+				proposals.add(new String[]{tmp.getName(),null});
+				if(tmp.getAlias()!=null){
+					proposals.add(new String[]{tmp.getAlias(),PROPOSALS_ALIAS_TYPE});
+				}
 			}
 
 			listCache = proposals;
@@ -120,12 +127,17 @@ public class JSDTModuleCompletionProposalComputer implements IJavaCompletionProp
 			proposals = listCache;//如果有cache取cache
 		}
 
-		String prop = null;
+		String[] prop = null;
 		for(int i = 0,l=proposals.size();i<l;i++ ){
 			prop = proposals.get(i);
-			if(currentText==null || prop.indexOf(currentText)==0){
-				completionProposalList.add(new CompletionProposal(prop, startOffset, offset-startOffset , prop.length()
-						,ImageManager.getImage(ImageManager.IMG_MODULE_ICON),null,null,null));
+			if(currentText==null || prop[0].indexOf(currentText)==0){
+				if(prop[1]!=null && prop[1].equals(PROPOSALS_ALIAS_TYPE)){
+					completionProposalList.add(new CompletionProposal(prop[0], startOffset, offset-startOffset , prop[0].length()
+							,ImageManager.getImage(ImageManager.IMG_ALIAS_MODULE_ICON),null,null,null));
+				}else{
+					completionProposalList.add(new CompletionProposal(prop[0], startOffset, offset-startOffset , prop[0].length()
+							,ImageManager.getImage(ImageManager.IMG_MODULE_ICON),null,null,null));
+				}
 			}
 		}
 

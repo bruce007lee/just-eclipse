@@ -8,6 +8,7 @@ import java.util.Vector;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 
+import com.alibaba.just.api.bean.AliasInfo;
 import com.alibaba.just.api.bean.Module;
 import com.alibaba.just.api.exception.ModuleParseException;
 
@@ -17,6 +18,7 @@ public abstract class AbstractModuleParser implements ModuleParser{
 	protected boolean isDispose = false;
 	protected FileFilter filter = DEFAULT_FILE_FILTER; 
 	private static final int TASK_LIMT = 100000;//用线程池时限制10w个task一次
+	private List<AliasInfo> aliasList = null;
 
 	public AbstractModuleParser(String charset){
 		this.charset = charset;		
@@ -47,7 +49,7 @@ public abstract class AbstractModuleParser implements ModuleParser{
 	/**
 	 * 并不一定执行，当使用线程池时只处理task队列
 	 */
-	protected void processFolder(File file,final List<Module> list,final int moduleType,List<Callable<Object>> tasks){
+	protected void processFolder(File file,final List<Module> list,final int moduleType,List<Callable<Object>> tasks,final ParserEvent event){
 		if(isDispose && !file.exists() || !file.isDirectory()){return;}
 		File[]  flist  = file.listFiles(filter);
 		for(final File f:flist){
@@ -56,7 +58,7 @@ public abstract class AbstractModuleParser implements ModuleParser{
 					/*当使用线程池时*/
 					tasks.add(new Callable<Object>(){
 						public Object call() throws Exception {
-							list.addAll(getModules(f,moduleType));
+							list.addAll(getModules(f,moduleType,event));
 							return null;
 						}					
 					});
@@ -69,10 +71,10 @@ public abstract class AbstractModuleParser implements ModuleParser{
 					}
 				}else{
 					/*当不使用线程池时*/
-					list.addAll(getModules(f,moduleType));
+					list.addAll(getModules(f,moduleType,event));
 				}
 			}else if(f.isDirectory()){
-				processFolder(f,list,moduleType,tasks);
+				processFolder(f,list,moduleType,tasks,event);
 			}
 		}
 	}
@@ -157,7 +159,8 @@ public abstract class AbstractModuleParser implements ModuleParser{
 		for(Module m : list){
 			subModNames = m.getRequiredModuleNames();
 			for(String subName : subModNames){
-				if(module.getName() != null && module.getName().equals(subName)){
+				if((module.getName() != null && module.getName().equals(subName)) || 
+						module.getAlias() != null && module.getAlias().equals(subName)){
 					rsList.add(m);
 					break;
 				}
@@ -168,21 +171,18 @@ public abstract class AbstractModuleParser implements ModuleParser{
 
 	/**
 	 * 
-	 * @param moduleName
+	 * @param moduleName NOTE: it maybe a module alias name
 	 * @param list
 	 * @return
 	 */
 	protected Module getModuleByName(String moduleName,List<Module> list){
-
-		if(moduleName==null){
-			return null;
-		}
-		for(Module submod : list){
-			if(moduleName.equals(submod.getName())){
-				return submod;
+		if(moduleName!=null && list!=null){
+			for(Module submod : list){
+				if(moduleName.equals(submod.getName()) || moduleName.equals(submod.getAlias())){
+					return submod;
+				}
 			}
 		}
-
 		return null;
 	}
 
@@ -201,11 +201,11 @@ public abstract class AbstractModuleParser implements ModuleParser{
 		paths.add(path);
 		return this.getAllModules(paths, moduleType);
 	}
-
-	/* (non-Javadoc)
-	 * @see com.alibaba.just.api.parser.ModuleParser#getAllModules(java.util.List, int)
+	
+	/**
+	 * 
 	 */
-	public List<Module> getAllModules(List<String> paths,final int moduleType){
+	public List<Module> getAllModules(List<String> paths,final int moduleType,final ParserEvent event){
 		final List<Module> moduleList = new Vector<Module>();
 		List<Callable<Object>> tasks = new ArrayList<Callable<Object>>();
 		File  file = null;
@@ -214,12 +214,12 @@ public abstract class AbstractModuleParser implements ModuleParser{
 			if(!isDispose){
 				if(file.exists()){
 					if(file.isDirectory()){
-						processFolder(file, moduleList,moduleType,tasks);						
+						processFolder(file, moduleList,moduleType,tasks,event);						
 					}else if(file.isFile()){
 						if(threadPool!=null){
 							tasks.add(new Callable<Object>(){
 								public Object call() throws Exception {
-									moduleList.addAll(getModules(path,moduleType));
+									moduleList.addAll(getModules(path,moduleType,event));
 									return null;
 								}					
 							});
@@ -232,7 +232,7 @@ public abstract class AbstractModuleParser implements ModuleParser{
 							}
 
 						}else{
-							moduleList.addAll(getModules(file,moduleType));
+							moduleList.addAll(getModules(file,moduleType,event));
 						}
 					}
 				}
@@ -246,15 +246,50 @@ public abstract class AbstractModuleParser implements ModuleParser{
 			} catch (InterruptedException e) {}
 		}
 		return moduleList;
+	
+	}
+
+
+	/* (non-Javadoc)
+	 * @see com.alibaba.just.api.parser.ModuleParser#getAllModules(java.util.List, int)
+	 */
+	public List<Module> getAllModules(List<String> paths,final int moduleType){
+		return getAllModules(paths,moduleType,null);
+	}
+
+	/**
+	 * Update module alias with alias list
+	 * @param module
+	 * @param aliasList
+	 * @return
+	 */
+	protected Module updateAlias(Module module,List<AliasInfo> aliasList){
+		if(module!=null && aliasList!=null){
+			for(AliasInfo ai:aliasList){
+				if(ai.getName()!=null && ai.getAlias()!=null && module.getName()!=null){
+					if(ai.getName().equals(module.getName())){
+						module.setAlias(ai.getAlias());
+					}
+				}
+			}
+		}
+		return module;
 	}
 
 
 	/* (non-Javadoc)
 	 * @see com.alibaba.just.api.parser.ModuleParser#getModules(java.lang.String, int)
 	 */
-	public List<Module> getModules(String filePath,int moduleType){
+	public List<Module> getModules(String filePath,int moduleType,ParserEvent event){
 		File file = new File(filePath);
-		return getModules(file,moduleType);
+		return getModules(file,moduleType,event);
+	}
+	
+	/* (non-Javadoc)
+	 * @see com.alibaba.just.api.parser.ModuleParser#getModules(java.lang.String, int)
+	 */
+	public List<Module> getModules(String filePath,int moduleType){	
+		return getModules(filePath,moduleType,null);
 	}
 
 	/* (non-Javadoc)
@@ -282,17 +317,25 @@ public abstract class AbstractModuleParser implements ModuleParser{
 		return getModule(filePath,MODULE_TYPE_NORMAL);
 	}
 
+
 	/* (non-Javadoc)
 	 * @see com.alibaba.just.api.parser.ModuleParser#getModules(java.io.File)
 	 */
 	public List<Module> getModules(File file){
 		return getModules(file,MODULE_TYPE_NORMAL);
 	}
+	
+	/**
+	 * 
+	 */
+	public List<Module> getModules(File file,int moduleType){
+		return this.getModules(file,moduleType,null);
+	}
 
 	/* (non-Javadoc)
 	 * @see com.alibaba.just.api.parser.ModuleParser#getModules(java.io.File, int)
 	 */
-	public abstract List<Module> getModules(File file,int moduleType);
+	public abstract List<Module> getModules(File file,int moduleType,ParserEvent event);
 
 	/* (non-Javadoc)
 	 * @see com.alibaba.just.api.parser.ModuleParser#dispose()
@@ -300,6 +343,7 @@ public abstract class AbstractModuleParser implements ModuleParser{
 	public void dispose(){
 		this.isDispose = true;
 		this.threadPool = null;
+		this.aliasList = null;
 	}
 
 	/* (non-Javadoc)
@@ -343,6 +387,14 @@ public abstract class AbstractModuleParser implements ModuleParser{
 	 */
 	public void setThreadPool(ExecutorService threadPool) {
 		this.threadPool = threadPool;
+	}
+
+	public List<AliasInfo> getAliasList() {
+		return aliasList;
+	}
+
+	public void setAliasList(List<AliasInfo> aliasList) {
+		this.aliasList = aliasList;
 	}
 
 }

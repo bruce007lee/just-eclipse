@@ -62,9 +62,10 @@ public class SimpleModuleParser extends AbstractModuleParser{
 	 * 由文件获取指定类型的模块
 	 * @param file
 	 * @param moduleType
+	 * @param event
 	 * @return
 	 */
-	public List<Module> getModules(File file,int moduleType){
+	public List<Module> getModules(File file,int moduleType,ParserEvent event){
 
 		List<Module> moduleList = new ArrayList<Module>();
 
@@ -131,11 +132,18 @@ public class SimpleModuleParser extends AbstractModuleParser{
 					//tmp = m.group(3);
 
 					module.setFilePath(absPath);
+					updateAlias(module,this.getAliasList());//update module alias
 					moduleList.add(module);
 				}
 			}
 
+			if(event!=null){
+				event.onEnd(this,file,moduleList);
+			}
 		}	
+		if(event!=null){
+			event.onDispose(this);
+		}
 		return moduleList;
 	}
 	

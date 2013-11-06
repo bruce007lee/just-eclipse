@@ -8,8 +8,8 @@ package com.alibaba.just.api.parser;
  *
  */
 public class ParserFactory {
-  public static int TYPE_SIMPLE = 1;	
-  public static int TYPE_RHINO = 0;	
+  public static final int TYPE_SIMPLE = 1;	
+  public static final int TYPE_RHINO = 0;	
   public static int TYPE_DEFAULT = TYPE_RHINO;
 	
    private ParserFactory(){};

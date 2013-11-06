@@ -37,8 +37,7 @@ public class UIUtil {
 		}
 		return null;
 	}
-	
-	
+		
 	public static IDecoratorManager getDecoratorManager(){
 		return Activator.getDefault().getWorkbench().getDecoratorManager();
 	}

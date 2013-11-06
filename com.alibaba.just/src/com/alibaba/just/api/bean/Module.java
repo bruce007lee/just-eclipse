@@ -1,4 +1,5 @@
 package com.alibaba.just.api.bean;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,10 +10,13 @@ import java.util.List;
 /**
  * @author bruce.liz
  */
-public class Module {	
+public class Module implements Serializable{	
+	private static final long serialVersionUID = 7743904505096219050L;
+	
 	private String name=null;
 	private List<String> requiredModuleNames= new ArrayList<String>();
 	private String filePath = null;
+	private String alias = null;
 	boolean isAnonymous = false;
 	
 	public boolean isAnonymous() {
@@ -41,6 +45,13 @@ public class Module {
 		this.requiredModuleNames = requiredModuleNames;
 	}
 	
+	public String getAlias() {
+		return alias;
+	}
+	public void setAlias(String alias) {
+		this.alias = alias;
+	}
+	
 	/**
 	 * test
 	 */
@@ -51,5 +62,4 @@ public class Module {
 		}
 		return str;
 	}
-		
 }
