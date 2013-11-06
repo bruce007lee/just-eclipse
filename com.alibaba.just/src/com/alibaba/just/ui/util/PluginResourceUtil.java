@@ -35,10 +35,11 @@ import com.alibaba.just.util.FileUtil;
  */
 public class PluginResourceUtil {
 
-	private static final String JAVASCRIPT_EXT = "js";
 	private static final String SEARCH_LABEL = "Searching"; //$NON-NLS-1$
 
 	private static PluginResourceUtil instace = new PluginResourceUtil();
+
+	private static ResourceParserEvent rpEvent = null ;
 
 	private PluginResourceUtil(){}
 
@@ -80,7 +81,7 @@ public class PluginResourceUtil {
 		if(list==null){list = new ArrayList<Module>();}
 		List<String> paths = new ArrayList<String>();
 		internalFindModules(resource,list,paths,parser,moduleType);
-		list.addAll(parser.getAllModules(paths, moduleType,instace.new ResourceParserEvent()));
+		list.addAll(parser.getAllModules(paths, moduleType,getParserEvent()));
 		return list;
 
 	}
@@ -143,14 +144,28 @@ public class PluginResourceUtil {
 					moduleList.addAll(mlist);
 				}
 			}else{
-				System.out.println("create lib cache:"+key);
 				List<Module> mlist =  parser.getAllModules(path);
-				ResourceCacheManager.put(key, new CacheElement(f.lastModified(),mlist));
-				moduleList.addAll(mlist);
+				if(!parser.isDisposed()){
+					//注意下异步时终止时的情况，如果没有做完不应该cache
+					System.out.println("create lib cache:"+key);
+					ResourceCacheManager.put(key, new CacheElement(f.lastModified(),mlist));
+					moduleList.addAll(mlist);
+				}
 			}
 		}
 
 		return moduleList;
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	private static ResourceParserEvent getParserEvent(){
+		if(rpEvent==null){
+			rpEvent = instace.new ResourceParserEvent();
+		}
+		return rpEvent;
 	}
 
 	/**
@@ -167,7 +182,7 @@ public class PluginResourceUtil {
 
 		//如果达到限制(10w)条先执行，防止内存消耗过多
 		if(paths.size()>100000){
-			moduleList.addAll(parser.getAllModules(paths, moduleType,instace.new ResourceParserEvent()));
+			moduleList.addAll(parser.getAllModules(paths, moduleType,getParserEvent()));
 			paths.clear();
 		}
 
@@ -259,7 +274,7 @@ public class PluginResourceUtil {
 		alias.add(new AliasInfo("fui/dialog/1.0","lofty/ui/dialog/1.0/dialog"));
 		alias.add(new AliasInfo("fui/position/1.0","lofty/ui/position/1.0/position"));
 		alias.add(new AliasInfo("fui/timer/1.0","lofty/ui/timer/1.0/timer"));
-		*/
+		 */
 
 		return alias;
 	}
@@ -374,12 +389,12 @@ public class PluginResourceUtil {
 	 *
 	 */
 	class ResourceParserEvent implements ParserEvent{
-		public void onEnd(ModuleParser parser,File file,List<Module> module) {
+		public void onParseFileSuccess(ModuleParser parser,File file,List<Module> module) {
 			if(file!=null && file.exists() && module!=null){
 				ResourceCacheManager.put(getResourceCacheKey(file), new CacheElement(file.lastModified(),module));
 			}
 		}
-		public void onDispose(ModuleParser parser) {}
+		public void onParseFileEnd(ModuleParser parser,File file) {}
 	}
 
 }

@@ -13,6 +13,6 @@ import com.alibaba.just.api.bean.Module;
  *
  */
 public interface ParserEvent {
-	public void onEnd(ModuleParser parser,File file,List<Module> module);
-	public void onDispose(ModuleParser parser);
+	public void onParseFileSuccess(ModuleParser parser,File file,List<Module> module);
+	public void onParseFileEnd(ModuleParser parser,File file);
 }

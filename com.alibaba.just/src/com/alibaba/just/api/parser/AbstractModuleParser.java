@@ -345,6 +345,10 @@ public abstract class AbstractModuleParser implements ModuleParser{
 		this.threadPool = null;
 		this.aliasList = null;
 	}
+	
+	public boolean isDisposed(){
+		return isDispose;
+	}
 
 	/* (non-Javadoc)
 	 * @see com.alibaba.just.api.parser.ModuleParser#getCharset()

@@ -132,7 +132,9 @@ public interface ModuleParser {
 	 * 释放资源
 	 */
 	public void dispose();
-
+	
+	public boolean isDisposed();
+	
 	public String getCharset();
 
 	public void setCharset(String charset);

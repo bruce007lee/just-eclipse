@@ -114,7 +114,7 @@ public class RhinoModuleParser extends AbstractModuleParser {
 					node = node.getNext();
 				}
 				if(event!=null){
-					event.onEnd(this,file,moduleList);
+					event.onParseFileSuccess(this,file,moduleList);
 				}
 			}	
 
@@ -124,7 +124,7 @@ public class RhinoModuleParser extends AbstractModuleParser {
 		}
 		
 		if(event!=null){
-			event.onDispose(this);
+			event.onParseFileEnd(this,file);
 		}
 
 		return moduleList;

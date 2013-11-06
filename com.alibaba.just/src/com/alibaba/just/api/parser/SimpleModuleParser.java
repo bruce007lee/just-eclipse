@@ -70,7 +70,7 @@ public class SimpleModuleParser extends AbstractModuleParser{
 		List<Module> moduleList = new ArrayList<Module>();
 
 		String absPath = file.getAbsolutePath();
-		if(file.exists() && (filter==null || (filter!=null && filter.accept(file)))){
+		if(!isDispose && file.exists() && (filter==null || (filter!=null && filter.accept(file)))){
 			String content = null;
 			try {
 				content = FileUtil.getFileContent(file, charset);
@@ -138,11 +138,11 @@ public class SimpleModuleParser extends AbstractModuleParser{
 			}
 
 			if(event!=null){
-				event.onEnd(this,file,moduleList);
+				event.onParseFileSuccess(this,file,moduleList);
 			}
 		}	
 		if(event!=null){
-			event.onDispose(this);
+			event.onParseFileEnd(this,file);
 		}
 		return moduleList;
 	}
