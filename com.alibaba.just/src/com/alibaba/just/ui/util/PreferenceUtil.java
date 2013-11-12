@@ -26,10 +26,13 @@ import org.w3c.dom.NodeList;
 
 import com.alibaba.just.Activator;
 import com.alibaba.just.PluginConstants;
+import com.alibaba.just.api.bean.AliasInfo;
+import com.alibaba.just.api.parser.ParserFactory;
 import com.alibaba.just.ui.preferences.PreferenceConstants;
 
 public class PreferenceUtil {	
 
+	private static final String PARSER_ENGINE_TYPE_SIMPLE = "0";
 	private static final String SEP_REG = "[\n]";
 
 	private static final String LIB_SEP= "|";
@@ -44,6 +47,11 @@ public class PreferenceUtil {
 	public static final String CONFIG_ROOT_NAME = "config";
 	public static final String PROPERTY_NAME = "property";
 	public static final String ATTR_NAME = "name";
+
+	public static final String ALIAS_LIST_NAME = "aliasList";
+	public static final String ALIAS_ITEM_NAME = "aliasItem";
+	public static final String ALIAS_ATTR_NAME = "name";
+	public static final String ALIAS_ATTR_ALIAS = "alias";
 
 	public static final QualifiedName CONFIG_QUALIFIEDNAME = new QualifiedName(PluginConstants.QUALIFIED_NAME, CONFIG_ROOT_NAME);
 
@@ -388,6 +396,8 @@ public class PreferenceUtil {
 
 	/**
 	 * 设置指定项目的root path列表
+	 * @param project
+	 * @param list
 	 */
 	public static void setProjectRootPathList(IProject project,List<String> list){
 		if(list!=null){
@@ -404,6 +414,121 @@ public class PreferenceUtil {
 		}		
 	}
 
+	/**
+	 * 
+	 * @param project
+	 * @param list
+	 */
+	public static void setProjectAliasList(IProject project,List<AliasInfo> list){
+		if(list!=null){	
+			if(project==null || project.getLocation()==null){
+				return;
+			}
+			try {
+
+				String path = getProjectConfigPath(project);
+				Object obj = project.getSessionProperty(CONFIG_QUALIFIEDNAME);
+				Document doc = null;
+				if(Document.class.isInstance(obj)){
+					doc = (Document)obj;
+				}else{
+					//project.setPersistentProperty(new QualifiedName(PluginConstants.QUALIFIED_NAME, key),value);
+					doc = loadConfig(path);
+					if(doc==null){
+						DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+						doc = builder.newDocument();
+					}
+					project.setSessionProperty(CONFIG_QUALIFIEDNAME,doc);
+				}
+
+				Element root = doc.getDocumentElement();
+				if(root==null){
+					root = doc.createElement(CONFIG_ROOT_NAME);
+					doc.appendChild(root);
+				}
+				NodeList alist = root.getElementsByTagName(ALIAS_LIST_NAME);
+
+				//clear all
+				if(alist!=null){
+					for(int i=0,l=alist.getLength();i<l;i++){
+						root.removeChild(alist.item(i));
+					}
+				}
+
+				Element aliasListRoot = doc.createElement(ALIAS_LIST_NAME);
+				root.appendChild(aliasListRoot);
+
+				//add new list
+				for(int i=0,l=list.size();i<l;i++){
+					aliasListRoot.appendChild(createAliasInfoElement(doc,list.get(i)));
+				}
+
+				saveConfig(path,doc);//save
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}		
+	}
+
+	private static Element createAliasInfoElement(Document doc,AliasInfo info){
+		Element item = doc.createElement(ALIAS_ITEM_NAME);
+		item.setAttribute(ALIAS_ATTR_NAME, info.getName());
+		item.setAttribute(ALIAS_ATTR_ALIAS, info.getAlias());
+		return item;
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public static List<AliasInfo> getProjectAliasList(IProject project){
+		List<AliasInfo> list = new ArrayList<AliasInfo>();
+
+		if(project==null || project.getLocation()==null){
+			return list;
+		}
+		try {
+			Object obj = project.getSessionProperty(CONFIG_QUALIFIEDNAME);
+			Document doc = null;
+			if(Document.class.isInstance(obj)){
+				doc = (Document)obj;
+			}else{
+				//val = project.getPersistentProperty(new QualifiedName(PluginConstants.QUALIFIED_NAME, key));
+				doc = loadConfig(getProjectConfigPath(project));
+				if(doc==null){
+					return null;
+				}
+				project.setSessionProperty(CONFIG_QUALIFIEDNAME,doc);
+			}
+			Element  root = doc.getDocumentElement();
+			if(root!=null){
+				NodeList alist = root.getElementsByTagName(ALIAS_LIST_NAME);
+
+				//clear all
+				if(alist!=null && alist.getLength()>0){
+					NodeList items =((Element)alist.item(0)).getElementsByTagName(ALIAS_ITEM_NAME);
+					Node item = null;
+					AliasInfo info =null;
+					for(int i=0,l=items.getLength();i<l;i++){
+						item = items.item(i);
+						if(Element.class.isInstance(item)){
+							list.add(convertToAliasInfo((Element)item));
+						}
+					}
+				}
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}		
+
+		return list;
+	}
+
+	private static AliasInfo convertToAliasInfo(Element el){
+		return new AliasInfo(el.getAttribute(ALIAS_ATTR_ALIAS),el.getAttribute(ALIAS_ATTR_NAME));
+	}
 
 	/**
 	 * 获取插件的PreferenceStore
@@ -423,5 +548,17 @@ public class PreferenceUtil {
 			charset = PreferenceConstants.DEFAULT_FILE_CHARTSET;
 		}
 		return charset;
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public static int getParserEngineType(){
+		String type = PreferenceUtil.getPluginPreferenceStore().getString(PreferenceConstants.P_PARSER_ENGINE);
+		if(type==null || type.length()<=0){
+			type = PreferenceConstants.DEFAULT_PARSER_ENGINE;
+		}
+		return PARSER_ENGINE_TYPE_SIMPLE.equalsIgnoreCase(type)?ParserFactory.TYPE_SIMPLE:ParserFactory.TYPE_RHINO;
 	}
 }

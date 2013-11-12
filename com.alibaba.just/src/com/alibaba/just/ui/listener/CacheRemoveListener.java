@@ -26,12 +26,21 @@ public class CacheRemoveListener implements IResourceChangeListener {
 		public boolean visit(IResourceDelta delta)
 				throws CoreException {
 			//System.out.println(delta +" "+ delta.getKind());
-			if((delta.getKind()==IResourceDelta.MOVED_TO || delta.getKind()==IResourceDelta.REMOVED) 
-					&& delta.getResource()!=null
+			if(  delta.getResource()!=null
 					&& IResource.FILE==delta.getResource().getType()
 					&& PluginConstants.JAVASCRIPT_EXT.equalsIgnoreCase(delta.getResource().getFileExtension()) ){
-				//System.out.println("remove cache file:"+ PluginResourceUtil.getResourceCacheKey( delta.getResource()));
-				ResourceCacheManager.remove(PluginResourceUtil.getResourceCacheKey( delta.getResource()));
+				
+				if(delta.getKind()==IResourceDelta.MOVED_TO || delta.getKind()==IResourceDelta.REMOVED){
+				  System.out.println("remove cache file:"+ PluginResourceUtil.getResourceCacheKey( delta.getResource()));
+				  ResourceCacheManager.remove(PluginResourceUtil.getResourceCacheKey(delta.getResource()));
+				}
+
+				//remove lib cache time stamp
+				IResource p = delta.getResource();
+				while(p!=null){
+					p.setPersistentProperty(PluginConstants.CACHE_QUALIFIEDNAME, null);//clear cache stamp
+					p = p.getParent();
+				}
 			}
 			return true;
 		}

@@ -47,7 +47,7 @@ public class ProjectPropertyPage extends PropertyPage {
 	private StructuredViewer  rootPathList;
 
 	/**
-	 * Constructor for SamplePropertyPage.
+	 * Constructor
 	 */
 	public ProjectPropertyPage() {
 		super();
@@ -492,7 +492,7 @@ public class ProjectPropertyPage extends PropertyPage {
 	 * @param after
 	 * @return
 	 */
-	private void clearLibPathCache(IProject project,List<String> before,List<String> after){
+	private void clearLibCache(IProject project,List<String> before,List<String> after){
 		List<String> list = new ArrayList<String>(5);
 		if(before!=null && after!=null){
 			String tmp = null;
@@ -511,7 +511,7 @@ public class ProjectPropertyPage extends PropertyPage {
 				}
 			}
 		}
-		PluginResourceUtil.removeProjectLibPathCache(project,list);
+		PluginResourceUtil.removeProjectLibCache(project,list);
 	}
 
 	public boolean performOk() {
@@ -527,20 +527,26 @@ public class ProjectPropertyPage extends PropertyPage {
 					new QualifiedName(QUALIFIED_NAME, ROOT_PATH_PROPERTY_KEY),
 					this.getToSaveStr(rootPathList));*/
 			
-			List<String> before = PluginResourceUtil.getLibPathList(project);	
+			List<String> before = PluginResourceUtil.getLibList(project);	
 			
 			PreferenceUtil.setProjectProperty(project, LIBS_PROPERTY_KEY, this.getToSaveStr(libPathList));
 			PreferenceUtil.setProjectProperty(project, ROOT_PATH_PROPERTY_KEY, this.getToSaveStr(rootPathList));
 			
-			List<String> after = PluginResourceUtil.getLibPathList(project);	
+			List<String> after = PluginResourceUtil.getLibList(project);	
 			
-			clearLibPathCache(project,before,after);
+			clearLibCache(project,before,after);
 			
 			RootPathDecorator.refresh();
 		} catch (Exception e) {
 			return false;
 		}
 		return true;
+	}
+
+	public void dispose() {
+		this.libPathList=null;
+		this.rootPathList=null;
+		super.dispose();
 	}
 
 }

@@ -14,6 +14,7 @@ import net.sf.ehcache.config.PersistenceConfiguration;
 import net.sf.ehcache.config.PersistenceConfiguration.Strategy;
 import net.sf.ehcache.store.MemoryStoreEvictionPolicy;
 
+import com.alibaba.just.ui.util.LogUtil;
 import com.alibaba.just.ui.util.PluginResourceUtil;
 
 /**
@@ -70,13 +71,13 @@ public class ResourceCacheManager {
 	}
 
 	public static void remove(Object obj){
-		//System.out.println("before cache size:"+ResourceCacheManager.getCache().getSize());
+		//LogUtil.log("before cache size:"+ResourceCacheManager.getCache().getSize());
 		getCache().remove(obj);
-		//System.out.println("after remove cache size:"+ResourceCacheManager.getCache().getSize());
+		//LogUtil.log("after remove cache size:"+ResourceCacheManager.getCache().getSize());
 	}
 
 	public static void put(Object obj,CacheElement cache,boolean isFlush){
-		//System.out.println("create cache:"+obj);
+		//LogUtil.log("create cache:"+obj);
 		getCache().put(new Element(obj,cache));
 		if(isFlush){
 			flush();
@@ -98,9 +99,14 @@ public class ResourceCacheManager {
 		return null;
 	}
 
+	public static void removeAll(){
+		getCache().removeAll();
+		//LogUtil.log("after remove all cache size:"+ResourceCacheManager.getCache().getSize());
+	}
+
 	public static void shutdown(){
 		if(manager!=null){
-			System.out.println("Shutdown resourceCacheManage ...");
+			LogUtil.log("Shutdown resourceCacheManage ...");
 			manager.shutdown();
 		}
 	}

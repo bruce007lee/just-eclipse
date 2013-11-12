@@ -20,11 +20,9 @@ import org.eclipse.ui.part.FileEditorInput;
 
 import com.alibaba.just.api.bean.Module;
 import com.alibaba.just.api.parser.ModuleParser;
-import com.alibaba.just.api.parser.ParserFactory;
 import com.alibaba.just.ui.dialogs.ListMultiSelectDialog;
 import com.alibaba.just.ui.dialogs.ListSelectDialog;
 import com.alibaba.just.ui.util.PluginResourceUtil;
-import com.alibaba.just.ui.util.PreferenceUtil;
 import com.alibaba.just.ui.util.UIUtil;
 import com.alibaba.just.ui.viewmodel.ViewItem;
 import com.alibaba.just.util.FileUtil;
@@ -218,7 +216,7 @@ public class ImportFolderModulesViewAction extends ImportModulesViewAction{
 
 	private List<Module> getRequire(List<Module> moduleList,IProject project,IFile file) throws Exception{
 		String path = file.getLocation().toFile().getAbsolutePath();
-		ModuleParser parser = ParserFactory.getModuleParser(PreferenceUtil.getFileCharset());
+		ModuleParser parser = PluginResourceUtil.getModuleParser();
 		parser.setThreadPool(UIUtil.getThreadPool());
 		Module module = parser.getModule(path,ModuleParser.MODULE_TYPE_ALL);
 		if(module==null){

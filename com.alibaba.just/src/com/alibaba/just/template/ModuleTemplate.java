@@ -68,13 +68,13 @@ public class ModuleTemplate {
 				if(i>0){
 					sb.append(",");
 				}
-				sb.append(getParamName(requiredModules.get(i).getName()));
+				sb.append(getParamName(requiredModules.get(i).getName(),i));
 			}
 		}
 		return sb.toString();
 	}
 	
-	private String getParamName(String moduleName){
+	private String getParamName(String moduleName,int idx){
 		if(moduleName ==null){
 			return "";
 		}
@@ -83,11 +83,14 @@ public class ModuleTemplate {
 			return "$";
 		}
 		
-		
 		String[] segs = moduleName.split("/");		
 		String name = segs[segs.length-1];
 		
-		String[] name_segs = name.split("[-_]");
+		if(name.matches("[\\d\\.]*")){
+			return "Module"+idx;
+		}
+		
+		String[] name_segs = name.split("[\\.\\-_]");
 		
 		StringBuffer sb = new StringBuffer();
 		

@@ -1,9 +1,14 @@
 package com.alibaba.just.ui.preferences;
 
-import org.eclipse.jface.preference.*;
-import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.eclipse.jface.preference.FieldEditorPreferencePage;
+import org.eclipse.jface.preference.RadioGroupFieldEditor;
+import org.eclipse.jface.preference.StringFieldEditor;
 import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPreferencePage;
+
 import com.alibaba.just.Activator;
+import com.alibaba.just.ui.cache.ResourceCacheManager;
+import com.alibaba.just.ui.util.PreferenceUtil;
 
 /**
  * This class represents a preference page that
@@ -28,12 +33,9 @@ public class PreferencePage
 		setPreferenceStore(Activator.getDefault().getPreferenceStore());
 		setDescription("Just Eclipse Preference");
 	}
-	
+
 	/**
-	 * Creates the field editors. Field editors are abstractions of
-	 * the common GUI blocks needed to manipulate various types
-	 * of preferences. Each field editor knows how to save and
-	 * restore itself.
+	 * 
 	 */
 	public void createFieldEditors() {
 		/*addField(new DirectoryFieldEditor(PreferenceConstants.P_PATH, 
@@ -51,14 +53,27 @@ public class PreferencePage
 			new String[][] { { "&Choice 1", "choice1" }, {
 				"C&hoice 2", "choice2" }
 		}, getFieldEditorParent()));*/
-		addField(
-			new StringFieldEditor(PreferenceConstants.P_FILE_CHARSET, "File &Charset:", getFieldEditorParent()));
+		addField(new StringFieldEditor(PreferenceConstants.P_FILE_CHARSET, "File &Charset:", getFieldEditorParent()));
+		addField(new RadioGroupFieldEditor(PreferenceConstants.P_PARSER_ENGINE,"Choose Module Parser Engine",1,
+				new String[][]{{"RegExp Engine (more fast)","0"},{"Rhino Engine (more strict)","1"}},getFieldEditorParent(),true));
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.IWorkbenchPreferencePage#init(org.eclipse.ui.IWorkbench)
 	 */
 	public void init(IWorkbench workbench) {
+	}
+
+	public boolean performOk() {
+		String charset = PreferenceUtil.getFileCharset();
+		int engineType = PreferenceUtil.getParserEngineType();
+		boolean rs =  super.performOk();
+		//if module parser config change,clear all cache
+		if(engineType!=PreferenceUtil.getParserEngineType() || !charset.equalsIgnoreCase((PreferenceUtil.getFileCharset()))){
+			ResourceCacheManager.removeAll();
+		}
+		
+		return rs;
 	}
 	
 }

@@ -29,6 +29,7 @@ import com.alibaba.just.api.bean.Module;
 import com.alibaba.just.api.parser.ModuleParser;
 import com.alibaba.just.ui.util.ImageManager;
 import com.alibaba.just.ui.util.PluginResourceUtil;
+import com.alibaba.just.ui.viewmodel.ModuleVO;
 import com.alibaba.just.ui.viewmodel.ViewItem;
 
 public class ModuleSelectionDialog extends FilteredItemsSelectionDialog {
@@ -84,9 +85,29 @@ public class ModuleSelectionDialog extends FilteredItemsSelectionDialog {
 		Object obj = super.getFirstResult();
 		//convert to module
 		if(ViewItem.class.isInstance(obj)){
-			obj = ((ViewItem)obj).getObj();
+			ViewItem vi = (ViewItem)obj;
+			obj = vi.getObj();
+			if(Module.class.isInstance(obj)){
+				ModuleVO  vo = convertModule((Module)obj);
+				if(vi.getLabel().equals(vo.getAlias())){
+					vo.setUseAlias(true);
+				}
+				obj = vo;
+			}
+		}else if(Module.class.isInstance(obj)){
+			obj = convertModule((Module)obj);
 		}
 		return obj;
+	}
+	
+	private ModuleVO convertModule(Module m){
+		ModuleVO vo = new ModuleVO();
+		vo.setName(m.getName());
+		vo.setAlias(m.getAlias());
+		vo.setFilePath(m.getFilePath());
+		vo.setAnonymous(m.isAnonymous());
+		vo.setRequiredModuleNames(m.getRequiredModuleNames());
+		return  vo;
 	}
 
 	protected Control createDialogArea(Composite parent){
@@ -251,52 +272,6 @@ public class ModuleSelectionDialog extends FilteredItemsSelectionDialog {
 		if(project!=null){
 			// Populate libs
 			try {
-				//List<String> libs = PreferenceUtil.getProjectLibsList(project);					
-				//List<Module> moduleList = new ArrayList<Module>();
-				//ModuleParser parser = ParserFactory.getModuleParser(PreferenceUtil.getFileCharset());
-				//parser.setThreadPool(UIUtil.getThreadPool());
-				/*
-				for(String lib:libs){
-					progressMonitor.worked(1);
-					String lb = lib.trim();
-					if(lb.length()>0){
-						String folderPath = null;
-						String type = PreferenceUtil.getProjectLibType(lb);
-						if(PreferenceUtil.LIB_TYPE_WORKSPACE_FOLDER.equals(type) ||
-								PreferenceUtil.LIB_TYPE_SELF.equals(type)){
-							如果是workspace里的目录
-							if(PreferenceUtil.LIB_TYPE_SELF.equals(type)){
-							   lb = project.getFullPath().toString();
-							}else{
-							   lb = PreferenceUtil.getProjectLibPath(lb);
-							}
-							progressMonitor.setTaskName(SEARCH_LABEL+"["+lb+"]");
-							IPath rootPath = wRoot.getFullPath();
-							IResource res = wRoot.findMember(rootPath.append(lb));
-							if(res!=null && res.isAccessible()){
-								PluginResourceUtil.getModulesByResource(res,moduleList,parser);
-							}
-						}else if(PreferenceUtil.LIB_TYPE_EXTERNAL_FOLDER.equals(type)){
-							如果是workspace外的目录
-							lb = PreferenceUtil.getProjectLibPath(lb);
-							progressMonitor.setTaskName(SEARCH_LABEL+"["+lb+"]");
-							File f = new File(lb);
-
-							try {
-								PluginResourceUtil.getModulesByLibPath(project,f,moduleList,parser);
-							} catch (Exception e) {}
-
-							if(f.exists() && f.isDirectory()){
-								folderPath = f.getAbsolutePath();
-								moduleList.addAll(parser.getAllModules(folderPath));
-							}								
-						}
-					}
-				}
-
-				PluginResourceUtil.updataLibPathCacheStatus(project);
-				 */
-
 				List<Module> moduleList = PluginResourceUtil.getAllModulesByProject(project,ModuleParser.MODULE_TYPE_NORMAL,progressMonitor);
 
 				Module tmp = null;

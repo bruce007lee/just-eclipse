@@ -52,4 +52,16 @@ public class AliasInfo {
 		this.isRegExp = isRegExp;
 	}
 
+	public boolean equals(Object obj) {
+		if(AliasInfo.class.isInstance(obj)){
+			AliasInfo o = (AliasInfo)obj;
+			if(((o.alias==null && this.alias==null) || (o.alias!=null && o.alias.equals(this.alias)))
+					&& ((o.name==null && this.name==null) || (o.name!=null && o.name.equals(this.name)))
+					&& o.isRegExp == this.isRegExp()){
+				return true;
+			}
+		}
+		return false;
+	}
+
 }

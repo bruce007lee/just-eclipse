@@ -10,7 +10,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.ide,
  org.eclipse.jface.text,
  org.eclipse.ui.editors,
- org.eclipse.ui.workbench.texteditor
+ org.eclipse.ui.workbench.texteditor,
+ org.eclipse.core.filesystem
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Export-Package: com.alibaba.just;uses:="org.eclipse.ui.plugin",
@@ -31,6 +32,6 @@ Bundle-ClassPath: .,
  lib/werken-xpath-0.9.4.jar,
  lib/js.jar,
  lib/ehcache-2.7.5.jar,
- lib/slf4j-api-1.6.6.jar
+ lib/slf4j-api-1.6.6.jar,
+ lib/json.jar
 Bundle-Vendor: Alibaba
-Import-Package: org.eclipse.core.filesystem

@@ -6,7 +6,6 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.dialogs.IDialogPage;
 import org.eclipse.jface.viewers.ISelection;
@@ -30,6 +29,7 @@ import org.eclipse.ui.dialogs.ContainerSelectionDialog;
 import com.alibaba.just.api.bean.Module;
 import com.alibaba.just.ui.dialogs.ModuleSelectionDialog;
 import com.alibaba.just.ui.util.PreferenceUtil;
+import com.alibaba.just.ui.viewmodel.ModuleVO;
 
 /**
  * The "New" wizard page allows setting the container for the new file as well
@@ -230,7 +230,7 @@ public class ModuleNewWizardPage extends WizardPage {
 					break;
 				}
 			}
-			
+
 			if(currentIdx>-1){
 
 				int to = currentIdx+move;
@@ -267,7 +267,16 @@ public class ModuleNewWizardPage extends WizardPage {
 				if(Module.class.isInstance(rs)){
 					String t = ((Module)rs).getName();
 					if(!isExist(selectedModuleList,t)){
-						selectedModuleList.add(t);
+						boolean isAdd = false;
+						if(ModuleVO.class.isInstance(rs)){
+							if(((ModuleVO)rs).isUseAlias()){
+								isAdd = true;
+								selectedModuleList.add(((Module)rs).getAlias());
+							}
+						}
+						if(!isAdd){
+							selectedModuleList.add(t);
+						}
 					}
 				}
 
@@ -293,7 +302,16 @@ public class ModuleNewWizardPage extends WizardPage {
 				if(Module.class.isInstance(rs)){
 					String t = ((Module)rs).getName();
 					if(!isExist(selectedModuleList,t)){
-						selectedModuleList.add(t);
+						boolean isAdd = false;
+						if(ModuleVO.class.isInstance(rs)){
+							if(((ModuleVO)rs).isUseAlias()){
+								isAdd = true;
+								selectedModuleList.add(((Module)rs).getAlias());
+							}
+						}
+						if(!isAdd){
+							selectedModuleList.add(t);
+						}
 					}
 				}
 			}
@@ -360,9 +378,9 @@ public class ModuleNewWizardPage extends WizardPage {
 			if(parentCt.length()>0 && parentCt.indexOf('/')==0){
 				parentCt = parentCt.substring(1);
 			}
-			fileText.setText(parentCt+(parentCt.length()>0?"/":"")+"new-module");
+			fileText.setText(parentCt+(parentCt.length()>0?"/":"")+"module");
 		}else{
-			fileText.setText("page/new-module");
+			fileText.setText("page/module");
 		}	
 	}
 

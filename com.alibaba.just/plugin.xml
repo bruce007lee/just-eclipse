@@ -31,16 +31,32 @@
          point="org.eclipse.ui.propertyPages">
       <page
             adaptable="true"
-            class="com.alibaba.just.ui.properties.ProjectPropertyPage"
+            class="com.alibaba.just.ui.properties.ProjectCategoryPage"
             icon="icons/sample.gif"
-            id="com.alibaba.just.ui.properties.ProjectPropertyPage"
-            name="Just Project Page"
+            id="com.alibaba.just.ui.properties"
+            name="Just Project Setting"
             objectClass="org.eclipse.core.resources.IProject">
          <enabledWhen>
             <adapt
                   type="org.eclipse.core.resources.IProject">
             </adapt>
          </enabledWhen>
+      </page>
+      <page
+            adaptable="true"
+            category="com.alibaba.just.ui.properties"
+            class="com.alibaba.just.ui.properties.ProjectPropertyPage"
+            id="com.alibaba.just.ui.properties.ProjectPropertyPage"
+            name="Module Libraries"
+            objectClass="org.eclipse.core.resources.IProject">
+      </page>
+      <page
+            adaptable="true"
+            category="com.alibaba.just.ui.properties"
+            class="com.alibaba.just.ui.properties.ProjectModuleAliasPage"
+            id="com.alibaba.just.page2"
+            name="Module Alias"
+            objectClass="org.eclipse.core.resources.IProject">
       </page>
    </extension>
    <extension id="com.alibaba.just.ui.resources.ProjectPreferences" point="org.eclipse.core.runtime.preferences" name="Just Preferences">

@@ -10,7 +10,7 @@ import com.alibaba.just.api.bean.Module;
  *
  */
 public class TemplateUtil {
-	private static final String SEP_REG= "_-";
+	private static final String SEP_REG= "_-.";
 	private static final String SEP_CHAR= "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 	private static final String DEFAULT_SEP= "-";
 	

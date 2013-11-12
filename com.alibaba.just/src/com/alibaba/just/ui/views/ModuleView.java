@@ -57,7 +57,6 @@ import com.alibaba.just.Activator;
 import com.alibaba.just.PluginConstants;
 import com.alibaba.just.api.bean.Module;
 import com.alibaba.just.api.parser.ModuleParser;
-import com.alibaba.just.api.parser.ParserFactory;
 import com.alibaba.just.ui.preferences.PreferenceConstants;
 import com.alibaba.just.ui.util.ImageManager;
 import com.alibaba.just.ui.util.PluginResourceUtil;
@@ -460,10 +459,10 @@ public class ModuleView extends ViewPart {
 
 			}
 		};
-		
+
 		final IResourceDeltaVisitor vistor = new IResourceDeltaVisitor(){
 			public boolean visit(IResourceDelta delta)
-					throws CoreException {
+			throws CoreException {
 				//System.out.println(delta +" "+ delta.getKind());
 				if((delta.getKind()==IResourceDelta.CHANGED) 
 						&& delta.getResource()!=null
@@ -669,7 +668,7 @@ public class ModuleView extends ViewPart {
 			 */
 			public void run(){
 				try {
-					parser = ParserFactory.getModuleParser(PreferenceUtil.getFileCharset());
+					parser = PluginResourceUtil.getModuleParser();
 					parser.setThreadPool(UIUtil.getThreadPool());
 					parser.setAliasList(PluginResourceUtil.getProjectAliasInfo(project));
 					Module module = parser.getModule(filepath,ModuleParser.MODULE_TYPE_ALL);
@@ -679,43 +678,6 @@ public class ModuleView extends ViewPart {
 					}
 
 					showLoading(true);
-					/*
-					List<String> libs = PreferenceUtil.getProjectLibsList(project);							
-					List<Module> moduleList = new ArrayList<Module>();
-				   IWorkspaceRoot  wRoot = ResourcesPlugin.getWorkspace().getRoot();
-					for(String lib:libs){
-						String lb = lib.trim();
-						if(lb.length()>0){
-							String folderPath = null;
-							String type = PreferenceUtil.getProjectLibType(lb);
-							if(PreferenceUtil.LIB_TYPE_WORKSPACE_FOLDER.equals(type) ||
-									PreferenceUtil.LIB_TYPE_SELF.equals(type)){
-								if(PreferenceUtil.LIB_TYPE_SELF.equals(type)){
-									lb = project.getFullPath().toString();
-								}else{
-									lb = PreferenceUtil.getProjectLibPath(lb);
-								}
-								IPath rootPath = wRoot.getFullPath();
-								IResource res = wRoot.findMember(rootPath.append(lb));
-								if(res!=null && res.isAccessible()){
-									PluginResourceUtil.getModulesByResource(res,moduleList,parser,ModuleParser.MODULE_TYPE_ALL);
-								}
-							}else{
-								lb = PreferenceUtil.getProjectLibPath(lb);
-								File f = new File(lb);								
-								try {
-									PluginResourceUtil.getModulesByLibPath(project,f,moduleList,parser);
-								} catch (Exception e) {}								
-								if(f.exists() && f.isDirectory()){
-									folderPath = f.getAbsolutePath();
-									moduleList.addAll(parser.getAllModules(folderPath));
-								}
-							}
-
-						}
-					}
-
-					PluginResourceUtil.updataLibPathCacheStatus(project);*/
 
 					List<Module> moduleList = PluginResourceUtil.getAllModulesByProject(parser,project,ModuleParser.MODULE_TYPE_ALL);
 
