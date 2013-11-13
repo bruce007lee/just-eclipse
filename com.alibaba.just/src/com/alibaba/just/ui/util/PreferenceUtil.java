@@ -497,7 +497,7 @@ public class PreferenceUtil {
 				//val = project.getPersistentProperty(new QualifiedName(PluginConstants.QUALIFIED_NAME, key));
 				doc = loadConfig(getProjectConfigPath(project));
 				if(doc==null){
-					return null;
+					return list;
 				}
 				project.setSessionProperty(CONFIG_QUALIFIEDNAME,doc);
 			}

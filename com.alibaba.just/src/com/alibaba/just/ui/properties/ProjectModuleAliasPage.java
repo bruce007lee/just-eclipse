@@ -341,7 +341,7 @@ public class ProjectModuleAliasPage extends PropertyPage{
 			MessageDialog.openInformation(
 					getShell(),
 					"Info",
-					"Alias info list is empty!");
+			"Alias info list is empty!");
 			return;
 		}
 		FileDialog dialog = new FileDialog(
@@ -443,7 +443,7 @@ public class ProjectModuleAliasPage extends PropertyPage{
 		}
 		return list;
 	}
-	
+
 	private List<AliasInfo> getSelectAliasList(){
 		List<AliasInfo> list = new ArrayList<AliasInfo>(5);
 		IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();	
