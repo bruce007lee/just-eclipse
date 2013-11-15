@@ -423,7 +423,7 @@ public class PluginResourceUtil {
 		}
 
 		if(progressMonitor!=null){
-			progressMonitor.done();
+			//progressMonitor.done();
 		}
 
 		return moduleList;

@@ -1,5 +1,6 @@
 package com.alibaba.just.ui.popup.actions;
 
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.action.IAction;
@@ -21,7 +22,9 @@ import org.eclipse.ui.texteditor.ITextEditor;
 
 import com.alibaba.just.api.bean.Module;
 import com.alibaba.just.ui.dialogs.ModuleSelectionDialog;
+import com.alibaba.just.ui.util.PreferenceUtil;
 import com.alibaba.just.ui.util.UIUtil;
+import com.alibaba.just.ui.viewmodel.ViewItem;
 
 /**
  * 
@@ -63,7 +66,7 @@ public class AddModuleViewAction implements IEditorActionDelegate {
 
 				IProject project = ifile.getProject();
 				if(ITextEditor.class.isInstance(targetEditor)){
-					handleShowModuleSelectionDlg(project,(ITextEditor)targetEditor);
+					handleShowModuleSelectionDlg(project,(ITextEditor)targetEditor,ifile);
 				}
 
 			} catch (Exception e) {
@@ -87,22 +90,29 @@ public class AddModuleViewAction implements IEditorActionDelegate {
 		if(ITextSelection.class.isInstance(selection)){
 			ITextSelection textSeleciton = (ITextSelection)selection;
 			document.replace(textSeleciton.getOffset(), textSeleciton.getLength() , text);
+			editor.selectAndReveal(textSeleciton.getOffset()+text.length(), 0);
 		}
+	}
+
+	private ITextSelection getEditSelection(ITextEditor editor){
+		ISelection selection = editor.getSelectionProvider().getSelection();
+		if(ITextSelection.class.isInstance(selection)){
+			return (ITextSelection)selection;
+		}
+		return null;
 	}
 
 	/**
 	 * 
 	 */
-	private void handleShowModuleSelectionDlg(IProject project,final ITextEditor editor){
+	private void handleShowModuleSelectionDlg(IProject project,final ITextEditor editor,IFile ifile){
 		moduleSelectionDialog = new ModuleSelectionDialog(UIUtil.getShell()){
 			protected void okPressed() {
 				this.computeResult();
 				try{
-					Object rs  = moduleSelectionDialog.getFirstResult();
-					//System.out.println(rs);
-					if(Module.class.isInstance(rs)){
-						String t = ((Module)rs).getName();
-						AddModuleViewAction.this.insertEditorText(editor,t);					
+					String str = moduleSelectionDialog.getFirstResultString();
+					if(str!=null){
+						AddModuleViewAction.this.insertEditorText(editor,str);
 					}
 				}catch(Exception e1){
 
@@ -119,8 +129,30 @@ public class AddModuleViewAction implements IEditorActionDelegate {
 				return rs;
 			}
 		};
+
+		ITextSelection sel = this.getEditSelection(editor);
+		if(sel!=null && sel.getText()!=null){
+			moduleSelectionDialog.setInitialPattern(sel.getText());
+		}
+		moduleSelectionDialog.setProject(project);
+
+		//目前path路径提示
+		if(ifile!=null){
+			IContainer  p = ifile.getParent();
+			IContainer root = PreferenceUtil.getCurrentRoot(p);
+			if(root!=null && root.getFullPath()!=null){
+				String mpath = root.getFullPath().toString();
+				mpath = PreferenceUtil.getRelativeRootPath(p.getFullPath().toString(),mpath);
+				if(mpath!=null){
+					if(mpath.length()>0 && mpath.indexOf('/')==0){
+						mpath = mpath.substring(1);
+					}
+					moduleSelectionDialog.setPackagePath(mpath);
+				}
+			}
+		}
+
 		moduleSelectionDialog.create();
-		moduleSelectionDialog.setProject(project);		
 		moduleSelectionDialog.getSelectedModBtn().addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e) {
 				try{
@@ -150,7 +182,7 @@ public class AddModuleViewAction implements IEditorActionDelegate {
 				}
 			}
 		});
-		moduleSelectionDialog.open();
+		moduleSelectionDialog.open();		
 	}
 
 	public void selectionChanged(IAction action, ISelection selection) {

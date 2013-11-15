@@ -365,6 +365,19 @@ public class PreferenceUtil {
 
 		return null;
 	}
+	
+	/**
+	 * 
+	 * @param containerPath
+	 * @param rootPath
+	 * @return
+	 */
+	public static String getRelativeRootPath(String containerPath ,String rootPath){
+		if(containerPath.indexOf(rootPath)==0){
+			return containerPath.substring(rootPath.length());
+		}		
+		return null;
+	}
 
 	/**
 	 * 

@@ -34,6 +34,10 @@ import com.alibaba.just.ui.viewmodel.ViewItem;
 
 public class ModuleSelectionDialog extends FilteredItemsSelectionDialog {
 
+	public static final int TYPE_PACKAGE = 2;
+	public static final int TYPE_ALIAS = 1;
+	public static final int TYPE_ORI = 0;
+
 	private static final int DAILOG_ID_ADD_SELECTED_MOD = 10;
 	private static final int DAILOG_ID_ADD_TEXT_MOD = 11;
 	private static final String DIALOG_HEIGHT = "DIALOG_HEIGHT"; //$NON-NLS-1$
@@ -48,6 +52,7 @@ public class ModuleSelectionDialog extends FilteredItemsSelectionDialog {
 
 
 	private IProject project = null;
+	private String packagePath = null;
 
 
 	public ModuleSelectionDialog(Shell shell) {
@@ -81,6 +86,26 @@ public class ModuleSelectionDialog extends FilteredItemsSelectionDialog {
 		return this.getFirstResult();
 	}
 
+	/**
+	 * 
+	 * @return
+	 */
+	public String getFirstResultString(){
+		Object obj = this.getFirstResult();
+		if(ModuleVO.class.isInstance(obj)){
+			if(((ModuleVO)obj).isUseAlias()){
+				return ((ModuleVO)obj).getAlias();
+			}else{
+				return ((ModuleVO)obj).getName();
+			}
+		}else if(Module.class.isInstance(obj)){
+			return ((Module)obj).getName();
+		}else if(obj!=null){
+			return obj.toString();
+		}	    
+		return null;
+	}
+
 	public Object getFirstResult() {
 		Object obj = super.getFirstResult();
 		//convert to module
@@ -99,7 +124,7 @@ public class ModuleSelectionDialog extends FilteredItemsSelectionDialog {
 		}
 		return obj;
 	}
-	
+
 	private ModuleVO convertModule(Module m){
 		ModuleVO vo = new ModuleVO();
 		vo.setName(m.getName());
@@ -207,7 +232,6 @@ public class ModuleSelectionDialog extends FilteredItemsSelectionDialog {
 				}else if(ViewItem.class.isInstance(item)){
 					return((ViewItem)item).getLabel()!=null && matches(((ViewItem)item).getLabel());
 				}	
-
 				return false;
 			}
 			public boolean isConsistentItem(Object item) {
@@ -224,14 +248,30 @@ public class ModuleSelectionDialog extends FilteredItemsSelectionDialog {
 		return new Comparator() {
 			public int compare(Object arg0, Object arg1) {
 				if(ViewItem.class.isInstance(arg0)){
+					if(!ViewItem.class.isInstance(arg1)){
+						return -1;
+					}else if(arg1!=null && ((ViewItem)arg0).getType() > ((ViewItem)arg1).getType()){
+						return -1;
+					}
+				}
+
+				if(ViewItem.class.isInstance(arg1)){
+					if(!ViewItem.class.isInstance(arg0)){
+						return 1;
+					}else if(arg1!=null && ((ViewItem)arg1).getType() > ((ViewItem)arg0).getType()){
+						return 1;
+					}
+				}
+
+				if(ViewItem.class.isInstance(arg0)){
 					arg0 = ((ViewItem)arg0).getLabel();
-					
+
 				}else if(Module.class.isInstance(arg0)){
 					arg0 =  ((Module)arg0).getName();
 				}
 				if(ViewItem.class.isInstance(arg1)){
 					arg1 = ((ViewItem)arg1).getLabel();
-					
+
 				}else if(Module.class.isInstance(arg1)){
 					arg1 =  ((Module)arg1).getName();
 				}
@@ -269,18 +309,29 @@ public class ModuleSelectionDialog extends FilteredItemsSelectionDialog {
 	private void fillProjectContentProvider(IProject project,AbstractContentProvider contentProvider,
 			ItemsFilter itemsFilter, IProgressMonitor progressMonitor)
 	throws CoreException { 
+
 		if(project!=null){
+			ViewItem vi = null;
+
+			//current package path
+			if(packagePath!=null){
+				vi = new ViewItem(packagePath,packagePath);
+				vi.setIconName(ImageManager.IMG_PACKAGE_OBJ);
+				vi.setType(TYPE_PACKAGE);
+				contentProvider.add(vi, itemsFilter);
+			}
+
 			// Populate libs
 			try {
 				List<Module> moduleList = PluginResourceUtil.getAllModulesByProject(project,ModuleParser.MODULE_TYPE_NORMAL,progressMonitor);
 
 				Module tmp = null;
-				ViewItem vi = null;
 				for (Iterator<Module> iter = moduleList.iterator(); iter.hasNext();) {
 					tmp = iter.next();
 					if(tmp.getAlias()!=null){
 						vi = new ViewItem(tmp,tmp.getAlias());
 						vi.setIconName(ImageManager.IMG_ALIAS_MODULE_ICON);
+						vi.setType(TYPE_ALIAS);
 						contentProvider.add(vi, itemsFilter);
 					}
 					contentProvider.add(tmp, itemsFilter);
@@ -320,6 +371,7 @@ public class ModuleSelectionDialog extends FilteredItemsSelectionDialog {
 			addSelectedModBtn = null;
 			addTextModBtn=null;
 			project=null;
+			packagePath = null;
 		}
 		return rs;
 	}
@@ -383,13 +435,22 @@ public class ModuleSelectionDialog extends FilteredItemsSelectionDialog {
 						ss.append(new StyledString(SEP + path,StyledString.QUALIFIER_STYLER));
 					}
 					return ss;					
+				}else{
+					return new StyledString(vi.getLabel());
 				}
-
 
 			}					
 			return new StyledString();
 		}
 
+	}
+
+	public String getPackagePath() {
+		return packagePath;
+	}
+
+	public void setPackagePath(String packagePath) {
+		this.packagePath = packagePath;
 	}
 
 }

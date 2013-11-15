@@ -2,13 +2,13 @@
 <?eclipse version="3.4"?>
 <plugin>
    <extension
-         id="JSDTModuleCompletionProposalComputer"
+         id="ModuleCompletionProposalComputer"
          name="Just Module Proposals"
          point="org.eclipse.wst.jsdt.ui.javaCompletionProposalComputer">
       <javaCompletionProposalComputer
             activate="true"
             categoryId="com.alibaba.just.jsdt.justModuleProposals"
-            class="com.alibaba.just.jsdt.editors.contentassist.JSDTModuleCompletionProposalComputer">
+            class="com.alibaba.just.jsdt.editors.contentassist.ModuleCompletionProposalComputer">
          <partition
                type="__java_string">
          </partition>

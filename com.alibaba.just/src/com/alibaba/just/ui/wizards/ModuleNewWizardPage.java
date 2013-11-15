@@ -293,8 +293,9 @@ public class ModuleNewWizardPage extends WizardPage {
 			}
 
 		};
-		moduleSelectionDialog.create();
 		moduleSelectionDialog.setProject(project);
+		
+		moduleSelectionDialog.create();
 		moduleSelectionDialog.getSelectedModBtn().addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e) {
 				Object rs  = moduleSelectionDialog.getSelectedResult();
@@ -366,7 +367,7 @@ public class ModuleNewWizardPage extends WizardPage {
 				if(root!=null && root.getFullPath()!=null){
 					String rootPath = root.getFullPath().toString();
 					containerText.setText(rootPath);
-					parentCt = getRelativeRootPath(container.getFullPath().toString(),rootPath);
+					parentCt = PreferenceUtil.getRelativeRootPath(container.getFullPath().toString(),rootPath);
 				}else{
 					containerText.setText(container.getFullPath().toString());	
 				}
@@ -382,13 +383,6 @@ public class ModuleNewWizardPage extends WizardPage {
 		}else{
 			fileText.setText("page/module");
 		}	
-	}
-
-	private String getRelativeRootPath(String containerPath ,String rootPath){
-		if(containerPath.indexOf(rootPath)==0){
-			return containerPath.substring(rootPath.length());
-		}		
-		return null;
 	}
 
 	/**

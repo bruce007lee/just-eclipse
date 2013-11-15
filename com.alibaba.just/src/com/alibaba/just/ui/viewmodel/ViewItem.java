@@ -15,6 +15,7 @@ public class ViewItem implements IAdaptable{
 	private Object obj;
 	private String iconName;
 	private String label;
+	private int type=0;
 	private boolean isChecked = false;
 	private boolean isGray = false;
 	
@@ -93,6 +94,14 @@ public class ViewItem implements IAdaptable{
 
 	public void setGray(boolean isGray) {
 		this.isGray = isGray;
+	}
+
+	public int getType() {
+		return type;
+	}
+
+	public void setType(int type) {
+		this.type = type;
 	}
 
 }

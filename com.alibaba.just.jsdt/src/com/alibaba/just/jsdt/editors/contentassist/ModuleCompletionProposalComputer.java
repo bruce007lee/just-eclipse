@@ -5,12 +5,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.contentassist.CompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -24,12 +24,15 @@ import org.eclipse.wst.jsdt.ui.text.java.IJavaCompletionProposalComputer;
 import com.alibaba.just.api.bean.Module;
 import com.alibaba.just.jsdt.util.ImageManager;
 import com.alibaba.just.ui.util.PluginResourceUtil;
+import com.alibaba.just.ui.util.PreferenceUtil;
 
-public class JSDTModuleCompletionProposalComputer implements IJavaCompletionProposalComputer{
+public class ModuleCompletionProposalComputer implements IJavaCompletionProposalComputer{
 
 	private static final String SEP_REG = "[\n]";
 
-	private static final String PROPOSALS_ALIAS_TYPE = "alias";
+	private static final String PROPOSALS_ALIAS_TYPE = "A";
+	private static final String PROPOSALS_NORMAL_TYPE = "M";
+	private static final String PROPOSALS_PACKAGE_TYPE = "P";
 
 	private boolean isStart = false;
 	private int startOffset = -1;
@@ -59,6 +62,7 @@ public class JSDTModuleCompletionProposalComputer implements IJavaCompletionProp
 
 
 		IProject project = null;
+		IFile ifile = null;
 
 		try{
 
@@ -70,7 +74,7 @@ public class JSDTModuleCompletionProposalComputer implements IJavaCompletionProp
 					if(editor!=null){
 						IEditorInput input = editor.getEditorInput();
 						if (input!=null && input instanceof IFileEditorInput){
-							IFile ifile =   ((IFileEditorInput) input).getFile();
+							ifile =   ((IFileEditorInput) input).getFile();
 							if(ifile!=null){
 								project = ifile.getProject();
 							}
@@ -110,13 +114,29 @@ public class JSDTModuleCompletionProposalComputer implements IJavaCompletionProp
 		//缓存结果
 		if(listCache==null){
 
+			//目前path路径提示
+			if(ifile!=null){
+				IContainer  p = ifile.getParent();
+				IContainer root = PreferenceUtil.getCurrentRoot(p);
+				if(root!=null && root.getFullPath()!=null){
+					String mpath = root.getFullPath().toString();
+					mpath = PreferenceUtil.getRelativeRootPath(p.getFullPath().toString(),mpath);
+					if(mpath!=null){
+						if(mpath.length()>0 && mpath.indexOf('/')==0){
+							mpath = mpath.substring(1);
+						}
+						proposals.add(new String[]{mpath,PROPOSALS_PACKAGE_TYPE});
+					}
+				}
+			}
+
 			List<Module> moduleList = PluginResourceUtil.getAllModulesByProject(project);
 
 			//转化为proposals
 			Module tmp = null;
 			for (Iterator<Module> iter = moduleList.iterator(); iter.hasNext();) {
 				tmp = iter.next();
-				proposals.add(new String[]{tmp.getName(),null});
+				proposals.add(new String[]{tmp.getName(),PROPOSALS_NORMAL_TYPE});
 				if(tmp.getAlias()!=null){
 					proposals.add(new String[]{tmp.getAlias(),PROPOSALS_ALIAS_TYPE});
 				}
@@ -132,11 +152,14 @@ public class JSDTModuleCompletionProposalComputer implements IJavaCompletionProp
 			prop = proposals.get(i);
 			if(currentText==null || prop[0].indexOf(currentText)==0){
 				if(prop[1]!=null && prop[1].equals(PROPOSALS_ALIAS_TYPE)){
-					completionProposalList.add(new CompletionProposal(prop[0], startOffset, offset-startOffset , prop[0].length()
-							,ImageManager.getImage(ImageManager.IMG_ALIAS_MODULE_ICON),null,null,null));
+					completionProposalList.add(new ModuleCompletionProposal(prop[0], startOffset, offset-startOffset , prop[0].length()
+							,ImageManager.getImage(ImageManager.IMG_ALIAS_MODULE_ICON),prop[1]));
+				}else if(prop[1]!=null && prop[1].equals(PROPOSALS_PACKAGE_TYPE)){
+					completionProposalList.add(new ModuleCompletionProposal(prop[0], startOffset, offset-startOffset , prop[0].length()
+							,ImageManager.getImage(ImageManager.IMG_PACKAGE_OBJ),prop[1]));
 				}else{
-					completionProposalList.add(new CompletionProposal(prop[0], startOffset, offset-startOffset , prop[0].length()
-							,ImageManager.getImage(ImageManager.IMG_MODULE_ICON),null,null,null));
+					completionProposalList.add(new ModuleCompletionProposal(prop[0], startOffset, offset-startOffset , prop[0].length()
+							,ImageManager.getImage(ImageManager.IMG_MODULE_ICON),prop[1]));
 				}
 			}
 		}

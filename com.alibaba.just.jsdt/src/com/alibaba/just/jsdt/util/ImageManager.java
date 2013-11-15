@@ -12,8 +12,8 @@ public class ImageManager {
 	
 	public static final String IMG_MODULE_ICON = "img_module_icon";
 	public static final String IMG_ALIAS_MODULE_ICON = "img_alias_module_icon";
-	
-	
+	public static final String IMG_PACKAGE_OBJ = "img_package_obj";
+		
 	private static ImageRegistry imageRegistry = null;
 	private static URL baseURL = null;
 	private ImageManager(){}
@@ -23,6 +23,7 @@ public class ImageManager {
 		imageRegistry = plugin.getImageRegistry();
 		ImageManager.putImage(IMG_MODULE_ICON, "icons/module.gif");
 		ImageManager.putImage(IMG_ALIAS_MODULE_ICON, "icons/alias_module.gif");
+		ImageManager.putImage(IMG_PACKAGE_OBJ, "icons/package_obj.gif");
 	}
 	
 	public static void dispose(){
