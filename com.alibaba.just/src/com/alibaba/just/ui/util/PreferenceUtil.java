@@ -121,9 +121,11 @@ public class PreferenceUtil {
 	private static List<Node> getChildNode(Node parent,String tagName){
 		List<Node> list = new ArrayList<Node>();
 		NodeList  nList =  parent.getChildNodes();
-		for(int i=0,l=nList.getLength();i<l;i++){
-			if(tagName.equals(nList.item(i).getNodeName())){
-				list.add(nList.item(i));
+		if(nList!=null){
+			for(int i=0,l=nList.getLength();i<l;i++){
+				if(tagName.equals(nList.item(i).getNodeName())){
+					list.add(nList.item(i));
+				}
 			}
 		}
 		return list;
@@ -365,7 +367,7 @@ public class PreferenceUtil {
 
 		return null;
 	}
-	
+
 	/**
 	 * 
 	 * @param containerPath
