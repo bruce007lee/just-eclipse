@@ -53,7 +53,9 @@ public class CacheRemoveListener implements IResourceChangeListener {
 	 */
 	public void resourceChanged(IResourceChangeEvent event){
 		try {
-			event.getDelta().accept(vistor);
+			if(event!=null && event.getDelta()!=null){
+			   event.getDelta().accept(vistor);
+			}
 		} catch (CoreException e) {
 			e.printStackTrace();
 		}
