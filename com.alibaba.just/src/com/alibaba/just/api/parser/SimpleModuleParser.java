@@ -141,12 +141,6 @@ public class SimpleModuleParser extends AbstractModuleParser{
 					module = new Module();
 
 					module.setAnonymous(true);
-
-					//模块依赖的子模块
-					tmp = m.group(1);
-					List<String> list = getRequiredModules(tmp);
-					module.getRequiredModuleNames().addAll(list);
-
 					module.setFilePath(absPath);
 					moduleList.add(module);
 				}
@@ -176,8 +170,6 @@ public class SimpleModuleParser extends AbstractModuleParser{
 					List<String> list = getRequiredModules(tmp);
 					module.getRequiredModuleNames().addAll(list);
 
-					//tmp = m.group(3);
-
 					module.setFilePath(absPath);
 					updateAlias(module,this.getAliasList());//update module alias
 					moduleList.add(module);
@@ -198,13 +190,6 @@ public class SimpleModuleParser extends AbstractModuleParser{
 					tmp = tmp.trim().substring(1);
 					tmp =  tmp.substring(0, tmp.length()-1);				
 					module.setName(tmp);
-
-					//模块依赖的子模块
-					tmp = m.group(2);
-					List<String> list = getRequiredModules(tmp);
-					module.getRequiredModuleNames().addAll(list);
-
-					//tmp = m.group(3);
 
 					module.setFilePath(absPath);
 					updateAlias(module,this.getAliasList());//update module alias
