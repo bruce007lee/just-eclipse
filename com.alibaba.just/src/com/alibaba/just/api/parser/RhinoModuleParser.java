@@ -75,6 +75,7 @@ public class RhinoModuleParser extends AbstractModuleParser {
 
 								List<AstNode> args = fc.getArguments();
 								//校验3参数普通模块
+								//侦测define("module",["required1","required2"...],function(){...});
 								if(args.size()==3 && (moduleType == MODULE_TYPE_ALL || moduleType == MODULE_TYPE_NORMAL)){
 									AstNode stringNode = args.get(0);
 									AstNode arrayNode = args.get(1);
@@ -98,6 +99,7 @@ public class RhinoModuleParser extends AbstractModuleParser {
 									AstNode node2 = args.get(1);
 									
 									//校验2参数的普通模块
+									//侦测define("module",function(){...});
 									if((moduleType == MODULE_TYPE_ALL || moduleType == MODULE_TYPE_NORMAL) && StringLiteral.class.isInstance(node1) &&
 											FunctionNode.class.isInstance(node2)){
 										Module module = new Module();
@@ -109,6 +111,7 @@ public class RhinoModuleParser extends AbstractModuleParser {
 									}
 									
 									//校验2参数匿名模块
+									//侦测define(["required1","required2"...],function(){...});
 									if((moduleType == MODULE_TYPE_ALL || moduleType == MODULE_TYPE_ANONYMOUS) && ArrayLiteral.class.isInstance(node1) &&
 											FunctionNode.class.isInstance(node2)){
 										Module module = new Module();
@@ -120,12 +123,12 @@ public class RhinoModuleParser extends AbstractModuleParser {
 								}
 								
 								//校验1参数的匿名模块
+								//侦测define(function(){...});
 								if(args.size()==1 && (moduleType == MODULE_TYPE_ALL || moduleType == MODULE_TYPE_ANONYMOUS)){
 									AstNode node1 = args.get(0);
 									if(FunctionNode.class.isInstance(node1)){
 										Module module = new Module();
 										module.setAnonymous(true);
-										module.getRequiredModuleNames().addAll(getRequiredModules((ArrayLiteral)node1));
 										module.setFilePath(absPath);
 										moduleList.add(module);
 									}
