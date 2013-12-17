@@ -74,7 +74,7 @@ public class RhinoModuleParser extends AbstractModuleParser {
 							if(Pattern.matches(DEFINE_KEY_REG,nameNode.toSource().trim())){
 
 								List<AstNode> args = fc.getArguments();
-								//校验普通模块
+								//校验3参数普通模块
 								if(args.size()==3 && (moduleType == MODULE_TYPE_ALL || moduleType == MODULE_TYPE_NORMAL)){
 									AstNode stringNode = args.get(0);
 									AstNode arrayNode = args.get(1);
@@ -93,15 +93,39 @@ public class RhinoModuleParser extends AbstractModuleParser {
 									}
 								}
 
-								//校验匿名模块
-								if(args.size()==2 && (moduleType == MODULE_TYPE_ALL || moduleType == MODULE_TYPE_ANONYMOUS)){
-									AstNode arrayNode = args.get(0);
-									AstNode funNode = args.get(1);
-									if(ArrayLiteral.class.isInstance(arrayNode) &&
-											FunctionNode.class.isInstance(funNode)){
+								if(args.size()==2){
+									AstNode node1 = args.get(0);
+									AstNode node2 = args.get(1);
+									
+									//校验2参数的普通模块
+									if((moduleType == MODULE_TYPE_ALL || moduleType == MODULE_TYPE_NORMAL) && StringLiteral.class.isInstance(node1) &&
+											FunctionNode.class.isInstance(node2)){
+										Module module = new Module();
+										module.setAnonymous(false);
+										module.setName(((StringLiteral)node1).getValue(false));
+										module.setFilePath(absPath);
+										updateAlias(module,this.getAliasList());//update module alias
+										moduleList.add(module);
+									}
+									
+									//校验2参数匿名模块
+									if((moduleType == MODULE_TYPE_ALL || moduleType == MODULE_TYPE_ANONYMOUS) && ArrayLiteral.class.isInstance(node1) &&
+											FunctionNode.class.isInstance(node2)){
 										Module module = new Module();
 										module.setAnonymous(true);
-										module.getRequiredModuleNames().addAll(getRequiredModules((ArrayLiteral)arrayNode));
+										module.getRequiredModuleNames().addAll(getRequiredModules((ArrayLiteral)node1));
+										module.setFilePath(absPath);
+										moduleList.add(module);
+									}
+								}
+								
+								//校验1参数的匿名模块
+								if(args.size()==1 && (moduleType == MODULE_TYPE_ALL || moduleType == MODULE_TYPE_ANONYMOUS)){
+									AstNode node1 = args.get(0);
+									if(FunctionNode.class.isInstance(node1)){
+										Module module = new Module();
+										module.setAnonymous(true);
+										module.getRequiredModuleNames().addAll(getRequiredModules((ArrayLiteral)node1));
 										module.setFilePath(absPath);
 										moduleList.add(module);
 									}

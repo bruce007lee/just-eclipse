@@ -15,9 +15,9 @@ import com.alibaba.just.util.FileUtil;
 public class SimpleModuleParser extends AbstractModuleParser{
 
 	/**
-	 * 普通模块正则
+	 * 3参普通模块正则单元
 	 */
-	private static final String MODULE_REGEX_SEG ="\\Wdefine[\\s]*\\(" +
+	private static final String NORMAL_SEG ="\\Wdefine[\\s]*\\(" +
 	"[\\s]*('[\\s]*[^\\(\\)]*'|\"[^\\(\\)]*\")[\\s]*" +
 	"," +
 	"[\\s]*(\\[[^\\[\\]]*\\])[\\s]*" +
@@ -25,12 +25,28 @@ public class SimpleModuleParser extends AbstractModuleParser{
 	"[\\s]*(function[\\s]*[\\s\\S]*)[\\s]*";
 	
 	/**
-	 * 匿名模块正则单元
+	 * 2参匿名模块正则单元
 	 */
-	private static final String ANONYMOUS_MODULE_REGEX_SEG="\\Wdefine[\\s]*\\(" +
+	private static final String ANONYMOUS_SEG="\\Wdefine[\\s]*\\(" +
 	"[\\s]*(\\[[^\\[\\]]*\\])[\\s]*" +
 	"," +
 	"[\\s]*(function[\\s]*[\\s\\S]*)[\\s]*";
+	
+	/**
+	 * 2参普通模块正则单元
+	 */
+	private static final String NORMAL_SEG_SIMPLE="\\Wdefine[\\s]*\\(" +
+	"[\\s]*('[\\s]*[^\\(\\)]*'|\"[^\\(\\)]*\")[\\s]*" +
+	"," +
+	"[\\s]*(function[\\s]*[\\s\\S]*)[\\s]*";
+	
+	/**
+	 * 1参匿名模块正则单元
+	 */
+	private static final String ANONYMOUS_SEG_SIMPLE="\\Wdefine[\\s]*\\(" +
+	"[\\s]*(function[\\s]*[\\s\\S]*)[\\s]*";
+	
+	/*----------------------------------------------------------------------*/
 	
 	/**
 	 * 普通模块正则单元
@@ -40,7 +56,15 @@ public class SimpleModuleParser extends AbstractModuleParser{
 	"," +
 	"[\\s]*(\\[[^\\[\\]]*\\])[\\s]*" +
 	"," +
-	"[\\s]*(function[\\s]*(?!("+MODULE_REGEX_SEG+")|("+ANONYMOUS_MODULE_REGEX_SEG+")))[\\s]*";
+	"[\\s]*(function[\\s]*(?!("+NORMAL_SEG+")|("+ANONYMOUS_SEG+")|("+NORMAL_SEG_SIMPLE+")|("+ANONYMOUS_SEG_SIMPLE+")))[\\s]*";
+	
+	/**
+	 * 简单普通模块正则单元
+	 */
+	private static final String MODULE_REGEX_SIMPLE ="\\Wdefine[\\s]*\\(" +
+	"[\\s]*('[\\s]*[^\\(\\)]*'|\"[^\\(\\)]*\")[\\s]*" +
+	"," +
+	"[\\s]*(function[\\s]*(?!("+NORMAL_SEG+")|("+ANONYMOUS_SEG+")|("+NORMAL_SEG_SIMPLE+")|("+ANONYMOUS_SEG_SIMPLE+")))[\\s]*";
 
 	/**
 	 * 匿名模块正则
@@ -48,7 +72,13 @@ public class SimpleModuleParser extends AbstractModuleParser{
 	private static final String ANONYMOUS_MODULE_REGEX ="\\Wdefine[\\s]*\\(" +
 	"[\\s]*(\\[[^\\[\\]]*\\])[\\s]*" +
 	"," +
-	"[\\s]*(function[\\s]*(?!("+MODULE_REGEX_SEG+")|("+ANONYMOUS_MODULE_REGEX_SEG+")))[\\s]*";
+	"[\\s]*(function[\\s]*(?!("+NORMAL_SEG+")|("+ANONYMOUS_SEG+")|("+NORMAL_SEG_SIMPLE+")|("+ANONYMOUS_SEG_SIMPLE+")))[\\s]*";
+	
+	/**
+	 * 简单匿名模块正则
+	 */
+	private static final String ANONYMOUS_MODULE_REGEX_SIMPLE ="\\Wdefine[\\s]*\\(" +
+	"[\\s]*(function[\\s]*(?!("+NORMAL_SEG+")|("+ANONYMOUS_SEG+")|("+NORMAL_SEG_SIMPLE+")|("+ANONYMOUS_SEG_SIMPLE+")))[\\s]*";
 
 	public SimpleModuleParser(String charset){
 		this.charset = charset;		
@@ -83,12 +113,30 @@ public class SimpleModuleParser extends AbstractModuleParser{
 
 			/*处理匿名模块*/
 			if(moduleType == MODULE_TYPE_ALL || moduleType == MODULE_TYPE_ANONYMOUS){
-				//只侦测标准形式define(["required1","required2"...],function(){...});
-
+				//侦测标准形式define(["required1","required2"...],function(){...});
 				Pattern p = Pattern.compile(ANONYMOUS_MODULE_REGEX,Pattern.MULTILINE);
 				Matcher m = p.matcher(content);
 				Module module = null;
 				String tmp = null;
+				while (m.find()) {
+					module = new Module();
+
+					module.setAnonymous(true);
+
+					//模块依赖的子模块
+					tmp = m.group(1);
+					List<String> list = getRequiredModules(tmp);
+					module.getRequiredModuleNames().addAll(list);
+
+					module.setFilePath(absPath);
+					moduleList.add(module);
+				}
+				
+				//侦测简易形式define(function(){...});
+				p = Pattern.compile(ANONYMOUS_MODULE_REGEX_SIMPLE,Pattern.MULTILINE);
+				m = p.matcher(content);
+				module = null;
+				tmp = null;
 				while (m.find()) {
 					module = new Module();
 
@@ -107,12 +155,39 @@ public class SimpleModuleParser extends AbstractModuleParser{
 
 			/*处理普通模块*/
 			if(moduleType == MODULE_TYPE_ALL || moduleType == MODULE_TYPE_NORMAL){
-				//只侦测标准形式define("module",["required1","required2"...],function(){...});
-
+				//侦测标准形式define("module",["required1","required2"...],function(){...});
 				Pattern p = Pattern.compile(MODULE_REGEX,Pattern.MULTILINE);
 				Matcher m = p.matcher(content);
 				Module module = null;
 				String tmp = null;
+				while (m.find()) {
+					module = new Module();
+
+					module.setAnonymous(false);
+
+					//模块名
+					tmp = m.group(1);
+					tmp = tmp.trim().substring(1);
+					tmp =  tmp.substring(0, tmp.length()-1);				
+					module.setName(tmp);
+
+					//模块依赖的子模块
+					tmp = m.group(2);
+					List<String> list = getRequiredModules(tmp);
+					module.getRequiredModuleNames().addAll(list);
+
+					//tmp = m.group(3);
+
+					module.setFilePath(absPath);
+					updateAlias(module,this.getAliasList());//update module alias
+					moduleList.add(module);
+				}
+				
+				//侦测简易形式define("module",function(){...});
+				p = Pattern.compile(MODULE_REGEX_SIMPLE,Pattern.MULTILINE);
+				m = p.matcher(content);
+				module = null;
+				tmp = null;
 				while (m.find()) {
 					module = new Module();
 
