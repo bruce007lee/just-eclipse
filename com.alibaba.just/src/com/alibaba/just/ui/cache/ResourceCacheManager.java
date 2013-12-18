@@ -44,7 +44,7 @@ public class ResourceCacheManager {
 				cfg.overflowToDisk(false).diskPersistent(false);
 				Cache cache = new Cache(cfg
 						.name(cacheName)
-						.maxBytesLocalHeap(10, MemoryUnit.MEGABYTES)
+						.maxBytesLocalHeap(20, MemoryUnit.MEGABYTES)
 						.memoryStoreEvictionPolicy(MemoryStoreEvictionPolicy.LFU)
 						.eternal(false)
 						.timeToLiveSeconds(0)
