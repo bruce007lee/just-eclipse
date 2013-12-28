@@ -19,5 +19,6 @@ public class PreferenceConstants {
 	/*for Module view*/
 	public static final String MODULE_VIEW_SHOW_TYPE = "just_module_view_show_type";
 	public static final String MODULE_VIEW_SHOW_USED_LIST = "just_module_view_used_list";
+	public static final String MODULE_VIEW_AUTO_REFRESH = "just_module_view_auto_refresh";
 
 }

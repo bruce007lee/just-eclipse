@@ -20,6 +20,7 @@ public class ImageManager {
 	public static final String IMG_FLAT_LAYOUT = "img_flat_layout";
 	public static final String IMG_HIERARCHICAL_LAYOUT = "img_hierarchical_layout";
 	public static final String IMG_REFRESH = "img_refresh";
+	public static final String IMG_SYNCED = "img_synced";
 	public static final String IMG_USED_LIST = "img_used_list";
 	public static final String IMG_PACKAGE_OBJ = "img_package_obj";
 	
@@ -40,6 +41,7 @@ public class ImageManager {
 		ImageManager.putImage(IMG_FLAT_LAYOUT, "icons/flatLayout.gif");
 		ImageManager.putImage(IMG_HIERARCHICAL_LAYOUT, "icons/hierarchicalLayout.gif");
 		ImageManager.putImage(IMG_REFRESH, "icons/refresh.gif");
+		ImageManager.putImage(IMG_SYNCED, "icons/synced.gif");
 		ImageManager.putImage(IMG_USED_LIST, "icons/usedList.gif");
 		
 		ImageManager.putImage(IMG_PACKAGE_OBJ, "icons/package_obj.gif");

@@ -101,6 +101,7 @@ public class ModuleView extends ViewPart {
 	private IAction action_hier;
 	private IAction action_refresh;
 	private IAction action_used_list;
+	private IAction action_auto_refresh;
 
 	/*
 	 * tree node
@@ -464,7 +465,7 @@ public class ModuleView extends ViewPart {
 			public boolean visit(IResourceDelta delta)
 			throws CoreException {
 				//System.out.println(delta +" "+ delta.getKind());
-				if((delta.getKind()==IResourceDelta.CHANGED) 
+				if(isAutoRefresh() && (delta.getKind()==IResourceDelta.CHANGED) 
 						&& delta.getResource()!=null
 						&& IResource.FILE==delta.getResource().getType()
 						&& PluginConstants.JAVASCRIPT_EXT.equalsIgnoreCase(delta.getResource().getFileExtension()) ){
@@ -799,7 +800,9 @@ public class ModuleView extends ViewPart {
 
 	private void fillContextMenu(IMenuManager manager) {
 		manager.add(action_refresh);
-		manager.add(new Separator());		
+		manager.add(new Separator());	
+		manager.add(action_auto_refresh);
+		manager.add(new Separator());
 		manager.add(action_used_list);
 		manager.add(new Separator());
 		manager.add(action_flat);
@@ -809,6 +812,8 @@ public class ModuleView extends ViewPart {
 
 	private void fillLocalToolBar(IToolBarManager manager) {
 		manager.add(action_refresh);
+		manager.add(new Separator());	
+		manager.add(action_auto_refresh);
 		manager.add(new Separator());
 		manager.add(action_used_list);
 		manager.add(new Separator());
@@ -826,7 +831,18 @@ public class ModuleView extends ViewPart {
 		};
 		action_refresh.setToolTipText("Refresh View");
 		action_refresh.setImageDescriptor(ImageDescriptor.createFromImage(ImageManager.getImage(ImageManager.IMG_REFRESH)));
-
+		
+		/*是否自动刷新按钮*/
+		/*是否显示被引用模块列表*/
+		action_auto_refresh = new Action("Auto Refresh",Action.AS_CHECK_BOX) {
+			public void run() {
+				setAutoRefresh(!isAutoRefresh());
+			}
+		};
+		action_auto_refresh.setToolTipText("Auto Refresh on file changed");
+		action_auto_refresh.setImageDescriptor(ImageDescriptor.createFromImage(ImageManager.getImage(ImageManager.IMG_SYNCED)));
+		action_auto_refresh.setChecked(isAutoRefresh());
+		
 		/*是否显示被引用模块列表*/
 		action_used_list = new Action("Show Used Module List",Action.AS_CHECK_BOX) {
 			public void run() {
@@ -885,11 +901,23 @@ public class ModuleView extends ViewPart {
 	private Boolean isShowUsedList(){
 		return PreferenceUtil.getPluginPreferenceStore().getBoolean(PreferenceConstants.MODULE_VIEW_SHOW_USED_LIST);
 	}
-
+	
 	private void showUsedList(boolean isShow){
 		try {
 			PreferenceUtil.getPluginPreferenceStore().setValue(PreferenceConstants.MODULE_VIEW_SHOW_USED_LIST,isShow);
 			changeShowType(getShowType());
+		} catch (Exception e) {
+			//e.printStackTrace();
+		}
+	}
+	
+	private Boolean isAutoRefresh(){
+		return PreferenceUtil.getPluginPreferenceStore().getBoolean(PreferenceConstants.MODULE_VIEW_AUTO_REFRESH);
+	}
+
+	private void setAutoRefresh(boolean isAuto){
+		try {
+			PreferenceUtil.getPluginPreferenceStore().setValue(PreferenceConstants.MODULE_VIEW_AUTO_REFRESH,isAuto);
 		} catch (Exception e) {
 			//e.printStackTrace();
 		}
