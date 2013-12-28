@@ -576,4 +576,28 @@ public class PreferenceUtil {
 		}
 		return PARSER_ENGINE_TYPE_SIMPLE.equalsIgnoreCase(type)?ParserFactory.TYPE_SIMPLE:ParserFactory.TYPE_RHINO;
 	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public static boolean isShowLibAnonymouseModule(){
+		return PreferenceUtil.getPluginPreferenceStore().getBoolean(PreferenceConstants.P_SHOW_LIB_ANONYMOUSE);
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public static boolean isShowMatchStart(){
+		return PreferenceUtil.getPluginPreferenceStore().getBoolean(PreferenceConstants.P_SHOW_MATCH_START);
+	}
+		
+	/**
+	 * 
+	 * @return
+	 */
+	public static boolean isShowMatchPartial(){
+		return PreferenceUtil.getPluginPreferenceStore().getBoolean(PreferenceConstants.P_SHOW_MATCH_PARTIAL);
+	}
 }

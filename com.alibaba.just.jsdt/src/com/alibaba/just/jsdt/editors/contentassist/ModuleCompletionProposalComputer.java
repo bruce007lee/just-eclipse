@@ -30,9 +30,11 @@ public class ModuleCompletionProposalComputer implements IJavaCompletionProposal
 
 	private static final String SEP_REG = "[\n]";
 
-	private static final String PROPOSALS_ALIAS_TYPE = "A";
-	private static final String PROPOSALS_NORMAL_TYPE = "M";
-	private static final String PROPOSALS_PACKAGE_TYPE = "P";
+	private static final String PROPOSALS_ALIAS_TYPE = ModuleCompletionProposal.PROPOSALS_ALIAS_TYPE;
+	private static final String PROPOSALS_NORMAL_TYPE = ModuleCompletionProposal.PROPOSALS_NORMAL_TYPE;
+	private static final String PROPOSALS_ALIAS_TYPE_LV1 = ModuleCompletionProposal.PROPOSALS_ALIAS_TYPE_LV1;
+	private static final String PROPOSALS_NORMAL_TYPE_LV1 = ModuleCompletionProposal.PROPOSALS_NORMAL_TYPE_LV1;
+	private static final String PROPOSALS_PACKAGE_TYPE =  ModuleCompletionProposal.PROPOSALS_PACKAGE_TYPE;
 
 	private boolean isStart = false;
 	private int startOffset = -1;
@@ -107,6 +109,8 @@ public class ModuleCompletionProposalComputer implements IJavaCompletionProposal
 			return completionProposalList;
 		}
 
+		String prefixStr = PreferenceUtil.isShowMatchStart()?this.seekForPrefix(document, startOffset):null;		
+		
 		//System.out.println("currentText:"+currentText);
 		//System.out.println("offset:"+offset);
 		List<String[]> proposals = new Vector<String[]>();
@@ -148,23 +152,80 @@ public class ModuleCompletionProposalComputer implements IJavaCompletionProposal
 		}
 
 		String[] prop = null;
+		boolean isPrefixMatch = false;
+		int  prefixLen = 0,replacementOffset=0,replacementLength=0;
+		String tmp = null;
 		for(int i = 0,l=proposals.size();i<l;i++ ){
 			prop = proposals.get(i);
-			if(currentText==null || prop[0].indexOf(currentText)==0){
-				if(prop[1]!=null && prop[1].equals(PROPOSALS_ALIAS_TYPE)){
-					completionProposalList.add(new ModuleCompletionProposal(prop[0], startOffset, offset-startOffset , prop[0].length()
-							,ImageManager.getImage(ImageManager.IMG_ALIAS_MODULE_ICON),prop[1]));
-				}else if(prop[1]!=null && prop[1].equals(PROPOSALS_PACKAGE_TYPE)){
-					completionProposalList.add(new ModuleCompletionProposal(prop[0], startOffset, offset-startOffset , prop[0].length()
-							,ImageManager.getImage(ImageManager.IMG_PACKAGE_OBJ),prop[1]));
-				}else{
-					completionProposalList.add(new ModuleCompletionProposal(prop[0], startOffset, offset-startOffset , prop[0].length()
-							,ImageManager.getImage(ImageManager.IMG_MODULE_ICON),prop[1]));
+			try{
+				
+				tmp =  prop[0].toLowerCase();
+				if(prefixStr!=null){
+					prefixLen = prefixStr.length();
+					isPrefixMatch = prefixLen>0 &&  tmp.indexOf((currentText==null ? prefixStr : prefixStr + currentText).toLowerCase())>=0;
 				}
+
+				if(currentText==null || isMatch(tmp,currentText) || isPrefixMatch){
+					
+					if(isPrefixMatch){
+						replacementOffset = startOffset-prefixLen;
+						replacementLength = offset-startOffset+prefixLen;
+					}else{
+						replacementOffset = startOffset;
+						replacementLength = offset-startOffset;
+					}
+					
+					if(prop[1]!=null && prop[1].equals(PROPOSALS_ALIAS_TYPE)){
+						completionProposalList.add(new ModuleCompletionProposal(prop[0], replacementOffset, replacementLength , prop[0].length()
+								,ImageManager.getImage(ImageManager.IMG_ALIAS_MODULE_ICON),isPrefixMatch?PROPOSALS_ALIAS_TYPE_LV1:prop[1]));
+					}else if(prop[1]!=null && prop[1].equals(PROPOSALS_PACKAGE_TYPE)){
+						completionProposalList.add(new ModuleCompletionProposal(prop[0], replacementOffset, replacementLength , prop[0].length()
+								,ImageManager.getImage(ImageManager.IMG_PACKAGE_OBJ),prop[1]));
+					}else{
+						completionProposalList.add(new ModuleCompletionProposal(prop[0], replacementOffset, replacementLength, prop[0].length()
+								,ImageManager.getImage(ImageManager.IMG_MODULE_ICON),isPrefixMatch?PROPOSALS_NORMAL_TYPE_LV1:prop[1]));
+					}
+				}
+			}catch(Exception e){
+				e.printStackTrace();
 			}
 		}
 
 		return completionProposalList;
+	}
+	
+	/**
+	 * 
+	 * @param tmp
+	 * @param currentText
+	 * @return
+	 */
+	private boolean isMatch(String tmp, String currentText){
+		return PreferenceUtil.isShowMatchPartial()?tmp.indexOf(currentText.toLowerCase())>=0:tmp.indexOf(currentText.toLowerCase())==0;
+	}
+
+	/**
+	 * 
+	 * @param document
+	 * @param endPos
+	 * @return
+	 */
+	private String seekForPrefix(IDocument document,int endPos){
+		int pos = endPos-1;
+		char ch;
+		while(pos>=0){
+			try {
+				ch = document.getChar(pos);
+				if(ch=='\"' || ch=='\''){
+					return document.get(pos+1,endPos-pos-1);
+				}
+			} catch (BadLocationException e) {
+				e.printStackTrace();
+			}
+			pos--;
+		}
+
+		return null;
 	}
 
 	public List computeContextInformation(

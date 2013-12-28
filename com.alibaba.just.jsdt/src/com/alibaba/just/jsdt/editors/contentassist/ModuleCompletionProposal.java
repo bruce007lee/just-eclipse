@@ -11,9 +11,11 @@ import org.eclipse.wst.jsdt.ui.text.java.IJavaCompletionProposal;
 
 public class ModuleCompletionProposal implements ICompletionProposal,IJavaCompletionProposal {
 
-	private static final String PROPOSALS_ALIAS_TYPE = "A";
-	private static final String PROPOSALS_NORMAL_TYPE = "M";
-	private static final String PROPOSALS_PACKAGE_TYPE = "P";
+	public static final String PROPOSALS_ALIAS_TYPE = "A";
+	public static final String PROPOSALS_NORMAL_TYPE = "M";
+	public static final String PROPOSALS_ALIAS_TYPE_LV1 = "A1";
+	public static final String PROPOSALS_NORMAL_TYPE_LV1 = "M1";
+	public static final String PROPOSALS_PACKAGE_TYPE = "P";
 
 	/** The string to be displayed in the completion proposal popup. */
 	private String fDisplayString;
@@ -139,6 +141,10 @@ public class ModuleCompletionProposal implements ICompletionProposal,IJavaComple
 
 	public int getRelevance() {
 		if(PROPOSALS_PACKAGE_TYPE.equals(fType)){
+			return 4;
+		}else if(PROPOSALS_ALIAS_TYPE_LV1.equals(fType)){
+			return 3;
+		}else if(PROPOSALS_NORMAL_TYPE_LV1.equals(fType)){
 			return 2;
 		}else if(PROPOSALS_ALIAS_TYPE.equals(fType)){
 			return 1;

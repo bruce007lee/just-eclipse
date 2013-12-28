@@ -1,5 +1,6 @@
 package com.alibaba.just.ui.preferences;
 
+import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.RadioGroupFieldEditor;
 import org.eclipse.jface.preference.StringFieldEditor;
@@ -56,6 +57,9 @@ public class PreferencePage
 		addField(new StringFieldEditor(PreferenceConstants.P_FILE_CHARSET, "File &Charset:", getFieldEditorParent()));
 		addField(new RadioGroupFieldEditor(PreferenceConstants.P_PARSER_ENGINE,"Choose Module Parser Engine",1,
 				new String[][]{{"RegExp Engine (more fast)","0"},{"Rhino Engine (more strict)","1"}},getFieldEditorParent(),true));
+		addField(new BooleanFieldEditor(PreferenceConstants.P_SHOW_LIB_ANONYMOUSE, "Show library's anonymouse module in Module View", getFieldEditorParent()));
+		addField(new BooleanFieldEditor(PreferenceConstants.P_SHOW_MATCH_START, "Show module assist with start string matches.(JSDT require)", getFieldEditorParent()));
+		addField(new BooleanFieldEditor(PreferenceConstants.P_SHOW_MATCH_PARTIAL, "Show module assist with partial matches.(JSDT require)", getFieldEditorParent()));
 	}
 
 	/* (non-Javadoc)
@@ -67,9 +71,12 @@ public class PreferencePage
 	public boolean performOk() {
 		String charset = PreferenceUtil.getFileCharset();
 		int engineType = PreferenceUtil.getParserEngineType();
+		boolean showAnoyModule = PreferenceUtil.isShowLibAnonymouseModule();
 		boolean rs =  super.performOk();
 		//if module parser config change,clear all cache
-		if(engineType!=PreferenceUtil.getParserEngineType() || !charset.equalsIgnoreCase((PreferenceUtil.getFileCharset()))){
+		if(engineType!=PreferenceUtil.getParserEngineType()                                 //engine type change
+				|| !charset.equalsIgnoreCase((PreferenceUtil.getFileCharset()))           //charset change
+				|| showAnoyModule != PreferenceUtil.isShowLibAnonymouseModule()){ //show lib mode change
 			ResourceCacheManager.removeAll();
 		}
 		

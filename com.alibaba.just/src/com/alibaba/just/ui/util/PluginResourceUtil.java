@@ -3,6 +3,7 @@ package com.alibaba.just.ui.util;
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -152,39 +153,44 @@ public class PluginResourceUtil {
 	 * @return
 	 * @throws Exception
 	 */
-	public static List<Module> getModulesByLib(IProject project,String libStr,List<Module> moduleList,ModuleParser parser) throws Exception{
+	public static List<Module> getModulesByLib(IProject project,String libStr,List<Module> moduleList,ModuleParser parser,int moduleType) throws Exception{
 		if(moduleList==null){moduleList = new ArrayList<Module>();}
 		libStr = libStr.trim();
 		String type = PreferenceUtil.getProjectLibType(libStr);
+		int mtype = ModuleParser.MODULE_TYPE_NORMAL;
+		//根据用户的配置决定是否读取并展示lib库中的匿名模块，默认不读取
+		if(PreferenceUtil.isShowLibAnonymouseModule()){
+			mtype = ModuleParser.MODULE_TYPE_ALL;
+		}
 		if(PreferenceUtil.LIB_TYPE_WORKSPACE_FOLDER.equals(type)){
 			/*外部lib*/
 			String lb = PreferenceUtil.getProjectLibPath(libStr);
 			IWorkspaceRoot  wRoot = ResourcesPlugin.getWorkspace().getRoot();
 			IPath rootPath = wRoot.getFullPath();
 			IResource res = wRoot.findMember(rootPath.append(lb));
-			
+
 			if(IContainer.class.isInstance(res) && res.exists()){
 				String key = getResourceCacheKey(project,libStr);
 				String stamp = res.getPersistentProperty(PluginConstants.CACHE_QUALIFIEDNAME);
-				
+
 				CacheElement cache = ResourceCacheManager.get(key);
 				if(stamp!=null && cache!=null && stamp.equals(cache.getStamp())){
 					List<Module> mlist =  (List<Module>) cache.getValue();
 					if(mlist!=null){
-						moduleList.addAll(mlist);
+						moduleList.addAll(filterByModuleType(mlist,moduleType,mtype));
 					}
 				}else{
 					List<String> paths = new ArrayList<String>();
 					/*lib的话默认都只取非匿名模块*/
-					internalFindModules(res,moduleList,paths,parser,parser.MODULE_TYPE_NORMAL,false);
-					List<Module> mlist =  parser.getAllModules(paths,parser.MODULE_TYPE_NORMAL);
+					internalFindModules(res,moduleList,paths,parser,mtype,false);
+					List<Module> mlist =  parser.getAllModules(paths,mtype);
 					if(!parser.isDisposed()){
 						//注意下异步时终止时的情况，如果没有做完不应该cache
 						stamp = Long.toString(new Date().getTime());
 						res.setPersistentProperty(PluginConstants.CACHE_QUALIFIEDNAME, stamp);
 						System.out.println("create lib cache:"+key);
 						ResourceCacheManager.put(key, new CacheElement(stamp,mlist));
-						moduleList.addAll(mlist);
+						moduleList.addAll(filterByModuleType(mlist,moduleType,mtype));
 					}
 				}
 			}
@@ -199,21 +205,42 @@ public class PluginResourceUtil {
 				if(cache!=null && ((Long)f.lastModified()).equals(cache.getStamp())){
 					List<Module> mlist =  (List<Module>) cache.getValue();
 					if(mlist!=null){
-						moduleList.addAll(mlist);
+						moduleList.addAll(filterByModuleType(mlist,moduleType,mtype));
 					}
 				}else{
 					/*lib的话默认都只取非匿名模块*/
-					List<Module> mlist =  parser.getAllModules(path,parser.MODULE_TYPE_NORMAL);
+					List<Module> mlist =  parser.getAllModules(path,mtype);
 					if(!parser.isDisposed()){
 						//注意下异步时终止时的情况，如果没有做完不应该cache
 						System.out.println("create lib cache:"+key);
 						ResourceCacheManager.put(key, new CacheElement(f.lastModified(),mlist));
-						moduleList.addAll(mlist);
+						moduleList.addAll(filterByModuleType(mlist,moduleType,mtype));
 					}
 				}
 			}
 		}
 		return moduleList;
+	}
+
+	/**
+	 * 根据类型过滤缓存的module列表(只当设置读取lib库的匿名模块时才处理，优化效率)
+	 * @param moduleList
+	 * @param moduleType
+	 * @return
+	 */
+	private static List<Module> filterByModuleType(List<Module> moduleList,int moduleType,int cacheType){
+		List<Module> newList = moduleList;
+		if(moduleList!=null && ModuleParser.MODULE_TYPE_ALL!= moduleType && cacheType!= moduleType){
+			//filter module by type
+			newList = new ArrayList<Module>();
+			for(Module m:moduleList){
+				if(moduleType==ModuleParser.MODULE_TYPE_NORMAL && m.isAnonymous()){							
+				}else{
+					newList.add(m);
+				}
+			}
+		}
+		return newList;
 	}
 
 	private static ResourceParserEvent getParserEvent(IResource resource){
@@ -267,7 +294,7 @@ public class PluginResourceUtil {
 						for(Object m:mlist){
 							if(Module.class.isInstance(m)){
 								mm = (Module)m;
-								if(moduleType==parser.MODULE_TYPE_NORMAL && mm.isAnonymous()){							
+								if(moduleType==ModuleParser.MODULE_TYPE_NORMAL && mm.isAnonymous()){							
 								}else{
 									moduleList.add(mm);
 								}
@@ -406,7 +433,7 @@ public class PluginResourceUtil {
 
 				}else if(PreferenceUtil.LIB_TYPE_WORKSPACE_FOLDER.equals(type) ||PreferenceUtil.LIB_TYPE_EXTERNAL_FOLDER.equals(type)){
 					try {
-						PluginResourceUtil.getModulesByLib(project,lb,moduleList,parser);
+						PluginResourceUtil.getModulesByLib(project,lb,moduleList,parser,moduleType);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}

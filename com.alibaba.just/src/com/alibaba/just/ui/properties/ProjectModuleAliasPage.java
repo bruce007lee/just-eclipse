@@ -122,7 +122,7 @@ public class ProjectModuleAliasPage extends PropertyPage{
 		viewer.getTable().setLinesVisible(true); //显示表格线 
 
 		GridData gd = new GridData(GridData.FILL_BOTH);	
-		gd.heightHint=400;
+		gd.heightHint=480;
 		viewer.getTable().setLayoutData(gd);
 
 		Composite btnbar = createDefaultComposite(composite,1,GridData.END);
