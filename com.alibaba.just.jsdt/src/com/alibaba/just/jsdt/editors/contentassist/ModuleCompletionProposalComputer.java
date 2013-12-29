@@ -28,7 +28,7 @@ import com.alibaba.just.ui.util.PreferenceUtil;
 
 public class ModuleCompletionProposalComputer implements IJavaCompletionProposalComputer{
 
-	private static final String WORD_DELIMITER = "\"\'\t\n\r";
+	private static final String WORD_DELIMITER = "\"\'\t\n\r ";
 
 	private static final String PROPOSALS_ALIAS_TYPE = ModuleCompletionProposal.PROPOSALS_ALIAS_TYPE;
 	private static final String PROPOSALS_NORMAL_TYPE = ModuleCompletionProposal.PROPOSALS_NORMAL_TYPE;
