@@ -28,7 +28,7 @@ import com.alibaba.just.ui.util.PreferenceUtil;
 
 public class ModuleCompletionProposalComputer implements IJavaCompletionProposalComputer{
 
-	private static final String SEP_REG = "[\n]";
+	private static final String WORD_DELIMITER = "\"\'\t\n\r";
 
 	private static final String PROPOSALS_ALIAS_TYPE = ModuleCompletionProposal.PROPOSALS_ALIAS_TYPE;
 	private static final String PROPOSALS_NORMAL_TYPE = ModuleCompletionProposal.PROPOSALS_NORMAL_TYPE;
@@ -216,10 +216,10 @@ public class ModuleCompletionProposalComputer implements IJavaCompletionProposal
 		while(pos>=0){
 			try {
 				ch = document.getChar(pos);
-				if(ch=='\"' || ch=='\''){
+				if(WORD_DELIMITER.indexOf(ch)>=0){
 					return document.get(pos+1,endPos-pos-1);
 				}
-			} catch (BadLocationException e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 			pos--;
