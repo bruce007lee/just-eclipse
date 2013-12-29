@@ -162,7 +162,7 @@ public class ModuleCompletionProposalComputer implements IJavaCompletionProposal
 				tmp =  prop[0].toLowerCase();
 				if(prefixStr!=null){
 					prefixLen = prefixStr.length();
-					isPrefixMatch = prefixLen>0 &&  tmp.indexOf((currentText==null ? prefixStr : prefixStr + currentText).toLowerCase())>=0;
+					isPrefixMatch = prefixLen>0 &&  tmp.indexOf((currentText==null ? prefixStr : prefixStr + currentText).toLowerCase())==0;
 				}
 
 				if(currentText==null || isMatch(tmp,currentText) || isPrefixMatch){

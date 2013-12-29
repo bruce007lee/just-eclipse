@@ -715,7 +715,12 @@ public class ModuleView extends ViewPart {
 								clearView(false);									
 								self.vcp.invisibleRoot.addChildren(roots);
 								self.viewer.refresh();
-								self.viewer.expandAll();
+								viewer.getTree().setRedraw(false);
+								try {
+								  viewer.expandAll();
+								} finally {
+								  viewer.getTree().setRedraw(true); 
+								}
 							}								
 						});
 					}
@@ -743,7 +748,12 @@ public class ModuleView extends ViewPart {
 							TreeNode root = new TreeNode("ERROR:"+error);
 							self.vcp.invisibleRoot.addChild(root);
 							self.viewer.refresh();
-							self.viewer.expandAll();
+							viewer.getTree().setRedraw(false);
+							try {
+							  viewer.expandAll();
+							} finally {
+							  viewer.getTree().setRedraw(true); 
+							}
 						}
 					});
 				}
