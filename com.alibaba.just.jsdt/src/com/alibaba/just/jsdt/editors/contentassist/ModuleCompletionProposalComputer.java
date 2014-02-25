@@ -1,6 +1,7 @@
 package com.alibaba.just.jsdt.editors.contentassist;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
@@ -230,12 +231,10 @@ public class ModuleCompletionProposalComputer implements IJavaCompletionProposal
 
 	public List computeContextInformation(
 			ContentAssistInvocationContext context, IProgressMonitor monitor) {
-		// TODO Auto-generated method stub
-		return null;
+		return Collections.EMPTY_LIST;
 	}
 
 	public String getErrorMessage() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
+ 
    <extension
          id="ModuleCompletionProposalComputer"
          name="Just Module Proposals"
@@ -24,5 +25,32 @@
       <proposalCategory
             icon="icons/sample.gif">
       </proposalCategory>
+   </extension>
+   <extension
+         id="JustWordsProposalComputer"
+         name="Just Words Proposals"
+         point="org.eclipse.wst.jsdt.ui.javaCompletionProposalComputer">
+      <javaCompletionProposalComputer
+            activate="true" 
+            categoryId="com.alibaba.just.jsdt.justWordsProposals"
+            class="com.alibaba.just.jsdt.editors.contentassist.WordsCompletionProposalComputer">
+         <partition
+               type="__dftl_partition_content_type">
+         </partition>
+      </javaCompletionProposalComputer>
+   </extension>
+   <extension
+         id="justWordsProposals"
+         name="Just Words Proposals"
+         point="org.eclipse.wst.jsdt.ui.javaCompletionProposalComputer">
+      <proposalCategory
+            icon="icons/sample.gif">
+      </proposalCategory>
+   </extension>
+   <extension
+         point="org.eclipse.ui.startup">
+      <startup
+            class="com.alibaba.just.jsdt.Startup">
+      </startup>
    </extension>
 </plugin>
