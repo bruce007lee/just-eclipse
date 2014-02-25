@@ -48,6 +48,7 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.editors.text.IEncodingSupport;
 import org.eclipse.ui.ide.FileStoreEditorInput;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.part.FileEditorInput;
@@ -959,8 +960,19 @@ public class ModuleView extends ViewPart {
 
 						if (fileToOpen.exists() && fileToOpen.isFile()) {
 							IFileStore fileStore = EFS.getLocalFileSystem().getStore(fileToOpen.toURI());
-							try {									
-								IDE.openEditorOnFileStore(page, fileStore);
+							try {
+								IEditorPart  editPart = IDE.openEditorOnFileStore(page, fileStore);
+								
+								//fix 显示非workspace文件编码问题,目前先使用justeclipse中设置的编码
+								//TODO 需要对lib库添加编码定义配置
+								if(editPart !=null && FileStoreEditorInput.class.isInstance(editPart.getEditorInput())){
+									IEncodingSupport encodingSupport= 
+										(IEncodingSupport)editPart.getAdapter(IEncodingSupport.class);
+									if(encodingSupport!=null){
+										encodingSupport.setEncoding(PreferenceUtil.getFileCharset());
+									}
+								}
+								
 							} catch (Exception e ) {
 								//e.printStackTrace();
 							}
