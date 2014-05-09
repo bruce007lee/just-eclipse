@@ -37,7 +37,7 @@ public class CacheRemoveListener implements IResourceChangeListener {
 
 				//remove lib cache time stamp
 				IResource p = delta.getResource();
-				while(p!=null){
+				while(p!=null && p.exists()){
 					p.setPersistentProperty(PluginConstants.CACHE_QUALIFIEDNAME, null);//clear cache stamp
 					p = p.getParent();
 				}
