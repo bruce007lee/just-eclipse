@@ -3,6 +3,11 @@
  */
 package com.alibaba.just.ui.util;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+
+import com.alibaba.just.Activator;
+
 /**
  * @author bruce.liz
  *
@@ -23,6 +28,11 @@ public class LogUtil {
     
     public static void log(Class clazz,Exception e){
     	System.out.println("["+clazz.getName()+"]"+e.toString());
+	}
+    
+    public static void error(Exception e){
+    	IStatus status = new Status(IStatus.ERROR,Activator.PLUGIN_ID,e.getMessage(),e);
+		Activator.getDefault().getLog().log(status);
 	}
 	
 }

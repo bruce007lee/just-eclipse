@@ -29,10 +29,12 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
 
+import com.alibaba.just.Activator;
 import com.alibaba.just.api.bean.Module;
 import com.alibaba.just.template.ModuleTemplate;
 import com.alibaba.just.ui.templates.TemplateConstants;
 import com.alibaba.just.ui.templates.TemplateManager;
+import com.alibaba.just.ui.util.LogUtil;
 import com.alibaba.just.ui.util.PreferenceUtil;
 
 /**
@@ -115,6 +117,9 @@ public class ModuleNewWizard extends Wizard implements INewWizard {
 		} catch (InterruptedException e) {
 			return false;
 		} catch (InvocationTargetException e) {
+			
+			LogUtil.error(e);
+			
 			Throwable realException = e.getTargetException();
 			MessageDialog.openError(getShell(), "Error", realException.getMessage());
 			return false;
