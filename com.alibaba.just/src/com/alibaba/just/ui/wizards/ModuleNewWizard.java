@@ -111,7 +111,7 @@ public class ModuleNewWizard extends Wizard implements INewWizard {
 			}
 		};
 		try {
-			getContainer().run(true, false, op);
+			getContainer().run(false, true, op);
 		} catch (InterruptedException e) {
 			return false;
 		} catch (InvocationTargetException e) {
