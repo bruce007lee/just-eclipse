@@ -23,6 +23,7 @@ import org.eclipse.wst.jsdt.ui.text.java.ContentAssistInvocationContext;
 import org.eclipse.wst.jsdt.ui.text.java.IJavaCompletionProposalComputer;
 
 import com.alibaba.just.api.bean.Module;
+import com.alibaba.just.jsdt.PluginConstants;
 import com.alibaba.just.jsdt.util.ImageManager;
 import com.alibaba.just.ui.util.PluginResourceUtil;
 import com.alibaba.just.ui.util.PreferenceUtil;
@@ -156,7 +157,12 @@ public class ModuleCompletionProposalComputer implements IJavaCompletionProposal
 		boolean isPrefixMatch = false;
 		int  prefixLen = 0,replacementOffset=0,replacementLength=0;
 		String tmp = null;
+		int size = 0;
 		for(int i = 0,l=proposals.size();i<l;i++ ){
+			//限制下一次显示的提示个数
+			if(size>=PluginConstants.PROPOSAL_MAX_SIZE){
+				break;
+			}
 			prop = proposals.get(i);
 			try{
 				
@@ -186,6 +192,7 @@ public class ModuleCompletionProposalComputer implements IJavaCompletionProposal
 						completionProposalList.add(new ModuleCompletionProposal(prop[0], replacementOffset, replacementLength, prop[0].length()
 								,ImageManager.getImage(ImageManager.IMG_MODULE_ICON),isPrefixMatch?PROPOSALS_NORMAL_TYPE_LV1:prop[1]));
 					}
+					size++;
 				}
 			}catch(Exception e){
 				e.printStackTrace();

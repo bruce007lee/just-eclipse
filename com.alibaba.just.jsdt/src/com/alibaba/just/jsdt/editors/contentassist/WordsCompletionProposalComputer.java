@@ -14,6 +14,8 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.wst.jsdt.ui.text.java.ContentAssistInvocationContext;
 import org.eclipse.wst.jsdt.ui.text.java.IJavaCompletionProposalComputer;
 
+import com.alibaba.just.jsdt.PluginConstants;
+
 public class WordsCompletionProposalComputer implements IJavaCompletionProposalComputer{
 
 	private static final String PROPOSALS_NORMAL_TYPE = ModuleCompletionProposal.PROPOSALS_NORMAL_TYPE;
@@ -98,7 +100,12 @@ public class WordsCompletionProposalComputer implements IJavaCompletionProposalC
 		int  prefixLen = 0,replacementOffset=0,replacementLength=0;
 		String tmp = null;
 		String tmp2 = null;
+		int size = 0;
 		for(int i = 0,l=proposals.size();i<l;i++ ){
+			//限制下一次显示的提示个数
+			if(size>=PluginConstants.PROPOSAL_MAX_SIZE){
+				break;
+			}
 			prop = proposals.get(i);
 			try{
 
@@ -121,6 +128,7 @@ public class WordsCompletionProposalComputer implements IJavaCompletionProposalC
 					}
 					completionProposalList.add(new ModuleCompletionProposal(prop, replacementOffset, replacementLength , prop.length()
 							,null,isPrefixMatch?PROPOSALS_NORMAL_TYPE_LV1:PROPOSALS_NORMAL_TYPE));
+					size++;
 				}
 			}catch(Exception e){
 				e.printStackTrace();
