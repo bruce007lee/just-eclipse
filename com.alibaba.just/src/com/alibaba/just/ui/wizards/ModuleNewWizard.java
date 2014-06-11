@@ -233,6 +233,7 @@ public class ModuleNewWizard extends Wizard implements INewWizard {
 			b = tpl.getParseContent().getBytes(charset);
 			tpl.destroy();
 		} catch (Exception e) {
+			LogUtil.error(e);
 			String error = e.getMessage();
 			if(error==null || error.trim().length()==0){
 				error = e.toString();
@@ -241,6 +242,7 @@ public class ModuleNewWizard extends Wizard implements INewWizard {
 					this.getShell(),
 					"Error",
 					error);  
+			b=new byte[0];
 		} 
 
 		return new ByteArrayInputStream(b);
