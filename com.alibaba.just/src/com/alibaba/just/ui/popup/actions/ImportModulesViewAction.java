@@ -35,6 +35,7 @@ import com.alibaba.just.template.ModuleTemplate;
 import com.alibaba.just.ui.dialogs.ListSelectDialog;
 import com.alibaba.just.ui.templates.TemplateConstants;
 import com.alibaba.just.ui.templates.TemplateManager;
+import com.alibaba.just.ui.util.LogUtil;
 import com.alibaba.just.ui.util.PluginResourceUtil;
 import com.alibaba.just.ui.util.PreferenceUtil;
 import com.alibaba.just.ui.util.UIUtil;
@@ -359,6 +360,7 @@ public class ImportModulesViewAction implements IEditorActionDelegate,IObjectAct
 			}
 
 		} catch (Exception e) {
+			LogUtil.error(e);
 			String error = e.getMessage();
 			if(error==null || error.trim().length()==0){
 				error = e.toString();

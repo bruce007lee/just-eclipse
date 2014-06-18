@@ -20,9 +20,11 @@ import com.alibaba.just.ui.util.TemplateUtil;
  *
  */
 public class ModuleTemplate {
-	
+
+	private static boolean isGlobalInit = false;
+
 	public static final String DEFAULT_TPL = "default.tpl";
-	
+
 	public static final String DEFAULT_DATETIME_FORMART = "yyyy-MM-dd";
 
 	private String moduleName = null;
@@ -60,7 +62,7 @@ public class ModuleTemplate {
 	public String getParseContent() throws Exception{
 		return getParseContent(null);
 	}
-	
+
 	private String getRequiredModuleParamsStr(List<Module> requiredModules){
 		StringBuffer sb = new StringBuffer();
 		if(requiredModules!=null){
@@ -73,7 +75,7 @@ public class ModuleTemplate {
 		}
 		return sb.toString();
 	}
-	
+
 	private String getParamName(String moduleName,int idx){
 		if(moduleName ==null){
 			return "";
@@ -82,25 +84,25 @@ public class ModuleTemplate {
 		if(moduleName.equalsIgnoreCase("jquery")){
 			return "$";
 		}
-		
+
 		String[] segs = moduleName.split("/");		
 		String name = segs[segs.length-1];
-		
+
 		if(name.matches("[\\d\\.]*")){
 			return "Module"+idx;
 		}
-		
+
 		String[] name_segs = name.split("[\\.\\-_]");
-		
+
 		StringBuffer sb = new StringBuffer();
-		
+
 		for(String nseg:name_segs){
 			if(nseg.length()>0){
-		      sb.append(nseg.substring(0, 1).toUpperCase());
-		      sb.append(nseg.substring(1, nseg.length()));
+				sb.append(nseg.substring(0, 1).toUpperCase());
+				sb.append(nseg.substring(1, nseg.length()));
 			}
 		}
-		
+
 		return sb.toString();
 	}
 
@@ -131,10 +133,14 @@ public class ModuleTemplate {
 			if(tpl!=null){
 				content = tpl;
 			}
-			
-			//Velocity.init("velocity.properties");
 
-			Velocity.init();
+			if(!isGlobalInit){
+				//only need run once
+				//Velocity.init("velocity.properties");
+				Velocity.setProperty(Velocity.RUNTIME_LOG_LOGSYSTEM, new TemplateLogger() );
+				Velocity.init();
+				isGlobalInit = true;
+			}
 
 			/*
 			 *  Make a context object and populate with the data.  This
@@ -176,7 +182,7 @@ public class ModuleTemplate {
 				if(sb!=null){sb.close();};
 				if(writer!=null){writer.close();};
 			}catch(Exception e1){
-				
+
 			}
 			throw e;
 		}

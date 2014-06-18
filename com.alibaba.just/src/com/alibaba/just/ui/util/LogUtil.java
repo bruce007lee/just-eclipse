@@ -31,7 +31,7 @@ public class LogUtil {
 	}
     
     public static void error(Exception e){
-    	IStatus status = new Status(IStatus.ERROR,Activator.PLUGIN_ID,e.getMessage(),e);
+    	IStatus status = new Status(IStatus.ERROR,Activator.PLUGIN_ID,e.toString(),e);
 		Activator.getDefault().getLog().log(status);
 	}
 	
