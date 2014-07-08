@@ -29,7 +29,6 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
 
-import com.alibaba.just.Activator;
 import com.alibaba.just.api.bean.Module;
 import com.alibaba.just.template.ModuleTemplate;
 import com.alibaba.just.ui.templates.TemplateConstants;

@@ -27,6 +27,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 				PreferenceConstants.DEFAULT_SHOW_MATCH_START);
 		store.setDefault(PreferenceConstants.P_SHOW_MATCH_PARTIAL,
 				PreferenceConstants.DEFAULT_SHOW_MATCH_PARTIAL);
+		store.setDefault(PreferenceConstants.P_DEFINE_KEY_WORD, PreferenceConstants.DEFAULT_DEFINE_KEY_WORD);
 	}
 
 }

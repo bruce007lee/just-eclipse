@@ -20,22 +20,44 @@ import com.alibaba.just.api.bean.Module;
 import com.alibaba.just.util.FileUtil;
 
 public class RhinoModuleParser extends AbstractModuleParser {
+	
+	//private static final String DEFINE_KEY_REG = "^(\\w+\\.)*(define)$";
+	
+	private String defineKeyWord=null;
+	
+	public RhinoModuleParser(String charset,String defineKeyWord){
+		if(this.charset!=null){
+		   this.charset = charset;	
+		}
+		if(defineKeyWord==null){
+			defineKeyWord = DEFINE_KEY_REG;
+		}
+		this.setDefineKeyWord(defineKeyWord);
+	}
+	
 	/**
 	 * 
 	 */
 	public RhinoModuleParser() {
-		super();
+		this(null,null);
 	}
 
 	/**
 	 * @param charset
 	 */
 	public RhinoModuleParser(String charset) {
-		super(charset);
+		this(charset,null);
 	}
 
-	private static final String DEFINE_KEY_REG = "^(\\w+\\.)*define$";
-
+	/*
+	 * (non-Javadoc)
+	 * @see com.alibaba.just.api.parser.ModuleParser#setDefineKeyWord(java.lang.String)
+	 */
+	public void setDefineKeyWord(String str){
+		if(str!=null && str.length()>0){
+			this.defineKeyWord = "^(\\w+\\.)*("+str+")$";
+		}
+	}
 
 	/* (non-Javadoc)
 	 * @see com.alibaba.just.api.parser.ModuleParser#getModules(java.io.File, int)
@@ -71,7 +93,7 @@ public class RhinoModuleParser extends AbstractModuleParser {
 							fc = this.getFirstFunctionCall(fc);
 							AstNode nameNode = fc.getTarget();
 							//System.out.println("NAME:"+n.getIdentifier());	
-							if(Pattern.matches(DEFINE_KEY_REG,nameNode.toSource().trim())){
+							if(Pattern.matches(defineKeyWord,nameNode.toSource().trim())){
 
 								List<AstNode> args = fc.getArguments();
 								//校验3参数普通模块

@@ -24,7 +24,6 @@ import com.alibaba.just.api.bean.Module;
 import com.alibaba.just.ui.dialogs.ModuleSelectionDialog;
 import com.alibaba.just.ui.util.PreferenceUtil;
 import com.alibaba.just.ui.util.UIUtil;
-import com.alibaba.just.ui.viewmodel.ViewItem;
 
 /**
  * 

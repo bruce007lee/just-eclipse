@@ -3,7 +3,6 @@ package com.alibaba.just.ui.util;
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -78,7 +77,7 @@ public class PluginResourceUtil {
 	 * @return 根据当前插件的设置生成ModuleParser
 	 */
 	public static ModuleParser getModuleParser(){
-		return ParserFactory.getModuleParser(PreferenceUtil.getParserEngineType(),PreferenceUtil.getFileCharset());
+		return ParserFactory.getModuleParser(PreferenceUtil.getParserEngineType(),PreferenceUtil.getFileCharset(),PreferenceUtil.getDefineKeyWord());
 	}
 
 	/**

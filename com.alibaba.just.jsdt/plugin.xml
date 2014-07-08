@@ -48,6 +48,27 @@
       </proposalCategory>
    </extension>
    <extension
+         id="JSDTJavascriptProposalComputer"
+         name="Just Javascript lib Proposals (beta)"
+         point="org.eclipse.wst.jsdt.ui.javaCompletionProposalComputer">
+      <javaCompletionProposalComputer
+            activate="true" 
+            categoryId="com.alibaba.just.jsdt.justJSDTProposals"
+            class="com.alibaba.just.jsdt.editors.contentassist.JSDTJavascriptCompletionProposalComputer">
+         <partition
+               type="__dftl_partition_content_type">
+         </partition>
+      </javaCompletionProposalComputer>
+   </extension>
+   <extension
+         id="JSDTJavascriptWordsProposals"
+         name="Just Javascript lib Proposals (beta)"
+         point="org.eclipse.wst.jsdt.ui.javaCompletionProposalComputer">
+      <proposalCategory
+            icon="icons/sample.gif">
+      </proposalCategory>
+   </extension>
+   <extension
          point="org.eclipse.ui.startup">
       <startup
             class="com.alibaba.just.jsdt.Startup">

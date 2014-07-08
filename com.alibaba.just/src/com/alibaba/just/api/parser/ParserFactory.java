@@ -14,17 +14,27 @@ public class ParserFactory {
 	
    private ParserFactory(){};
    
+   /**
+    * 
+    * @deprecated
+    * @param charset
+    * @return
+    */
    public static ModuleParser getModuleParser(String charset){
-	   return getModuleParser(TYPE_DEFAULT,charset);
+	   return getModuleParser(TYPE_DEFAULT,charset,ModuleParser.DEFINE_KEY_REG);
    }
    
-   public static ModuleParser getModuleParser(int type,String charset){
+   public static ModuleParser getModuleParser(String charset,String key){
+	   return getModuleParser(TYPE_DEFAULT,charset,key);
+   }
+   
+   public static ModuleParser getModuleParser(int type,String charset,String key){
 	   if(type==TYPE_SIMPLE){
-		   return new SimpleModuleParser(charset);
+		   return new SimpleModuleParser(charset,key);
 	   }else if(type==TYPE_RHINO){
-		   return new RhinoModuleParser(charset);
+		   return new RhinoModuleParser(charset,key);
 	   }else{
-		   return new RhinoModuleParser(charset);
+		   return new RhinoModuleParser(charset,key);
 	   }
    }
    

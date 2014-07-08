@@ -564,6 +564,19 @@ public class PreferenceUtil {
 		}
 		return charset;
 	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public static String getDefineKeyWord(){
+		String key = PreferenceUtil.getPluginPreferenceStore().getString(PreferenceConstants.P_DEFINE_KEY_WORD);
+		if(key==null || key.length()<=0){
+			key = PreferenceConstants.DEFAULT_DEFINE_KEY_WORD;
+		}
+		//key = key.trim();
+		return key;
+	}
 
 	/**
 	 * 

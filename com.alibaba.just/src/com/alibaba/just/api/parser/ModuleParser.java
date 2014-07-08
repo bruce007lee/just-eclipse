@@ -16,6 +16,7 @@ import com.alibaba.just.api.exception.ModuleParseException;
  */
 public interface ModuleParser {
 
+	public static final String DEFINE_KEY_REG = "define";
 	public static final String DEFAULT_CHARSET = "GBK";
 	public static final int MODULE_TYPE_NORMAL = 0;
 	public static final int MODULE_TYPE_ANONYMOUS = 1;
@@ -150,5 +151,7 @@ public interface ModuleParser {
 	public ExecutorService getThreadPool();
 
 	public void setThreadPool(ExecutorService threadPool);
+	
+	public void setDefineKeyWord(String str);
 
 }

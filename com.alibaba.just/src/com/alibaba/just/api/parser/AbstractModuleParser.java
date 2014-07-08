@@ -25,7 +25,7 @@ public abstract class AbstractModuleParser implements ModuleParser{
 	}
 
 	public AbstractModuleParser(){}
-
+	
 	/**
 	 * 处理folder中文件
 	 * @param file
