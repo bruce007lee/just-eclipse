@@ -121,8 +121,8 @@ public class JSDTJavascriptCompletionProposalComputer implements IJavaCompletion
 			proposals = new Vector<String[]>();
 
 			IJavaScriptProject p = JavaScriptCore.create(project);
-            
-            /*
+
+			/*
             TypeNameMatchRequestor requestor= new TypeNameMatchRequestor(){
                     @Override
                     public void acceptTypeNameMatch(TypeNameMatch match) {
@@ -157,25 +157,27 @@ public class JSDTJavascriptCompletionProposalComputer implements IJavaCompletion
                     e.printStackTrace();
             }*/
 
-            IPackageFragment[] pels = null;
-            try {
-                    pels = p.getPackageFragments();
-                    for(IPackageFragment pel:pels){
-                            IJavaScriptUnit[] uels = pel.getJavaScriptUnits();
-                            for(IJavaScriptUnit uel:uels){
-                                    IType[] tels = uel.getAllTypes();
-                                    for(IType tel:tels){
-                                            IJavaScriptElement[] jels = tel.getChildren();
-                                            for(IJavaScriptElement jel:jels){
-                                                    proposals.add(new String[]{jel.getElementName(),jel.getElementName()+" - "+tel.getElementName()});
-                                            }
-                                    }
-                            }
-                    }
-            } catch (JavaScriptModelException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-            }
+			IPackageFragment[] pels = null;
+			String name = null;
+			try {
+				pels = p.getPackageFragments();
+				for(IPackageFragment pel:pels){
+					IJavaScriptUnit[] uels = pel.getJavaScriptUnits();
+					for(IJavaScriptUnit uel:uels){
+						IType[] tels = uel.getAllTypes();
+						for(IType tel:tels){
+							IJavaScriptElement[] jels = tel.getChildren();
+							for(IJavaScriptElement jel:jels){
+								name = jel.getElementName() + "()";
+								proposals.add(new String[]{name,name+" - "+tel.getElementName()});
+							}
+						}
+					}
+				}
+			} catch (JavaScriptModelException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 
 			listCache = proposals;
 		}else{
