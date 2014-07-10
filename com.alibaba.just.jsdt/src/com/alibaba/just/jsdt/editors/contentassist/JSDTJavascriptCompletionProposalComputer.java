@@ -11,12 +11,16 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.wst.jsdt.core.IClassFile;
+import org.eclipse.wst.jsdt.core.IField;
+import org.eclipse.wst.jsdt.core.IFunction;
 import org.eclipse.wst.jsdt.core.IJavaScriptElement;
 import org.eclipse.wst.jsdt.core.IJavaScriptProject;
 import org.eclipse.wst.jsdt.core.IJavaScriptUnit;
@@ -28,16 +32,17 @@ import org.eclipse.wst.jsdt.ui.text.java.ContentAssistInvocationContext;
 import org.eclipse.wst.jsdt.ui.text.java.IJavaCompletionProposalComputer;
 
 import com.alibaba.just.jsdt.PluginConstants;
+import com.alibaba.just.jsdt.util.ImageManager;
+import com.alibaba.just.jsdt.util.ProposalUtil;
 
 public class JSDTJavascriptCompletionProposalComputer implements IJavaCompletionProposalComputer{
 
-	private static final String PROPOSALS_NORMAL_TYPE = ModuleCompletionProposal.PROPOSALS_NORMAL_TYPE;
-	private static final String PROPOSALS_NORMAL_TYPE_LV1 = ModuleCompletionProposal.PROPOSALS_NORMAL_TYPE_LV1;
+	private static final String SYSTEM_LIB_PATH = "/org.eclipse.wst.jsdt.core/libraries";
 
 	private boolean isStart = false;
 	private int startOffset = -1;
 
-	private List<String[]> listCache = null;
+	private List<Object[]> listCache = null;
 
 	public void sessionStarted() {
 		//System.out.println("sessionStarted");
@@ -52,7 +57,6 @@ public class JSDTJavascriptCompletionProposalComputer implements IJavaCompletion
 		}
 	}
 
-	@SuppressWarnings("static-access")
 	public List computeCompletionProposals(
 			ContentAssistInvocationContext context, IProgressMonitor monitor) {
 
@@ -112,13 +116,13 @@ public class JSDTJavascriptCompletionProposalComputer implements IJavaCompletion
 
 		//System.out.println("currentText:"+currentText + " prefixStr:"+prefixStr);
 
-		List<String[]> proposals = null;
+		List<Object[]> proposals = null;
 
 
 		//缓存结果
 		if(listCache==null){
 
-			proposals = new Vector<String[]>();
+			proposals = new Vector<Object[]>();
 
 			IJavaScriptProject p = JavaScriptCore.create(project);
 
@@ -168,11 +172,39 @@ public class JSDTJavascriptCompletionProposalComputer implements IJavaCompletion
 						for(IType tel:tels){
 							IJavaScriptElement[] jels = tel.getChildren();
 							for(IJavaScriptElement jel:jels){
-								name = jel.getElementName() + "()";
-								proposals.add(new String[]{name,name+" - "+tel.getElementName()});
+								//doc = ProposalUtil.getJavadocHtml(jel);
+								if(IFunction.class.isInstance(jel)){
+									//name = jel.getElementName() + "()";
+									name = ProposalUtil.createMethodProposalLabel((IFunction)jel);
+								}else{
+									name = jel.getElementName();
+								}
+								proposals.add(new Object[]{name,name+" - "+tel.getElementName(),jel});
 							}
 						}
 					}
+
+					IClassFile[] clfs = pel.getClassFiles();
+					for(IClassFile clf:clfs){
+						String path = clf.getPath().toFile().getParentFile().getAbsolutePath();
+						if(path!=null && !path.replace('\\', '/').endsWith(SYSTEM_LIB_PATH) ){
+							IType[] tels = clf.getTypes();
+							for(IType tel:tels){
+								IJavaScriptElement[] jels = tel.getChildren();
+								for(IJavaScriptElement jel:jels){
+									//doc = ProposalUtil.getJavadocHtml(jel);
+									if(IFunction.class.isInstance(jel)){
+										//name = jel.getElementName() + "()";
+										name = ProposalUtil.createMethodProposalLabel((IFunction)jel);
+									}else{
+										name = jel.getElementName();
+									}
+									proposals.add(new Object[]{name,name+" - "+tel.getElementName(),jel});
+								}
+							}
+						}
+					}
+
 				}
 			} catch (JavaScriptModelException e) {
 				// TODO Auto-generated catch block
@@ -184,7 +216,7 @@ public class JSDTJavascriptCompletionProposalComputer implements IJavaCompletion
 			proposals = listCache;//如果有cache取cache
 		}
 
-		String[] prop = null;
+		Object[] prop = null;
 		boolean isPrefixMatch = false;
 		int  prefixLen = 0,replacementOffset=0,replacementLength=0;
 		String tmp = null;
@@ -198,7 +230,7 @@ public class JSDTJavascriptCompletionProposalComputer implements IJavaCompletion
 			prop = proposals.get(i);
 			try{
 
-				tmp =  prop[0].toLowerCase();
+				tmp =  ((String)prop[0]).toLowerCase();
 				if(prefixStr!=null){
 					prefixLen = prefixStr.length();
 					tmp2 = (currentText==null ? prefixStr : prefixStr + currentText);
@@ -215,8 +247,8 @@ public class JSDTJavascriptCompletionProposalComputer implements IJavaCompletion
 						replacementOffset = startOffset;
 						replacementLength = offset-startOffset;
 					}
-					completionProposalList.add(new ModuleCompletionProposal(prop[0], replacementOffset, replacementLength , prop[0].length()
-							,null,prop[1],null,null," test2"));
+					completionProposalList.add(new JavascriptCompletionProposal((String)prop[0], replacementOffset, replacementLength ,((String)prop[0]).length()
+							,getIcon((IJavaScriptElement)prop[2]),(String)prop[1],null,(IJavaScriptElement)prop[2],null));
 					size++;
 				}
 			}catch(Exception e){
@@ -226,6 +258,15 @@ public class JSDTJavascriptCompletionProposalComputer implements IJavaCompletion
 		}
 
 		return completionProposalList;
+	}
+
+	private Image getIcon(IJavaScriptElement jel){
+		if(IFunction.class.isInstance(jel)){
+			return ImageManager.getImage(ImageManager.IMG_METHOD_PUBLIC_OBJ);
+		}else if(IField.class.isInstance(jel)){
+			return ImageManager.getImage(ImageManager.IMG_FIELD_PUBLIC_OBJ);
+		}
+		return null;
 	}
 
 	/**

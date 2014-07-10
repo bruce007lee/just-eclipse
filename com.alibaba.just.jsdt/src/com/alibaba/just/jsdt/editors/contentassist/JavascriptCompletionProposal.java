@@ -6,13 +6,15 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.wst.jsdt.core.IJavaScriptElement;
 import org.eclipse.wst.jsdt.ui.text.java.IJavaCompletionProposal;
 
-public class WordsCompletionProposal implements IJavaCompletionProposal {
+import com.alibaba.just.jsdt.util.ProposalUtil;
 
-	public static final String PROPOSALS_NORMAL_TYPE = "M";
-	public static final String PROPOSALS_NORMAL_TYPE_LV1 = "M1";
+public class JavascriptCompletionProposal implements IJavaCompletionProposal {
 
+	private static final String LEFT_PARENTHESE = "(";
+	private static final String RIGHT_PARENTHESE = ")";
 
 	/** The string to be displayed in the completion proposal popup. */
 	private String fDisplayString;
@@ -29,7 +31,8 @@ public class WordsCompletionProposal implements IJavaCompletionProposal {
 	/** The context information of this proposal. */
 	private IContextInformation fContextInformation;
 	/** The additional info of this proposal. */
-	private String fAdditionalProposalInfo;
+	//private String fAdditionalProposalInfo;
+	private IJavaScriptElement fJavaScriptElement;
 
 	private String fType;
 
@@ -42,7 +45,7 @@ public class WordsCompletionProposal implements IJavaCompletionProposal {
 	 * @param replacementLength the length of the text to be replaced
 	 * @param cursorPosition the position of the cursor following the insert relative to replacementOffset
 	 */
-	public WordsCompletionProposal(String replacementString, int replacementOffset, int replacementLength, int cursorPosition) {
+	public JavascriptCompletionProposal(String replacementString, int replacementOffset, int replacementLength, int cursorPosition) {
 		this(replacementString, replacementOffset, replacementLength, cursorPosition, null, null, null, null,null);
 	}
 
@@ -55,7 +58,7 @@ public class WordsCompletionProposal implements IJavaCompletionProposal {
 	 * @param img
 	 * @param type
 	 */
-	public WordsCompletionProposal(String replacementString, int replacementOffset, int replacementLength, int cursorPosition,Image img,String type) {
+	public JavascriptCompletionProposal(String replacementString, int replacementOffset, int replacementLength, int cursorPosition,Image img,String type) {
 		this(replacementString, replacementOffset, replacementLength, cursorPosition, img, null, null, null,type);
 	}
 
@@ -71,7 +74,7 @@ public class WordsCompletionProposal implements IJavaCompletionProposal {
 	 * @param contextInformation the context information associated with this proposal
 	 * @param additionalProposalInfo the additional information associated with this proposal
 	 */
-	public WordsCompletionProposal(String replacementString, int replacementOffset, int replacementLength, int cursorPosition, Image image, String displayString, IContextInformation contextInformation, String additionalProposalInfo,String type) {
+	public JavascriptCompletionProposal(String replacementString, int replacementOffset, int replacementLength, int cursorPosition, Image image, String displayString, IContextInformation contextInformation, IJavaScriptElement javaScriptElement,String type) {
 		Assert.isNotNull(replacementString);
 		Assert.isTrue(replacementOffset >= 0);
 		Assert.isTrue(replacementLength >= 0);
@@ -84,7 +87,7 @@ public class WordsCompletionProposal implements IJavaCompletionProposal {
 		fImage= image;
 		fDisplayString= displayString;
 		fContextInformation= contextInformation;
-		fAdditionalProposalInfo= additionalProposalInfo;
+		fJavaScriptElement= javaScriptElement;
 		fType = type;
 	}
 
@@ -94,7 +97,7 @@ public class WordsCompletionProposal implements IJavaCompletionProposal {
 	public void apply(IDocument document) {
 		try {
 			document.replace(fReplacementOffset, fReplacementLength, fReplacementString);
-		} catch (BadLocationException x) {
+		} catch (Exception x) {
 			// ignore
 		}
 	}
@@ -103,6 +106,18 @@ public class WordsCompletionProposal implements IJavaCompletionProposal {
 	 * @see ICompletionProposal#getSelection(IDocument)
 	 */
 	public Point getSelection(IDocument document) {
+		try {
+			String str = document.get(fReplacementOffset, fCursorPosition);
+
+			int start = str.indexOf(LEFT_PARENTHESE);
+			int end = str.indexOf(RIGHT_PARENTHESE);
+
+			if(start>0 && end >0 && end>start){
+				return new Point(fReplacementOffset + start + 1, end - start - 1);
+			}
+
+		} catch (BadLocationException e) {
+		}
 		return new Point(fReplacementOffset + fCursorPosition, 0);
 	}
 
@@ -133,14 +148,22 @@ public class WordsCompletionProposal implements IJavaCompletionProposal {
 	 * @see ICompletionProposal#getAdditionalProposalInfo()
 	 */
 	public String getAdditionalProposalInfo() {
-		return fAdditionalProposalInfo;
+		if(fJavaScriptElement!=null){
+			return ProposalUtil.getJavadocHtml(fJavaScriptElement);
+		}
+		return null;
+	}
+
+	public int getReplacementOffset() {
+		return fReplacementOffset;
+	}
+
+	public int getCursorPosition() {
+		return fCursorPosition;
 	}
 
 	public int getRelevance() {
-		if(PROPOSALS_NORMAL_TYPE_LV1.equals(fType)){
-			return 1;
-		}else{
-			return 0;
-		}
+		return -10;
 	}
+
 }

@@ -13,6 +13,8 @@ public class ImageManager {
 	public static final String IMG_MODULE_ICON = "img_module_icon";
 	public static final String IMG_ALIAS_MODULE_ICON = "img_alias_module_icon";
 	public static final String IMG_PACKAGE_OBJ = "img_package_obj";
+	public static final String IMG_METHOD_PUBLIC_OBJ = "img_method_pub_obj";
+	public static final String IMG_FIELD_PUBLIC_OBJ = "img_field_pub_obj";
 		
 	private static ImageRegistry imageRegistry = null;
 	private static URL baseURL = null;
@@ -24,6 +26,8 @@ public class ImageManager {
 		ImageManager.putImage(IMG_MODULE_ICON, "icons/module.gif");
 		ImageManager.putImage(IMG_ALIAS_MODULE_ICON, "icons/alias_module.gif");
 		ImageManager.putImage(IMG_PACKAGE_OBJ, "icons/package_obj.gif");
+		ImageManager.putImage(IMG_METHOD_PUBLIC_OBJ, "icons/method_pub_obj.gif");
+		ImageManager.putImage(IMG_FIELD_PUBLIC_OBJ, "icons/field_pub_obj.gif");
 	}
 	
 	public static void dispose(){

@@ -3,13 +3,12 @@ package com.alibaba.just.jsdt.editors.contentassist;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.wst.jsdt.ui.text.java.IJavaCompletionProposal;
 
-public class ModuleCompletionProposal implements ICompletionProposal,IJavaCompletionProposal {
+public class ModuleCompletionProposal implements IJavaCompletionProposal {
 
 	public static final String PROPOSALS_ALIAS_TYPE = "A";
 	public static final String PROPOSALS_NORMAL_TYPE = "M";
