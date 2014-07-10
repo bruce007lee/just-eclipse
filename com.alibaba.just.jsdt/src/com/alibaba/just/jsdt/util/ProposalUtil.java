@@ -62,7 +62,6 @@ public class ProposalUtil {
 		Reader reader = null;
 		if (curr instanceof IMember) {
 			IMember member= (IMember) curr;
-			//HTMLPrinter.addSmallHeader(buffer, getInfoText(member));
 			try {
 				reader= JSdocContentAccess.getHTMLContentReader(member, true, true);
 
@@ -88,6 +87,7 @@ public class ProposalUtil {
 				reader= new StringReader("error_gettingJavadoc");
 			}
 			if (reader != null) {
+				HTMLPrinter.addPageProlog(buffer);
 				HTMLPrinter.addParagraph(buffer, reader);
 			}
 		}
