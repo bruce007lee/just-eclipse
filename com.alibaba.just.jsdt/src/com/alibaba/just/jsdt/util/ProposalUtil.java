@@ -84,11 +84,12 @@ public class ProposalUtil {
 					}*/
 
 			} catch (JavaScriptModelException ex) {
-				reader= new StringReader("error_gettingJavadoc");
+				reader= new StringReader("Getting Javadoc Error");
 			}
 			if (reader != null) {
 				HTMLPrinter.addPageProlog(buffer);
 				HTMLPrinter.addParagraph(buffer, reader);
+				HTMLPrinter.addPageEpilog(buffer);
 			}
 		}
 
@@ -101,7 +102,6 @@ public class ProposalUtil {
 		}
 
 		if (buffer.length() > 0) {
-			HTMLPrinter.addPageEpilog(buffer);
 			return buffer.toString();
 		}
 

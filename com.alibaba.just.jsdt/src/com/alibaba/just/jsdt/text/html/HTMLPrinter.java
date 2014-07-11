@@ -219,7 +219,7 @@ public class HTMLPrinter {
 	}
 
 	public static void addPageEpilog(StringBuffer buffer) {
-		buffer.append("</font></body></html>"); //$NON-NLS-1$
+		buffer.append("</body></html>"); //$NON-NLS-1$
 	}
 
 	public static void startBulletList(StringBuffer buffer) {
@@ -248,8 +248,9 @@ public class HTMLPrinter {
 
 	public static void addParagraph(StringBuffer buffer, String paragraph) {
 		if (paragraph != null) {
-			buffer.append("<p>"); //$NON-NLS-1$
+			buffer.append("<div>"); //$NON-NLS-1$
 			buffer.append(paragraph);
+			buffer.append("</div>"); //$NON-NLS-1$
 		}
 	}
 
