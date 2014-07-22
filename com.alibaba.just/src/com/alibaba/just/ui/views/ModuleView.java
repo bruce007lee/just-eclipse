@@ -58,6 +58,7 @@ import com.alibaba.just.Activator;
 import com.alibaba.just.PluginConstants;
 import com.alibaba.just.api.bean.Module;
 import com.alibaba.just.api.parser.ModuleParser;
+import com.alibaba.just.api.parser.ParseUtil;
 import com.alibaba.just.ui.preferences.PreferenceConstants;
 import com.alibaba.just.ui.util.ImageManager;
 import com.alibaba.just.ui.util.PluginResourceUtil;
@@ -76,6 +77,7 @@ public class ModuleView extends ViewPart {
 	 */
 	public static final String ID = "com.alibaba.just.ui.views.ModuleView";
 
+	private static final String ALIAS_SEP= " , ";
 	private static final String TREE_LABEL_FILE_MISSING = " - [Missing]";
 	private static final String SHOW_TYPE_FLAT = "flat";
 	private static final String SHOW_TYPE_HIER = "hier";
@@ -111,8 +113,8 @@ public class ModuleView extends ViewPart {
 		private Object obj;
 		private String iconName;
 		private int type = TYPE_IMP_ORI;
-
 		private String desc;
+		private String name=null;
 
 		public String getIconName() {
 			return this.iconName;
@@ -127,6 +129,10 @@ public class ModuleView extends ViewPart {
 			this.obj = obj;
 			children = new ArrayList<TreeNode>();
 		}
+		
+		public void setName(String name){
+			this.name = name;
+		}
 
 		public String getName() {
 			if(Module.class.isInstance(obj)){
@@ -134,8 +140,11 @@ public class ModuleView extends ViewPart {
 				if(m.isAnonymous()){
 					return "<anonymous module>";
 				}else{
-					if(((Module)obj).getAlias()!=null && type==TYPE_IMP_ALIAS){
-						return ((Module)obj).getAlias();
+					if(((Module)obj).hasAlias() && type==TYPE_IMP_ALIAS){
+						if(name!=null){
+							return name;
+						}
+						return ((Module)obj).getAlias().get(0);
 					}else{
 						return ((Module)obj).getName();
 					}
@@ -289,11 +298,11 @@ public class ModuleView extends ViewPart {
 						text.append(" - (" + node.getChildren().length +")", StyledString.QUALIFIER_STYLER);
 					}
 
-					if(m!=null && m.getAlias()!=null){
+					if(m!=null && m.hasAlias()){
 						if(node.getType()==TYPE_IMP_ALIAS){
 							text.append(" - source:<"+m.getName()+">", StyledString.DECORATIONS_STYLER);
 						}else{
-							text.append(" - alias:<"+m.getAlias()+">", StyledString.DECORATIONS_STYLER);
+							text.append(" - alias:<"+getAliasDisplay(m.getAlias())+">", StyledString.DECORATIONS_STYLER);
 						}
 					}
 
@@ -308,6 +317,17 @@ public class ModuleView extends ViewPart {
 			}
 		}
 
+	}
+	
+	private String getAliasDisplay(List<String> aliasList){
+		StringBuffer sb = new StringBuffer();
+		for(int i=0,l=aliasList.size();i<l;i++){
+			if(i>0){
+				sb.append(ALIAS_SEP);
+			}
+			sb.append(aliasList.get(i));
+		}
+		return sb.toString();
 	}
 
 	class NameSorter extends ViewerSorter {
@@ -555,7 +575,7 @@ public class ModuleView extends ViewPart {
 					if(m.isAnonymous() && m.getFilePath()!=null){
 						um.setDesc(" - ["+m.getFilePath()+"]");
 					}
-					um.setIconName(m.getAlias()==null?ImageManager.IMG_MODULE_ICON:ImageManager.IMG_ALIAS_MODULE_ICON);
+					um.setIconName(!m.hasAlias()?ImageManager.IMG_MODULE_ICON:ImageManager.IMG_ALIAS_MODULE_ICON);
 					tp.addChild(um);
 				}
 			}
@@ -576,11 +596,14 @@ public class ModuleView extends ViewPart {
 		tp.setIconName(ImageManager.IMG_MODULE_ICON);//set icon
 		List<String> names = module.getRequiredModuleNames();
 		TreeNode tmp = null;
+		boolean isMatchAlias = false;
 		for(String name:names){
 			for(Module impModule:allImported){
-				if(name.equals(impModule.getName()) || name.equals(impModule.getAlias())){
+				isMatchAlias = ParseUtil.isMatchAlias(name, impModule);
+				if(name.equals(impModule.getName()) || isMatchAlias){
 					tmp = getRequiredModulesTree(impModule,allImported);
-					if(name.equals(impModule.getAlias())){
+					if(isMatchAlias){
+						tmp.setName(name);
 						tmp.setType(TYPE_IMP_ALIAS);
 						tmp.setIconName(ImageManager.IMG_ALIAS_MODULE_ICON);
 					}
@@ -591,17 +614,26 @@ public class ModuleView extends ViewPart {
 		}
 		return tp;
 	}
+	
+	private List<TreeNode> getRequiredModulesList(List<TreeNode> list,Module module,List<Module> allImported){
+		return getRequiredModulesList(null, list, module, allImported, false, true);
+	}
 
 	/**
 	 * 得到列表结构的module树对象
+	 * @param mName
+	 * @param list
 	 * @param module
 	 * @param allImported
+	 * @param isImpAlias
+	 * @param isStartModule
 	 * @return
 	 */
-	private List<TreeNode> getRequiredModulesList(List<TreeNode> list,Module module,List<Module> allImported,boolean isImpAlias,boolean isStartModule){
+	private List<TreeNode> getRequiredModulesList(String mName,List<TreeNode> list,Module module,List<Module> allImported,boolean isImpAlias,boolean isStartModule){
 		List<TreeNode> l = list==null ? new ArrayList<TreeNode>() : list;
 		TreeNode tp = new TreeNode(module);
 		if(isImpAlias){
+			tp.setName(mName);
 			tp.setType(TYPE_IMP_ALIAS);
 			tp.setIconName(ImageManager.IMG_ALIAS_MODULE_ICON);
 		}else{
@@ -612,13 +644,15 @@ public class ModuleView extends ViewPart {
 			l.add(tp);
 			List<String> names = module.getRequiredModuleNames();
 			List<TreeNode> tmp = l;
+			boolean isMatchAlias = false;
 			if(isStartModule){
 				tmp = new ArrayList<TreeNode>();
 			}
 			for(String name:names){
 				for(Module impModule:allImported){
-					if(name.equals(impModule.getName()) || name.equals(impModule.getAlias())){
-						getRequiredModulesList(tmp,impModule,allImported,name.equals(impModule.getAlias()),false);
+					isMatchAlias = ParseUtil.isMatchAlias(name, impModule);
+					if(name.equals(impModule.getName()) || isMatchAlias){
+						getRequiredModulesList(name,tmp,impModule,allImported,isMatchAlias,false);
 						break;
 					}
 				}
@@ -628,6 +662,7 @@ public class ModuleView extends ViewPart {
 			}
 		}else{
 			if(isImpAlias){
+				exist.setName(mName);
 				exist.setType(TYPE_IMP_ALIAS);
 				exist.setIconName(ImageManager.IMG_ALIAS_MODULE_ICON);
 			}
@@ -694,7 +729,7 @@ public class ModuleView extends ViewPart {
 
 						String showType = getShowType();
 						if(SHOW_TYPE_FLAT.equalsIgnoreCase(showType)){
-							root.addChildren(getRequiredModulesList(new ArrayList<TreeNode>(),module, requires,false,true));
+							root.addChildren(getRequiredModulesList(new ArrayList<TreeNode>(),module, requires));
 							root.setIconName(ImageManager.IMG_FLAT_LAYOUT);
 						}else{
 							root.addChild(getRequiredModulesTree(module, requires));
@@ -718,9 +753,9 @@ public class ModuleView extends ViewPart {
 								self.viewer.refresh();
 								viewer.getTree().setRedraw(false);
 								try {
-								  viewer.expandAll();
+									viewer.expandAll();
 								} finally {
-								  viewer.getTree().setRedraw(true); 
+									viewer.getTree().setRedraw(true); 
 								}
 							}								
 						});
@@ -751,9 +786,9 @@ public class ModuleView extends ViewPart {
 							self.viewer.refresh();
 							viewer.getTree().setRedraw(false);
 							try {
-							  viewer.expandAll();
+								viewer.expandAll();
 							} finally {
-							  viewer.getTree().setRedraw(true); 
+								viewer.getTree().setRedraw(true); 
 							}
 						}
 					});
@@ -842,7 +877,7 @@ public class ModuleView extends ViewPart {
 		};
 		action_refresh.setToolTipText("Refresh View");
 		action_refresh.setImageDescriptor(ImageDescriptor.createFromImage(ImageManager.getImage(ImageManager.IMG_REFRESH)));
-		
+
 		/*是否自动刷新按钮*/
 		/*是否显示被引用模块列表*/
 		action_auto_refresh = new Action("Auto Refresh",Action.AS_CHECK_BOX) {
@@ -853,7 +888,7 @@ public class ModuleView extends ViewPart {
 		action_auto_refresh.setToolTipText("Auto Refresh on file changed");
 		action_auto_refresh.setImageDescriptor(ImageDescriptor.createFromImage(ImageManager.getImage(ImageManager.IMG_SYNCED)));
 		action_auto_refresh.setChecked(isAutoRefresh());
-		
+
 		/*是否显示被引用模块列表*/
 		action_used_list = new Action("Show Used Module List",Action.AS_CHECK_BOX) {
 			public void run() {
@@ -912,7 +947,7 @@ public class ModuleView extends ViewPart {
 	private Boolean isShowUsedList(){
 		return PreferenceUtil.getPluginPreferenceStore().getBoolean(PreferenceConstants.MODULE_VIEW_SHOW_USED_LIST);
 	}
-	
+
 	private void showUsedList(boolean isShow){
 		try {
 			PreferenceUtil.getPluginPreferenceStore().setValue(PreferenceConstants.MODULE_VIEW_SHOW_USED_LIST,isShow);
@@ -921,7 +956,7 @@ public class ModuleView extends ViewPart {
 			//e.printStackTrace();
 		}
 	}
-	
+
 	private Boolean isAutoRefresh(){
 		return PreferenceUtil.getPluginPreferenceStore().getBoolean(PreferenceConstants.MODULE_VIEW_AUTO_REFRESH);
 	}
@@ -962,7 +997,7 @@ public class ModuleView extends ViewPart {
 							IFileStore fileStore = EFS.getLocalFileSystem().getStore(fileToOpen.toURI());
 							try {
 								IEditorPart  editPart = IDE.openEditorOnFileStore(page, fileStore);
-								
+
 								//fix 显示非workspace文件编码问题,目前先使用justeclipse中设置的编码
 								//TODO 需要对lib库添加编码定义配置
 								if(editPart !=null && FileStoreEditorInput.class.isInstance(editPart.getEditorInput())){
@@ -972,7 +1007,7 @@ public class ModuleView extends ViewPart {
 										encodingSupport.setEncoding(PreferenceUtil.getFileCharset());
 									}
 								}
-								
+
 							} catch (Exception e ) {
 								//e.printStackTrace();
 							}

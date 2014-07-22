@@ -265,13 +265,14 @@ public class ModuleNewWizardPage extends WizardPage {
 				Object rs  = moduleSelectionDialog.getFirstResult();
 				//System.out.println(rs);
 				if(Module.class.isInstance(rs)){
-					String t = ((Module)rs).getName();
+					Module m = (Module)rs;
+					String t = m.getName();
 					if(!isExist(selectedModuleList,t)){
 						boolean isAdd = false;
 						if(ModuleVO.class.isInstance(rs)){
-							if(((ModuleVO)rs).isUseAlias()){
+							if(((ModuleVO)rs).isUseAlias() && m.hasAlias()){
 								isAdd = true;
-								selectedModuleList.add(((Module)rs).getAlias());
+								selectedModuleList.add(((ModuleVO)rs).getCurrentAlias());
 							}
 						}
 						if(!isAdd){
@@ -301,13 +302,14 @@ public class ModuleNewWizardPage extends WizardPage {
 				Object rs  = moduleSelectionDialog.getSelectedResult();
 				//System.out.println(rs);
 				if(Module.class.isInstance(rs)){
-					String t = ((Module)rs).getName();
+					Module m = (Module)rs;
+					String t = m.getName();
 					if(!isExist(selectedModuleList,t)){
 						boolean isAdd = false;
 						if(ModuleVO.class.isInstance(rs)){
-							if(((ModuleVO)rs).isUseAlias()){
+							if(((ModuleVO)rs).isUseAlias() && m.hasAlias()){
 								isAdd = true;
-								selectedModuleList.add(((Module)rs).getAlias());
+								selectedModuleList.add(((ModuleVO)rs).getCurrentAlias());
 							}
 						}
 						if(!isAdd){

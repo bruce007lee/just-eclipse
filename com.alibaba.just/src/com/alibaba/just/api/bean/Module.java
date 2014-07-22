@@ -16,7 +16,7 @@ public class Module implements Serializable{
 	private String name=null;
 	private List<String> requiredModuleNames= new ArrayList<String>();
 	private String filePath = null;
-	private String alias = null;
+	private List<String> alias = null;
 	boolean isAnonymous = false;
 	
 	public boolean isAnonymous() {
@@ -45,11 +45,18 @@ public class Module implements Serializable{
 		this.requiredModuleNames = requiredModuleNames;
 	}
 	
-	public String getAlias() {
+	public List<String> getAlias() {
 		return alias;
 	}
-	public void setAlias(String alias) {
+	public void setAlias(List<String> alias) {
 		this.alias = alias;
+	}
+	
+	public boolean hasAlias(){
+		if(alias!=null && alias.size()>0){
+			return true;
+		}
+		return false;
 	}
 	
 	/**

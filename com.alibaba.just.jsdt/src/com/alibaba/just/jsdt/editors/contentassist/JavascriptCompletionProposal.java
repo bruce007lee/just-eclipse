@@ -6,6 +6,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.wst.jsdt.core.IFunction;
 import org.eclipse.wst.jsdt.core.IJavaScriptElement;
 import org.eclipse.wst.jsdt.ui.text.java.IJavaCompletionProposal;
 
@@ -163,6 +164,9 @@ public class JavascriptCompletionProposal implements IJavaCompletionProposal {
 	}
 
 	public int getRelevance() {
+		if(IFunction.class.isInstance(fJavaScriptElement)){
+			return -11;
+		}
 		return -10;
 	}
 

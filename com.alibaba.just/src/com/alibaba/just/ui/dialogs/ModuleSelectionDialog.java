@@ -27,6 +27,7 @@ import org.eclipse.ui.dialogs.FilteredItemsSelectionDialog;
 
 import com.alibaba.just.api.bean.Module;
 import com.alibaba.just.api.parser.ModuleParser;
+import com.alibaba.just.api.parser.ParseUtil;
 import com.alibaba.just.ui.util.ImageManager;
 import com.alibaba.just.ui.util.PluginResourceUtil;
 import com.alibaba.just.ui.viewmodel.ModuleVO;
@@ -93,10 +94,11 @@ public class ModuleSelectionDialog extends FilteredItemsSelectionDialog {
 	public String getFirstResultString(){
 		Object obj = this.getFirstResult();
 		if(ModuleVO.class.isInstance(obj)){
-			if(((ModuleVO)obj).isUseAlias()){
-				return ((ModuleVO)obj).getAlias();
+			ModuleVO vo = (ModuleVO)obj;
+			if(vo.isUseAlias()){
+				return vo.getAlias().get(0);
 			}else{
-				return ((ModuleVO)obj).getName();
+				return vo.getName();
 			}
 		}else if(Module.class.isInstance(obj)){
 			return ((Module)obj).getName();
@@ -114,8 +116,9 @@ public class ModuleSelectionDialog extends FilteredItemsSelectionDialog {
 			obj = vi.getObj();
 			if(Module.class.isInstance(obj)){
 				ModuleVO  vo = convertModule((Module)obj);
-				if(vi.getLabel().equals(vo.getAlias())){
+				if(ParseUtil.isMatchAlias(vi.getLabel(), vo)){
 					vo.setUseAlias(true);
+					vo.setCurrentAlias(vi.getLabel());
 				}
 				obj = vo;
 			}
@@ -326,13 +329,17 @@ public class ModuleSelectionDialog extends FilteredItemsSelectionDialog {
 				List<Module> moduleList = PluginResourceUtil.getAllModulesByProject(project,ModuleParser.MODULE_TYPE_NORMAL,progressMonitor);
 
 				Module tmp = null;
+				List<String> aliasList = null;
 				for (Iterator<Module> iter = moduleList.iterator(); iter.hasNext();) {
 					tmp = iter.next();
-					if(tmp.getAlias()!=null){
-						vi = new ViewItem(tmp,tmp.getAlias());
-						vi.setIconName(ImageManager.IMG_ALIAS_MODULE_ICON);
-						vi.setType(TYPE_ALIAS);
-						contentProvider.add(vi, itemsFilter);
+					if(tmp.hasAlias()){
+						aliasList = tmp.getAlias();
+						for(String alias:aliasList){
+							vi = new ViewItem(tmp,alias);
+							vi.setIconName(ImageManager.IMG_ALIAS_MODULE_ICON);
+							vi.setType(TYPE_ALIAS);
+							contentProvider.add(vi, itemsFilter);
+						}
 					}
 					contentProvider.add(tmp, itemsFilter);
 				}

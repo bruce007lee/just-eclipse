@@ -7,7 +7,7 @@ public class PreferenceConstants {
 	public static final String DEFAULT_FILE_CHARTSET = "GBK";
 	public static final String DEFAULT_PARSER_ENGINE = "1";
 	public static final boolean DEFAULT_SHOW_LIB_ANONYMOUSE = false;
-	public static final boolean DEFAULT_SHOW_MATCH_START = false;
+	public static final boolean DEFAULT_SHOW_MATCH_START = true;
 	public static final boolean DEFAULT_SHOW_MATCH_PARTIAL = true;
 	public static final String DEFAULT_DEFINE_KEY_WORD = "define";
 	

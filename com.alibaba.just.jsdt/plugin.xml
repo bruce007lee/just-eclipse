@@ -1,7 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
+
+  <!-- category -->
+  <extension
+         id="justModuleProposals"
+         name="Just Module Proposals"
+         point="org.eclipse.wst.jsdt.ui.javaCompletionProposalComputer">
+      <proposalCategory
+            icon="icons/sample.gif">
+      </proposalCategory>
+   </extension>  
+   <extension
+         id="justWordsProposals"
+         name="Just Words Proposals"
+         point="org.eclipse.wst.jsdt.ui.javaCompletionProposalComputer">
+      <proposalCategory
+            icon="icons/sample.gif">
+      </proposalCategory>
+   </extension>
+   <extension
+         id="justJsdtJavascriptProposals"
+         name="Just JavaScript Lib Proposals (beta)"
+         point="org.eclipse.wst.jsdt.ui.javaCompletionProposalComputer">
+      <proposalCategory
+            icon="icons/sample.gif">
+      </proposalCategory>
+   </extension>
  
+  <!-- completions -->
    <extension
          id="ModuleCompletionProposalComputer"
          name="Just Module Proposals"
@@ -19,14 +46,6 @@
       </javaCompletionProposalComputer>
    </extension>
    <extension
-         id="justModuleProposals"
-         name="Just Module Proposals"
-         point="org.eclipse.wst.jsdt.ui.javaCompletionProposalComputer">
-      <proposalCategory
-            icon="icons/sample.gif">
-      </proposalCategory>
-   </extension>
-   <extension
          id="JustWordsProposalComputer"
          name="Just Words Proposals"
          point="org.eclipse.wst.jsdt.ui.javaCompletionProposalComputer">
@@ -40,34 +59,20 @@
       </javaCompletionProposalComputer>
    </extension>
    <extension
-         id="justWordsProposals"
-         name="Just Words Proposals"
-         point="org.eclipse.wst.jsdt.ui.javaCompletionProposalComputer">
-      <proposalCategory
-            icon="icons/sample.gif">
-      </proposalCategory>
-   </extension>
-   <extension
-         id="JSDTJavascriptProposalComputer"
-         name="Just Javascript lib Proposals (beta)"
+         id="justJsdtJavascriptProposalComputer"
+         name="Just JavaScript Lib Proposals (beta)"
          point="org.eclipse.wst.jsdt.ui.javaCompletionProposalComputer">
       <javaCompletionProposalComputer
             activate="false" 
-            categoryId="com.alibaba.just.jsdt.justJSDTProposals"
+            categoryId="com.alibaba.just.jsdt.justJsdtJavascriptProposals"
             class="com.alibaba.just.jsdt.editors.contentassist.JSDTJavascriptCompletionProposalComputer">
          <partition
                type="__dftl_partition_content_type">
          </partition>
       </javaCompletionProposalComputer>
    </extension>
-   <extension
-         id="JSDTJavascriptWordsProposals"
-         name="Just Javascript lib Proposals (beta)"
-         point="org.eclipse.wst.jsdt.ui.javaCompletionProposalComputer">
-      <proposalCategory
-            icon="icons/sample.gif">
-      </proposalCategory>
-   </extension>
+
+   <!-- startup -->
    <extension
          point="org.eclipse.ui.startup">
       <startup

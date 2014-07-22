@@ -10,7 +10,8 @@ import com.alibaba.just.api.bean.Module;
  *
  */
 public class ModuleVO extends Module {
-      private boolean isUseAlias = false;
+    private boolean isUseAlias = false;
+    private String currentAlias = null;
 
 	public boolean isUseAlias() {
 		return isUseAlias;
@@ -18,6 +19,14 @@ public class ModuleVO extends Module {
 
 	public void setUseAlias(boolean isUseAlias) {
 		this.isUseAlias = isUseAlias;
+	}
+
+	public String getCurrentAlias() {
+		return currentAlias;
+	}
+
+	public void setCurrentAlias(String currentAlias) {
+		this.currentAlias = currentAlias;
 	}
       
 }

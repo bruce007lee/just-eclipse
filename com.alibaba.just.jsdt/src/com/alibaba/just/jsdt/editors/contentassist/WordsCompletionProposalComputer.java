@@ -97,15 +97,12 @@ public class WordsCompletionProposalComputer implements IJavaCompletionProposalC
 
 		String prop = null;
 		boolean isPrefixMatch = false;
+		boolean isMatch = false;
 		int  prefixLen = 0,replacementOffset=0,replacementLength=0;
 		String tmp = null;
 		String tmp2 = null;
 		int size = 0;
 		for(int i = 0,l=proposals.size();i<l;i++ ){
-			//限制下一次显示的提示个数
-			if(size>=PluginConstants.PROPOSAL_MAX_SIZE){
-				break;
-			}
 			prop = proposals.get(i);
 			try{
 
@@ -115,9 +112,9 @@ public class WordsCompletionProposalComputer implements IJavaCompletionProposalC
 					tmp2 = (currentText==null ? prefixStr : prefixStr + currentText);
 					isPrefixMatch = prefixLen>0 &&  !prop.equals(tmp2) && tmp.indexOf(tmp2.toLowerCase())==0;
 				}
-				//if(  ( (prefixStr==null || prefixStr.equals("")) && (currentText==null || tmp.indexOf(currentText.toLowerCase())==0) ) || isPrefixMatch){
+				isMatch = (currentText !=null && tmp !=null && tmp.indexOf(currentText.toLowerCase())==0);
 
-				if(currentText==null || tmp.indexOf(currentText.toLowerCase())==0 || isPrefixMatch){
+				if(currentText==null || isMatch || isPrefixMatch){
 
 					if(isPrefixMatch){
 						replacementOffset = startOffset-prefixLen;
@@ -126,9 +123,12 @@ public class WordsCompletionProposalComputer implements IJavaCompletionProposalC
 						replacementOffset = startOffset;
 						replacementLength = offset-startOffset;
 					}
-					completionProposalList.add(new ModuleCompletionProposal(prop, replacementOffset, replacementLength , prop.length()
-							,null,isPrefixMatch?PROPOSALS_NORMAL_TYPE_LV1:PROPOSALS_NORMAL_TYPE));
-					size++;
+					//限制下一次显示的提示个数
+					if(isPrefixMatch || isMatch || (!isPrefixMatch && !isMatch && size<PluginConstants.PROPOSAL_MAX_SIZE)){
+						completionProposalList.add(new ModuleCompletionProposal(prop, replacementOffset, replacementLength , prop.length()
+								,null,isPrefixMatch?PROPOSALS_NORMAL_TYPE_LV1:PROPOSALS_NORMAL_TYPE));
+						size++;
+					}
 				}
 			}catch(Exception e){
 				e.printStackTrace();

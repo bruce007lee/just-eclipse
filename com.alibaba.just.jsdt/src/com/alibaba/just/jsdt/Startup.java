@@ -32,7 +32,7 @@ public class Startup implements IStartup {
 				String[] ids = new String[]{
 						"com.alibaba.just.jsdt.justWordsProposals",
 						"com.alibaba.just.jsdt.justModuleProposals",
-						"com.alibaba.just.jsdt.justJSDTProposals",
+						"com.alibaba.just.jsdt.justJsdtJavascriptProposals",
 						"org.eclipse.wst.jsdt.ui.spellingProposalCategory",
 						"org.eclipse.wst.jsdt.ui.javaTypeProposalCategory",
 						"org.eclipse.wst.jsdt.ui.javaNoTypeProposalCategory",

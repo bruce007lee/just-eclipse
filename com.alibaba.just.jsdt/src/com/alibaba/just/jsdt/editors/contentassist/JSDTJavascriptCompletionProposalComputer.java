@@ -218,27 +218,23 @@ public class JSDTJavascriptCompletionProposalComputer implements IJavaCompletion
 
 		Object[] prop = null;
 		boolean isPrefixMatch = false;
+		boolean isMatch = false;
 		int  prefixLen = 0,replacementOffset=0,replacementLength=0;
 		String tmp = null;
 		String tmp2 = null;
 		int size = 0;
 		for(int i = 0,l=proposals.size();i<l;i++ ){
-			//限制下一次显示的提示个数
-			if(size>=PluginConstants.PROPOSAL_MAX_SIZE){
-				break;
-			}
 			prop = proposals.get(i);
 			try{
-
 				tmp =  ((String)prop[0]).toLowerCase();
 				if(prefixStr!=null){
 					prefixLen = prefixStr.length();
 					tmp2 = (currentText==null ? prefixStr : prefixStr + currentText);
 					isPrefixMatch = prefixLen>0 &&  !prop.equals(tmp2) && tmp.indexOf(tmp2.toLowerCase())==0;
 				}
-				//if(  ( (prefixStr==null || prefixStr.equals("")) && (currentText==null || tmp.indexOf(currentText.toLowerCase())==0) ) || isPrefixMatch){
+				isMatch = (currentText !=null && tmp !=null && tmp.indexOf(currentText.toLowerCase())==0);
 
-				if(currentText==null || tmp.indexOf(currentText.toLowerCase())==0 || isPrefixMatch){
+				if(currentText==null || isMatch || isPrefixMatch){
 
 					if(isPrefixMatch){
 						replacementOffset = startOffset-prefixLen;
@@ -247,9 +243,12 @@ public class JSDTJavascriptCompletionProposalComputer implements IJavaCompletion
 						replacementOffset = startOffset;
 						replacementLength = offset-startOffset;
 					}
-					completionProposalList.add(new JavascriptCompletionProposal((String)prop[0], replacementOffset, replacementLength ,((String)prop[0]).length()
-							,getIcon((IJavaScriptElement)prop[2]),(String)prop[1],null,(IJavaScriptElement)prop[2],null));
-					size++;
+					//限制下一次显示的提示个数
+					if(isPrefixMatch || isMatch || (!isPrefixMatch && !isMatch && size<PluginConstants.PROPOSAL_MAX_SIZE)){
+						completionProposalList.add(new JavascriptCompletionProposal((String)prop[0], replacementOffset, replacementLength ,((String)prop[0]).length()
+								,getIcon((IJavaScriptElement)prop[2]),(String)prop[1],null,(IJavaScriptElement)prop[2],null));
+						size++;
+					}
 				}
 			}catch(Exception e){
 				e.printStackTrace();

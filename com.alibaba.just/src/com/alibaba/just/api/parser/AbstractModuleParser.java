@@ -25,7 +25,7 @@ public abstract class AbstractModuleParser implements ModuleParser{
 	}
 
 	public AbstractModuleParser(){}
-	
+
 	/**
 	 * 处理folder中文件
 	 * @param file
@@ -160,7 +160,7 @@ public abstract class AbstractModuleParser implements ModuleParser{
 			subModNames = m.getRequiredModuleNames();
 			for(String subName : subModNames){
 				if((module.getName() != null && module.getName().equals(subName)) || 
-						module.getAlias() != null && module.getAlias().equals(subName)){
+						ParseUtil.isMatchAlias(subName, module)){
 					rsList.add(m);
 					break;
 				}
@@ -178,7 +178,7 @@ public abstract class AbstractModuleParser implements ModuleParser{
 	protected Module getModuleByName(String moduleName,List<Module> list){
 		if(moduleName!=null && list!=null){
 			for(Module submod : list){
-				if(moduleName.equals(submod.getName()) || moduleName.equals(submod.getAlias())){
+				if(moduleName.equals(submod.getName()) || ParseUtil.isMatchAlias(moduleName, submod)){
 					return submod;
 				}
 			}
@@ -201,7 +201,7 @@ public abstract class AbstractModuleParser implements ModuleParser{
 		paths.add(path);
 		return this.getAllModules(paths, moduleType);
 	}
-	
+
 	/**
 	 * 
 	 */
@@ -246,7 +246,7 @@ public abstract class AbstractModuleParser implements ModuleParser{
 			} catch (InterruptedException e) {}
 		}
 		return moduleList;
-	
+
 	}
 
 
@@ -265,13 +265,15 @@ public abstract class AbstractModuleParser implements ModuleParser{
 	 */
 	protected Module updateAlias(Module module,List<AliasInfo> aliasList){
 		if(module!=null && aliasList!=null){
+			List<String> alias = new ArrayList<String>(1);
 			for(AliasInfo ai:aliasList){
 				if(ai.getName()!=null && ai.getAlias()!=null && module.getName()!=null){
-					if(ai.getName().equals(module.getName())){
-						module.setAlias(ai.getAlias());
+					if(ai.getName().equals(module.getName()) && !alias.contains(ai.getAlias())){
+						alias.add(ai.getAlias());
 					}
 				}
 			}
+			module.setAlias(alias);
 		}
 		return module;
 	}
@@ -284,7 +286,7 @@ public abstract class AbstractModuleParser implements ModuleParser{
 		File file = new File(filePath);
 		return getModules(file,moduleType,event);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see com.alibaba.just.api.parser.ModuleParser#getModules(java.lang.String, int)
 	 */
@@ -324,7 +326,7 @@ public abstract class AbstractModuleParser implements ModuleParser{
 	public List<Module> getModules(File file){
 		return getModules(file,MODULE_TYPE_NORMAL);
 	}
-	
+
 	/**
 	 * 
 	 */
@@ -345,7 +347,7 @@ public abstract class AbstractModuleParser implements ModuleParser{
 		this.threadPool = null;
 		this.aliasList = null;
 	}
-	
+
 	public boolean isDisposed(){
 		return isDispose;
 	}

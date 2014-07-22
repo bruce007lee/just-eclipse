@@ -2,6 +2,7 @@ package com.alibaba.just.jsdt.editors.contentassist;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
@@ -112,7 +113,7 @@ public class ModuleCompletionProposalComputer implements IJavaCompletionProposal
 		}
 
 		String prefixStr = PreferenceUtil.isShowMatchStart()?this.seekForPrefix(document, startOffset):null;		
-		
+
 		//System.out.println("currentText:"+currentText);
 		//System.out.println("offset:"+offset);
 		List<String[]> proposals = new Vector<String[]>();
@@ -140,11 +141,15 @@ public class ModuleCompletionProposalComputer implements IJavaCompletionProposal
 
 			//转化为proposals
 			Module tmp = null;
+			List<String> aliasList = null;
 			for (Iterator<Module> iter = moduleList.iterator(); iter.hasNext();) {
 				tmp = iter.next();
 				proposals.add(new String[]{tmp.getName(),PROPOSALS_NORMAL_TYPE});
-				if(tmp.getAlias()!=null){
-					proposals.add(new String[]{tmp.getAlias(),PROPOSALS_ALIAS_TYPE});
+				if(tmp.hasAlias()){
+					aliasList = tmp.getAlias();
+					for(String alias:aliasList){
+						proposals.add(new String[]{alias,PROPOSALS_ALIAS_TYPE});
+					}
 				}
 			}
 
@@ -155,25 +160,24 @@ public class ModuleCompletionProposalComputer implements IJavaCompletionProposal
 
 		String[] prop = null;
 		boolean isPrefixMatch = false;
+		boolean isMatch = false;
 		int  prefixLen = 0,replacementOffset=0,replacementLength=0;
 		String tmp = null;
 		int size = 0;
 		for(int i = 0,l=proposals.size();i<l;i++ ){
-			//限制下一次显示的提示个数
-			if(size>=PluginConstants.PROPOSAL_MAX_SIZE){
-				break;
-			}
 			prop = proposals.get(i);
 			try{
-				
+
 				tmp =  prop[0].toLowerCase();
 				if(prefixStr!=null){
 					prefixLen = prefixStr.length();
 					isPrefixMatch = prefixLen>0 &&  tmp.indexOf((currentText==null ? prefixStr : prefixStr + currentText).toLowerCase())==0;
 				}
 
-				if(currentText==null || isMatch(tmp,currentText) || isPrefixMatch){
-					
+				isMatch = isMatch(tmp,currentText);
+
+				if(currentText==null || isMatch || isPrefixMatch){
+
 					if(isPrefixMatch){
 						replacementOffset = startOffset-prefixLen;
 						replacementLength = offset-startOffset+prefixLen;
@@ -181,18 +185,26 @@ public class ModuleCompletionProposalComputer implements IJavaCompletionProposal
 						replacementOffset = startOffset;
 						replacementLength = offset-startOffset;
 					}
-					
+
 					if(prop[1]!=null && prop[1].equals(PROPOSALS_ALIAS_TYPE)){
-						completionProposalList.add(new ModuleCompletionProposal(prop[0], replacementOffset, replacementLength , prop[0].length()
-								,ImageManager.getImage(ImageManager.IMG_ALIAS_MODULE_ICON),isPrefixMatch?PROPOSALS_ALIAS_TYPE_LV1:prop[1]));
+						//限制下一次显示的提示个数
+						if(isPrefixMatch || isMatch || (!isPrefixMatch && !isMatch && size<PluginConstants.PROPOSAL_MAX_SIZE)){
+							completionProposalList.add(new ModuleCompletionProposal(prop[0], replacementOffset, replacementLength , prop[0].length()
+									,ImageManager.getImage(ImageManager.IMG_ALIAS_MODULE_ICON),isPrefixMatch?PROPOSALS_ALIAS_TYPE_LV1:prop[1]));
+							size++;
+						}
 					}else if(prop[1]!=null && prop[1].equals(PROPOSALS_PACKAGE_TYPE)){
 						completionProposalList.add(new ModuleCompletionProposal(prop[0], replacementOffset, replacementLength , prop[0].length()
 								,ImageManager.getImage(ImageManager.IMG_PACKAGE_OBJ),prop[1]));
 					}else{
-						completionProposalList.add(new ModuleCompletionProposal(prop[0], replacementOffset, replacementLength, prop[0].length()
-								,ImageManager.getImage(ImageManager.IMG_MODULE_ICON),isPrefixMatch?PROPOSALS_NORMAL_TYPE_LV1:prop[1]));
+						//限制下一次显示的提示个数
+						if(isPrefixMatch || isMatch || (!isPrefixMatch && !isMatch && size<PluginConstants.PROPOSAL_MAX_SIZE)){
+							completionProposalList.add(new ModuleCompletionProposal(prop[0], replacementOffset, replacementLength, prop[0].length()
+									,ImageManager.getImage(ImageManager.IMG_MODULE_ICON),isPrefixMatch?PROPOSALS_NORMAL_TYPE_LV1:prop[1]));
+							size++;
+						}
+
 					}
-					size++;
 				}
 			}catch(Exception e){
 				e.printStackTrace();
@@ -201,7 +213,7 @@ public class ModuleCompletionProposalComputer implements IJavaCompletionProposal
 
 		return completionProposalList;
 	}
-	
+
 	/**
 	 * 
 	 * @param tmp
@@ -209,6 +221,9 @@ public class ModuleCompletionProposalComputer implements IJavaCompletionProposal
 	 * @return
 	 */
 	private boolean isMatch(String tmp, String currentText){
+		if(tmp==null || currentText==null){
+			return false;
+		}
 		return PreferenceUtil.isShowMatchPartial()?tmp.indexOf(currentText.toLowerCase())>=0:tmp.indexOf(currentText.toLowerCase())==0;
 	}
 
