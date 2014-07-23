@@ -96,7 +96,7 @@ public class ModuleSelectionDialog extends FilteredItemsSelectionDialog {
 		if(ModuleVO.class.isInstance(obj)){
 			ModuleVO vo = (ModuleVO)obj;
 			if(vo.isUseAlias()){
-				return vo.getAlias().get(0);
+				return vo.getCurrentAlias();
 			}else{
 				return vo.getName();
 			}
