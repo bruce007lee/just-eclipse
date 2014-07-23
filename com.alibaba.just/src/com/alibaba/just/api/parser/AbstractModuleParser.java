@@ -160,7 +160,7 @@ public abstract class AbstractModuleParser implements ModuleParser{
 			subModNames = m.getRequiredModuleNames();
 			for(String subName : subModNames){
 				if((module.getName() != null && module.getName().equals(subName)) || 
-						ParseUtil.isMatchAlias(subName, module)){
+						ParserUtil.isMatchAlias(subName, module)){
 					rsList.add(m);
 					break;
 				}
@@ -178,7 +178,7 @@ public abstract class AbstractModuleParser implements ModuleParser{
 	protected Module getModuleByName(String moduleName,List<Module> list){
 		if(moduleName!=null && list!=null){
 			for(Module submod : list){
-				if(moduleName.equals(submod.getName()) || ParseUtil.isMatchAlias(moduleName, submod)){
+				if(moduleName.equals(submod.getName()) || ParserUtil.isMatchAlias(moduleName, submod)){
 					return submod;
 				}
 			}

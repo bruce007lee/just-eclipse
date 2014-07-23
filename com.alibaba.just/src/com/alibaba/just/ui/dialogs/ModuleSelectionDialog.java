@@ -27,7 +27,7 @@ import org.eclipse.ui.dialogs.FilteredItemsSelectionDialog;
 
 import com.alibaba.just.api.bean.Module;
 import com.alibaba.just.api.parser.ModuleParser;
-import com.alibaba.just.api.parser.ParseUtil;
+import com.alibaba.just.api.parser.ParserUtil;
 import com.alibaba.just.ui.util.ImageManager;
 import com.alibaba.just.ui.util.PluginResourceUtil;
 import com.alibaba.just.ui.viewmodel.ModuleVO;
@@ -116,7 +116,7 @@ public class ModuleSelectionDialog extends FilteredItemsSelectionDialog {
 			obj = vi.getObj();
 			if(Module.class.isInstance(obj)){
 				ModuleVO  vo = convertModule((Module)obj);
-				if(ParseUtil.isMatchAlias(vi.getLabel(), vo)){
+				if(ParserUtil.isMatchAlias(vi.getLabel(), vo)){
 					vo.setUseAlias(true);
 					vo.setCurrentAlias(vi.getLabel());
 				}

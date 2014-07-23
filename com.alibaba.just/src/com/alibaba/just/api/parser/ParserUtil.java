@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.alibaba.just.api.bean.Module;
 
-public class ParseUtil {
+public class ParserUtil {
 
 	/**
 	 * 指定的名称是否为指定模块的别名

@@ -58,7 +58,7 @@ import com.alibaba.just.Activator;
 import com.alibaba.just.PluginConstants;
 import com.alibaba.just.api.bean.Module;
 import com.alibaba.just.api.parser.ModuleParser;
-import com.alibaba.just.api.parser.ParseUtil;
+import com.alibaba.just.api.parser.ParserUtil;
 import com.alibaba.just.ui.preferences.PreferenceConstants;
 import com.alibaba.just.ui.util.ImageManager;
 import com.alibaba.just.ui.util.PluginResourceUtil;
@@ -599,7 +599,7 @@ public class ModuleView extends ViewPart {
 		boolean isMatchAlias = false;
 		for(String name:names){
 			for(Module impModule:allImported){
-				isMatchAlias = ParseUtil.isMatchAlias(name, impModule);
+				isMatchAlias = ParserUtil.isMatchAlias(name, impModule);
 				if(name.equals(impModule.getName()) || isMatchAlias){
 					tmp = getRequiredModulesTree(impModule,allImported);
 					if(isMatchAlias){
@@ -650,7 +650,7 @@ public class ModuleView extends ViewPart {
 			}
 			for(String name:names){
 				for(Module impModule:allImported){
-					isMatchAlias = ParseUtil.isMatchAlias(name, impModule);
+					isMatchAlias = ParserUtil.isMatchAlias(name, impModule);
 					if(name.equals(impModule.getName()) || isMatchAlias){
 						getRequiredModulesList(name,tmp,impModule,allImported,isMatchAlias,false);
 						break;
