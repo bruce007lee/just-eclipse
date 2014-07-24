@@ -10,6 +10,7 @@ import java.util.Map;
 
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
+import org.apache.velocity.app.VelocityEngine;
 
 import com.alibaba.just.api.bean.Module;
 import com.alibaba.just.ui.util.TemplateUtil;
@@ -21,7 +22,7 @@ import com.alibaba.just.ui.util.TemplateUtil;
  */
 public class ModuleTemplate {
 
-	private static boolean isGlobalInit = false;
+	private static VelocityEngine engine = null;
 
 	public static final String DEFAULT_TPL = "default.tpl";
 
@@ -121,6 +122,15 @@ public class ModuleTemplate {
 		return sb.toString();
 	}
 
+	private VelocityEngine getVelocityEngine() throws Exception{
+		if(engine==null){
+			engine = new VelocityEngine();
+			engine.setProperty(Velocity.RUNTIME_LOG_LOGSYSTEM, new TemplateLogger() );
+			engine.init();
+		}
+		return engine;
+	}
+
 	public String getParseContent(Map props) throws Exception{
 
 		String content = "";
@@ -133,20 +143,6 @@ public class ModuleTemplate {
 			if(tpl!=null){
 				content = tpl;
 			}
-
-			if(!isGlobalInit){
-				//only need run once
-				//Velocity.init("velocity.properties");
-				Velocity.setProperty(Velocity.RUNTIME_LOG_LOGSYSTEM, new TemplateLogger() );
-				Velocity.init();
-				isGlobalInit = true;
-			}
-
-			/*
-			 *  Make a context object and populate with the data.  This
-			 *  is where the Velocity engine gets the data to resolve the
-			 *  references (ex. $list) in the template
-			 */
 
 			VelocityContext context = new VelocityContext();
 
@@ -171,7 +167,7 @@ public class ModuleTemplate {
 
 			writer = new OutputStreamWriter(sb);
 
-			Velocity.evaluate(context, writer, DEFAULT_TPL , content);
+			this.getVelocityEngine().evaluate(context, writer, DEFAULT_TPL , content);
 			writer.flush();
 			content =  sb.toString();
 
