@@ -4,9 +4,11 @@ import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
+import com.alibaba.just.template.ModuleTemplate;
 import com.alibaba.just.ui.cache.ResourceCacheManager;
 import com.alibaba.just.ui.listener.CacheRemoveListener;
 import com.alibaba.just.ui.util.ImageManager;
+import com.alibaba.just.ui.util.LogUtil;
 import com.alibaba.just.ui.util.PluginResourceUtil;
 
 /**
@@ -19,11 +21,11 @@ public class Activator extends AbstractUIPlugin {
 
 	// The shared instance
 	private static Activator plugin;
-	
+
 	private static InstanceScope is;
-	
+
 	private CacheRemoveListener cacheRemoveListener = null;
-		
+
 	/**
 	 * The constructor
 	 */
@@ -40,6 +42,11 @@ public class Activator extends AbstractUIPlugin {
 		ImageManager.init(this);	
 		cacheRemoveListener = new CacheRemoveListener();		
 		PluginResourceUtil.getWorkspace().addResourceChangeListener(cacheRemoveListener);
+		try{
+			ModuleTemplate.initVelocityEngine();
+		}catch(Exception e){
+			LogUtil.error(e);
+		}
 	}
 
 	/*
@@ -63,12 +70,12 @@ public class Activator extends AbstractUIPlugin {
 	public static Activator getDefault() {
 		return plugin;
 	}
-	
+
 	public static InstanceScope getInstanceScope(){
 		if(is == null){
 			is = new InstanceScope();
 		}
 		return is;
 	}
-	
+
 }

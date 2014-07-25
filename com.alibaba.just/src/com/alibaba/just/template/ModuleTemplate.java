@@ -121,13 +121,17 @@ public class ModuleTemplate {
 		}
 		return sb.toString();
 	}
-
-	private VelocityEngine getVelocityEngine() throws Exception{
+	
+	public static void initVelocityEngine() throws Exception{
 		if(engine==null){
 			engine = new VelocityEngine();
 			engine.setProperty(Velocity.RUNTIME_LOG_LOGSYSTEM, new TemplateLogger() );
 			engine.init();
 		}
+	}
+
+	private VelocityEngine getVelocityEngine() throws Exception{
+		ModuleTemplate.initVelocityEngine();
 		return engine;
 	}
 
