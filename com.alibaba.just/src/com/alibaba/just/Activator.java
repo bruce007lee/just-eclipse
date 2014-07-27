@@ -4,11 +4,9 @@ import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
-import com.alibaba.just.template.ModuleTemplate;
 import com.alibaba.just.ui.cache.ResourceCacheManager;
 import com.alibaba.just.ui.listener.CacheRemoveListener;
 import com.alibaba.just.ui.util.ImageManager;
-import com.alibaba.just.ui.util.LogUtil;
 import com.alibaba.just.ui.util.PluginResourceUtil;
 
 /**
