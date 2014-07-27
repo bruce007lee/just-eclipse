@@ -13,6 +13,7 @@ import org.apache.velocity.app.Velocity;
 import org.apache.velocity.app.VelocityEngine;
 
 import com.alibaba.just.api.bean.Module;
+import com.alibaba.just.ui.util.LogUtil;
 import com.alibaba.just.ui.util.TemplateUtil;
 
 /**
@@ -121,17 +122,27 @@ public class ModuleTemplate {
 		}
 		return sb.toString();
 	}
-	
-	public static void initVelocityEngine() throws Exception{
-		if(engine==null){
-			engine = new VelocityEngine();
-			engine.setProperty(Velocity.RUNTIME_LOG_LOGSYSTEM, new TemplateLogger() );
-			engine.init();
-		}
+
+	private void initVelocityEngine() throws Exception{
+		Thread thread = Thread.currentThread();
+		ClassLoader loader = thread.getContextClassLoader();
+		//fix velocity class loader issue within osgi
+		thread.setContextClassLoader(this.getClass().getClassLoader());
+		try {
+			if(engine==null){
+				engine = new VelocityEngine();
+				engine.setProperty(Velocity.RUNTIME_LOG_LOGSYSTEM, new TemplateLogger() );
+				engine.init();
+			}				
+		}catch(Exception e) {
+			LogUtil.error(e);
+		}finally {
+			thread.setContextClassLoader(loader);
+		}			
 	}
 
 	private VelocityEngine getVelocityEngine() throws Exception{
-		ModuleTemplate.initVelocityEngine();
+		this.initVelocityEngine();
 		return engine;
 	}
 

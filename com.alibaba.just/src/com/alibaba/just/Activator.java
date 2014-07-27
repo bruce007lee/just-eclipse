@@ -42,11 +42,6 @@ public class Activator extends AbstractUIPlugin {
 		ImageManager.init(this);	
 		cacheRemoveListener = new CacheRemoveListener();		
 		PluginResourceUtil.getWorkspace().addResourceChangeListener(cacheRemoveListener);
-		try{
-			ModuleTemplate.initVelocityEngine();
-		}catch(Exception e){
-			LogUtil.error(e);
-		}
 	}
 
 	/*
