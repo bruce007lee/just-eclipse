@@ -2,6 +2,20 @@
 <?eclipse version="3.4"?>
 <plugin>
 
+<!-- override WTP setting , fix script type issue -->
+<extension point="org.eclipse.core.contenttype.contentTypes">
+	<!-- declares a content type for JavaScript Source files -->
+	<content-type id="jsSource" name="JavaScript Source File (just eclipse)" 
+		base-type="org.eclipse.core.runtime.text"
+		priority="high"	
+		file-extensions="js"/>
+	<!-- declares a content type for JSON files -->
+	<content-type id="jsonSource" name="JS Object Notation File (just eclipse)" 
+		base-type="org.eclipse.core.runtime.text"
+		priority="normal"		
+		file-extensions="json"/>
+</extension>
+
   <!-- category -->
   <extension
          id="justModuleProposals"
