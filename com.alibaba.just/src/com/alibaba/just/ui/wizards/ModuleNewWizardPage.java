@@ -55,6 +55,10 @@ public class ModuleNewWizardPage extends WizardPage {
 
 	private IProject project;
 
+	private String currentRootContainerPath="";
+
+	private String currentContainerPath="";
+
 
 	/**
 	 * Constructor for SampleNewWizardPage.
@@ -124,6 +128,12 @@ public class ModuleNewWizardPage extends WizardPage {
 		//是否按模块名创建路径
 		Button cb = new Button(container, SWT.CHECK);
 		isCreateModulePathCb = cb;
+		isCreateModulePathCb.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				handleCreateModulePathChange();
+				dialogChanged();
+			}
+		});
 		cb.setSelection(true);
 		cb.setText("Create &path by module name");
 
@@ -206,6 +216,15 @@ public class ModuleNewWizardPage extends WizardPage {
 		initialize();
 		dialogChanged();
 		setControl(container);
+	}
+
+	private void handleCreateModulePathChange(){
+		boolean isSelect = isCreateModulePathCb.getSelection();
+		if(isSelect){
+			this.containerText.setText(this.currentRootContainerPath);
+		}else{
+			this.containerText.setText(this.currentContainerPath);
+		}
 	}
 
 	private void handleModuleRemove(){
@@ -295,7 +314,7 @@ public class ModuleNewWizardPage extends WizardPage {
 
 		};
 		moduleSelectionDialog.setProject(project);
-		
+
 		moduleSelectionDialog.create();
 		moduleSelectionDialog.getSelectedModBtn().addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e) {
@@ -365,6 +384,8 @@ public class ModuleNewWizardPage extends WizardPage {
 				else
 					container = ((IResource) obj).getParent();
 
+				this.currentContainerPath = container.getFullPath().toString();
+
 				IContainer root = PreferenceUtil.getCurrentRoot(container);
 				if(root!=null && root.getFullPath()!=null){
 					String rootPath = root.getFullPath().toString();
@@ -373,6 +394,7 @@ public class ModuleNewWizardPage extends WizardPage {
 				}else{
 					containerText.setText(container.getFullPath().toString());	
 				}
+				this.currentRootContainerPath = containerText.getText();
 				this.project=((IResource) obj).getProject();
 			}
 		}
@@ -384,7 +406,9 @@ public class ModuleNewWizardPage extends WizardPage {
 			fileText.setText(parentCt+(parentCt.length()>0?"/":"")+"module");
 		}else{
 			fileText.setText("page/module");
-		}	
+		}
+
+		handleCreateModulePathChange();
 	}
 
 	/**
