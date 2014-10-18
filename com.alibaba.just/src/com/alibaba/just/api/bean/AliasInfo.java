@@ -53,7 +53,7 @@ public class AliasInfo {
 	}
 
 	public boolean equals(Object obj) {
-		if(AliasInfo.class.isInstance(obj)){
+		if(obj instanceof AliasInfo){
 			AliasInfo o = (AliasInfo)obj;
 			if(((o.alias==null && this.alias==null) || (o.alias!=null && o.alias.equals(this.alias)))
 					&& ((o.name==null && this.name==null) || (o.name!=null && o.name.equals(this.name)))

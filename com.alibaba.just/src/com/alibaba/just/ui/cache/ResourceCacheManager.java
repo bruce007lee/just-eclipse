@@ -90,7 +90,7 @@ public class ResourceCacheManager {
 		Element el = getCache().get(obj);
 		if(el!=null){
 			Object cel = el.getObjectValue();
-			if(CacheElement.class.isInstance(cel)){
+			if(cel instanceof CacheElement){
 				return (CacheElement)cel;
 			}
 		}

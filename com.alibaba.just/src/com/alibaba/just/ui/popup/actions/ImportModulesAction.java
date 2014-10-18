@@ -44,10 +44,10 @@ public class ImportModulesAction extends ImportModulesViewAction{
 	 */
 	public void run(IAction action) {		
 		if(selection==null){return;}		
-		if(!IStructuredSelection.class.isInstance(selection)){return;}		
+		if(!(selection instanceof IStructuredSelection)){return;}		
 		IStructuredSelection sel = (IStructuredSelection)selection;
 		Object obj = sel.getFirstElement();		
-		if(!IFile.class.isInstance(obj)){return;}
+		if(!(obj instanceof IFile)){return;}
 
 		Shell shell = UIUtil.getShell();
 		try {

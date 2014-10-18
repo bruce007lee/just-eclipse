@@ -34,12 +34,12 @@ public class OpenModuleAction implements IWorkbenchWindowActionDelegate {
 		if(part==null){return;}
 
 		String selectText = null;
-		if(TextSelection.class.isInstance(this.selection)){
+		if(this.selection instanceof TextSelection){
 			selectText = ((TextSelection)this.selection).getText();
 		}
 
 		IEditorInput input = part.getEditorInput();
-		if(FileEditorInput.class.isInstance(input)){
+		if(input instanceof FileEditorInput){
 			FileEditorInput fileInput = (FileEditorInput)input;
 			try {
 				IFile ifile = fileInput.getFile();

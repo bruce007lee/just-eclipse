@@ -21,6 +21,10 @@ public interface ModuleParser {
 	public static final int MODULE_TYPE_NORMAL = 0;
 	public static final int MODULE_TYPE_ANONYMOUS = 1;
 	public static final int MODULE_TYPE_ALL = 2;
+	
+	public static final int MD_TYPE_AMD = 1;
+	public static final int MD_TYPE_CMD = 2;
+	public static final int MD_TYPE_UMD = MD_TYPE_AMD | MD_TYPE_CMD;
 	/**
 	 * 默认的js文件filter
 	 */
@@ -128,6 +132,10 @@ public interface ModuleParser {
 	 * @return
 	 */
 	public List<Module> getModules(File file, int moduleType);
+	
+	public int getMdType();
+
+	public void setMdType(int mdType);
 
 	/**
 	 * 释放资源

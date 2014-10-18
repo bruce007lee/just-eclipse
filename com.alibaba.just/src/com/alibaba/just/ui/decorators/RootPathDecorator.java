@@ -56,7 +56,7 @@ public class RootPathDecorator extends LabelProvider implements ILightweightLabe
 		this.createImageDescriptors();
 
 		IResource resource = (IResource) element;
-		if(IFolder.class.isInstance(element)){
+		if(element instanceof IFolder){
 			IFolder ifolder = (IFolder) element;	
 			String path = ifolder.getFullPath().toString();
 			IProject project = ifolder.getProject();

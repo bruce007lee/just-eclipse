@@ -164,7 +164,7 @@ public class JavascriptCompletionProposal implements IJavaCompletionProposal {
 	}
 
 	public int getRelevance() {
-		if(IFunction.class.isInstance(fJavaScriptElement)){
+		if(fJavaScriptElement instanceof IFunction){
 			return -11;
 		}
 		return -10;

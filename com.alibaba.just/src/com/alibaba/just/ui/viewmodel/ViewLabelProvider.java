@@ -15,7 +15,7 @@ import com.alibaba.just.ui.util.ImageManager;
 public class ViewLabelProvider extends LabelProvider {
 	
 	public String getText(Object obj) {
-		if(ViewItem.class.isInstance(obj)){
+		if(obj instanceof ViewItem){
 			String label = ((ViewItem)obj).getLabel();
 			if(label==null){
 				label = ((ViewItem)obj).getObj().toString();
@@ -27,7 +27,7 @@ public class ViewLabelProvider extends LabelProvider {
 	}
 	
 	public Image getImage(Object obj) {
-		if(ViewItem.class.isInstance(obj)){
+		if(obj instanceof ViewItem){
 			return ImageManager.getImage(((ViewItem)obj).getIconName());
 		}else{
 			return null;

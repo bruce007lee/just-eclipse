@@ -97,7 +97,7 @@ public class EditAliasConfigDialog extends Dialog {
 			}
 
 			public void focusLost(FocusEvent e) {
-				if(Text.class.isInstance(e.getSource())){
+				if(e.getSource() instanceof Text){
 					Text t = (Text)e.getSource();
 					t.setText(t.getText().trim());
 				}

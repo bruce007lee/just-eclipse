@@ -55,7 +55,7 @@ public class AddModuleViewAction implements IEditorActionDelegate {
 
 		IEditorInput input = targetEditor.getEditorInput();
 
-		if(FileEditorInput.class.isInstance(input)){
+		if(input instanceof FileEditorInput){
 			FileEditorInput fileInput = (FileEditorInput)input;
 			try {
 				IFile ifile = fileInput.getFile();
@@ -64,7 +64,7 @@ public class AddModuleViewAction implements IEditorActionDelegate {
 				}
 
 				IProject project = ifile.getProject();
-				if(ITextEditor.class.isInstance(targetEditor)){
+				if(targetEditor instanceof ITextEditor){
 					handleShowModuleSelectionDlg(project,(ITextEditor)targetEditor,ifile);
 				}
 
@@ -86,7 +86,7 @@ public class AddModuleViewAction implements IEditorActionDelegate {
 	private void insertEditorText(ITextEditor editor,String text) throws Exception{
 		IDocument document = editor.getDocumentProvider().getDocument(editor.getEditorInput());
 		ISelection selection = editor.getSelectionProvider().getSelection();
-		if(ITextSelection.class.isInstance(selection)){
+		if(selection instanceof ITextSelection){
 			ITextSelection textSeleciton = (ITextSelection)selection;
 			document.replace(textSeleciton.getOffset(), textSeleciton.getLength() , text);
 			editor.selectAndReveal(textSeleciton.getOffset()+text.length(), 0);
@@ -95,7 +95,7 @@ public class AddModuleViewAction implements IEditorActionDelegate {
 
 	private ITextSelection getEditSelection(ITextEditor editor){
 		ISelection selection = editor.getSelectionProvider().getSelection();
-		if(ITextSelection.class.isInstance(selection)){
+		if(selection instanceof ITextSelection){
 			return (ITextSelection)selection;
 		}
 		return null;
@@ -157,7 +157,7 @@ public class AddModuleViewAction implements IEditorActionDelegate {
 				try{
 					Object rs  = moduleSelectionDialog.getSelectedResult();
 					//System.out.println(rs);
-					if(Module.class.isInstance(rs)){
+					if(rs instanceof Module){
 						String t = ((Module)rs).getName();
 						AddModuleViewAction.this.insertEditorText(editor,t);					
 					}
@@ -171,7 +171,7 @@ public class AddModuleViewAction implements IEditorActionDelegate {
 			public void widgetSelected(SelectionEvent e) {
 				try{
 					Control c = moduleSelectionDialog.getPatternControl();
-					if(Text.class.isInstance(c)){
+					if(c instanceof Text){
 						Text  text = (Text) c;
 						String t = text.getText().trim();
 						AddModuleViewAction.this.insertEditorText(editor,t);

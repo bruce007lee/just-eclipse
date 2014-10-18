@@ -283,12 +283,12 @@ public class ModuleNewWizardPage extends WizardPage {
 				this.computeResult();
 				Object rs  = moduleSelectionDialog.getFirstResult();
 				//System.out.println(rs);
-				if(Module.class.isInstance(rs)){
+				if(rs instanceof Module){
 					Module m = (Module)rs;
 					String t = m.getName();
 					if(!isExist(selectedModuleList,t)){
 						boolean isAdd = false;
-						if(ModuleVO.class.isInstance(rs)){
+						if(rs instanceof ModuleVO){
 							if(((ModuleVO)rs).isUseAlias() && m.hasAlias()){
 								isAdd = true;
 								selectedModuleList.add(((ModuleVO)rs).getCurrentAlias());
@@ -320,12 +320,12 @@ public class ModuleNewWizardPage extends WizardPage {
 			public void widgetSelected(SelectionEvent e) {
 				Object rs  = moduleSelectionDialog.getSelectedResult();
 				//System.out.println(rs);
-				if(Module.class.isInstance(rs)){
+				if(rs instanceof Module){
 					Module m = (Module)rs;
 					String t = m.getName();
 					if(!isExist(selectedModuleList,t)){
 						boolean isAdd = false;
-						if(ModuleVO.class.isInstance(rs)){
+						if(rs instanceof ModuleVO){
 							if(((ModuleVO)rs).isUseAlias() && m.hasAlias()){
 								isAdd = true;
 								selectedModuleList.add(((ModuleVO)rs).getCurrentAlias());
@@ -342,7 +342,7 @@ public class ModuleNewWizardPage extends WizardPage {
 		moduleSelectionDialog.getTextModBtn().addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e) {
 				Control c = moduleSelectionDialog.getPatternControl();
-				if(Text.class.isInstance(c)){
+				if(c instanceof Text){
 					Text  text = (Text) c;
 					String t = text.getText().trim();
 					if(!isExist(selectedModuleList,t)){

@@ -35,16 +35,16 @@ public class ImportFolderModulesAction extends ImportFolderModulesViewAction{
 	 */
 	public void run(IAction action) {		
 		if(selection==null){return;}		
-		if(!IStructuredSelection.class.isInstance(selection)){return;}		
+		if(!(selection instanceof IStructuredSelection)){return;}		
 		IStructuredSelection sel = (IStructuredSelection)selection;
 		Object obj = sel.getFirstElement();
 		IContainer container = null;
 
-		if(IContainer.class.isInstance(obj)){
+		if(obj instanceof IContainer){
 			container = (IFolder)obj;
 		}
 
-		if(IFile.class.isInstance(obj)){
+		if(obj instanceof IFile){
 			container = ((IFile)obj).getParent();
 		}
 

@@ -135,7 +135,7 @@ public class ModuleView extends ViewPart {
 		}
 
 		public String getName() {
-			if(Module.class.isInstance(obj)){
+			if(obj instanceof Module){
 				Module m = (Module)obj;
 				if(m.isAnonymous()){
 					return "<anonymous module>";
@@ -278,10 +278,10 @@ public class ModuleView extends ViewPart {
 			Object obj = cell.getElement();
 			TreeNode node = null;
 			Module m = null;
-			if(TreeNode.class.isInstance(obj)){				
+			if(obj instanceof TreeNode){				
 				StyledString text = new StyledString();				
 				node = (TreeNode)obj;
-				if(Module.class.isInstance(node.getObject())){
+				if(node.getObject() instanceof Module){
 					m = (Module)node.getObject();
 				}
 
@@ -395,9 +395,9 @@ public class ModuleView extends ViewPart {
 	 */
 	private void updateView(IWorkbenchPart part){
 		try{
-			if(IEditorPart.class.isInstance(part)){
+			if(part instanceof IEditorPart){
 				IEditorInput input = ((IEditorPart)part).getEditorInput();
-				if(FileEditorInput.class.isInstance(input)){
+				if(input instanceof FileEditorInput){
 					currentFilePath = null;
 					FileEditorInput fileInput = (FileEditorInput)input;
 					IFile ff = fileInput.getFile();
@@ -411,7 +411,7 @@ public class ModuleView extends ViewPart {
 					currentFileTimeStamp = ff.getModificationStamp();
 					//异步刷新
 					loadModuleRequires(currentFile,true);
-				}else if(FileStoreEditorInput.class.isInstance(input)){
+				}else if(input instanceof FileStoreEditorInput){
 					FileStoreEditorInput fileInput = (FileStoreEditorInput)input;
 					if(currentFile!=null){
 						IProject project = currentFile.getProject();
@@ -432,7 +432,7 @@ public class ModuleView extends ViewPart {
 					}
 				}
 			}
-			/*else if(!ModuleView.class.isInstance(part)){
+			/*else if(! part istanceof ModuleView){
 				clearView(true);
 			}*/
 		}catch(Exception e){
@@ -972,10 +972,10 @@ public class ModuleView extends ViewPart {
 	private void openSelectModule(){
 		ISelection selection = viewer.getSelection();
 		Object obj = ((IStructuredSelection)selection).getFirstElement();
-		if(TreeNode.class.isInstance(obj)){
+		if(obj instanceof TreeNode){
 			TreeNode  node = (TreeNode)obj;
 			Object o = node.getObject();
-			if(Module.class.isInstance(o)){
+			if(o instanceof Module){
 				final String filePath = ((Module)o).getFilePath();
 
 				if(filePath==null){
@@ -1000,7 +1000,7 @@ public class ModuleView extends ViewPart {
 
 								//fix 显示非workspace文件编码问题,目前先使用justeclipse中设置的编码
 								//TODO 需要对lib库添加编码定义配置
-								if(editPart !=null && FileStoreEditorInput.class.isInstance(editPart.getEditorInput())){
+								if(editPart !=null && editPart.getEditorInput() instanceof FileStoreEditorInput){
 									IEncodingSupport encodingSupport= 
 										(IEncodingSupport)editPart.getAdapter(IEncodingSupport.class);
 									if(encodingSupport!=null){

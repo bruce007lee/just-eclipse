@@ -59,7 +59,7 @@ public class ImportFolderModulesViewAction extends ImportModulesViewAction{
 
 		IEditorInput input = targetEditor.getEditorInput();
 
-		if(FileEditorInput.class.isInstance(input)){
+		if(input instanceof FileEditorInput){
 			Shell shell = UIUtil.getShell();
 			FileEditorInput fileInput = (FileEditorInput)input;
 			try {
@@ -129,7 +129,7 @@ public class ImportFolderModulesViewAction extends ImportModulesViewAction{
 			  l = mainFiles.size();
 			}
 			for(IResource res:resources){
-				if(IFile.class.isInstance(res)){
+				if(res instanceof IFile){
 					f = (IFile)res;
 					if(VALID_MODULE_EXT.equalsIgnoreCase(f.getFileExtension()) && !mergeFileList.contains(f)){
 						item = new ViewItem(f);
@@ -158,9 +158,9 @@ public class ImportFolderModulesViewAction extends ImportModulesViewAction{
 						List<String> mains = new ArrayList<String>();
 						for(Object obj:checkList){
 							IFile f = null;
-							if(ViewItem.class.isInstance(obj)){
+							if(obj instanceof ViewItem){
 								obj = ((ViewItem)obj).getObj();
-								if(IFile.class.isInstance(obj)){
+								if(obj instanceof IFile){
 									f = (IFile)obj;
 									List<Module> fm = getRequire(moduleList, p, f);
 									boolean exist = false;

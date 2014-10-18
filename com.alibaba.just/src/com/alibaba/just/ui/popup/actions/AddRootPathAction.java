@@ -30,10 +30,10 @@ public class AddRootPathAction implements IObjectActionDelegate {
 	public void run(IAction action) {
 		
 		if(selection==null){return;}		
-		if(!IStructuredSelection.class.isInstance(selection)){return;}		
+		if(!(selection instanceof IStructuredSelection)){return;}		
 		IStructuredSelection sel = (IStructuredSelection)selection;
 		Object obj = sel.getFirstElement();		
-		if(!IFolder.class.isInstance(obj)){return;}
+		if(!(obj instanceof IFolder)){return;}
 
 		try {
 			IFolder ifolder = (IFolder) obj;

@@ -395,25 +395,25 @@ public class ProjectModuleAliasPage extends PropertyPage{
 
 				Object lofty = scope.get("lofty", scope);
 				NativeObject no= null;
-				if(NativeObject.class.isInstance(lofty)){
+				if(lofty instanceof NativeObject){
 					no = (NativeObject)lofty;
 					rs = no.get("alias", no);
 				}
 
-				if(!NativeObject.class.isInstance(rs)){
-					if(NativeObject.class.isInstance(result)){
+				if(!(rs instanceof NativeObject)){
+					if(result instanceof NativeObject){
 						rs = (NativeObject)result;
 					}
 				}
 
-				if(NativeObject.class.isInstance(rs)){
+				if(rs instanceof NativeObject){
 					no = (NativeObject)rs;
 					Set<Entry<Object, Object>>  set = no.entrySet();					 
 					Iterator<Entry<Object, Object>> iter = set.iterator();
 					Entry<Object, Object> item = null;
 					while(iter.hasNext()){
 						item =  iter.next();
-						if(String.class.isInstance(item.getKey()) && String.class.isInstance(item.getValue())){
+						if(item.getKey() instanceof String && item.getValue() instanceof String){
 							list.add(new AliasInfo((String)item.getKey(),(String)item.getValue()));
 						}
 					}
@@ -438,7 +438,7 @@ public class ProjectModuleAliasPage extends PropertyPage{
 		Object item = null;
 		for(int j=0;j<count;j++){
 			item= viewer.getElementAt(j);
-			if(AliasInfo.class.isInstance(item))
+			if(item instanceof AliasInfo)
 				list.add((AliasInfo)item);
 		}
 		return list;
@@ -451,7 +451,7 @@ public class ProjectModuleAliasPage extends PropertyPage{
 		Object[] olist = selection.toArray();
 		AliasInfo ai = null;
 		for(Object obj:olist){
-			if(AliasInfo.class.isInstance(obj)){;
+			if(obj instanceof AliasInfo){;
 			list.add((AliasInfo)obj);
 			}
 		}

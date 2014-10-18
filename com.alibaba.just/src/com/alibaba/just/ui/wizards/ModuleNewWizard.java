@@ -188,7 +188,7 @@ public class ModuleNewWizard extends Wizard implements INewWizard {
 
 	private void createFolder(IFolder folder,IProgressMonitor monitor) throws Exception{
 		IContainer parentCt = folder.getParent();		
-		if(!IProject.class.isInstance(parentCt)){
+		if(!(parentCt instanceof IProject)){
 			IFolder parent = parentCt.getFolder(null);
 			if(!parent.exists()){
 				createFolder(parent,monitor);

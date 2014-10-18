@@ -26,7 +26,7 @@ public class NewModuleWizardAction implements IObjectActionDelegate {
 
 	public void run(IAction action) {
 		try {
-			if(IStructuredSelection.class.isInstance(selection)){
+			if(selection instanceof IStructuredSelection){
 				IWorkbench workbench = Activator.getDefault().getWorkbench();
 				IWizardDescriptor iwd = workbench.getNewWizardRegistry().findWizard(NEW_MODULE_WIZARD_ID);
 				IWorkbenchWizard  ww = iwd.createWizard();				

@@ -168,7 +168,7 @@ public class PluginResourceUtil {
 			IPath rootPath = wRoot.getFullPath();
 			IResource res = wRoot.findMember(rootPath.append(lb));
 
-			if(IContainer.class.isInstance(res) && res.exists()){
+			if(res instanceof IContainer && res.exists()){
 				String key = getResourceCacheKey(project,libStr);
 				String stamp = res.getPersistentProperty(PluginConstants.CACHE_QUALIFIEDNAME);
 
@@ -272,7 +272,7 @@ public class PluginResourceUtil {
 			return moduleList;
 		}
 
-		if(IContainer.class.isInstance(resource)){
+		if(resource instanceof IContainer){
 			IContainer pro = (IContainer)resource;
 			IResource[] members = pro.members();
 			for(int i=0,l=members.length;i<l;i++){
@@ -287,11 +287,11 @@ public class PluginResourceUtil {
 				CacheElement cache = ResourceCacheManager.get(key);
 				if(cache!=null && cache.getStamp()!=null && cache.getStamp().equals(f.lastModified())){
 					Object obj = cache.getValue();
-					if(List.class.isInstance(obj)){
+					if(obj instanceof List){
 						List mlist = (List)obj;
 						Module mm = null;
 						for(Object m:mlist){
-							if(Module.class.isInstance(m)){
+							if(m instanceof Module){
 								mm = (Module)m;
 								if(moduleType==ModuleParser.MODULE_TYPE_NORMAL && mm.isAnonymous()){							
 								}else{
@@ -369,7 +369,7 @@ public class PluginResourceUtil {
 		if(parser.getFilter()!=null && !parser.getFilter().accept(resource.getLocation().toFile())){
 
 		}else{
-			if(IContainer.class.isInstance(resource)){
+			if(resource instanceof IContainer){
 				IContainer pro = (IContainer)resource;
 				IResource[] members=null;
 				try {

@@ -173,7 +173,7 @@ public class JSDTJavascriptCompletionProposalComputer implements IJavaCompletion
 							IJavaScriptElement[] jels = tel.getChildren();
 							for(IJavaScriptElement jel:jels){
 								//doc = ProposalUtil.getJavadocHtml(jel);
-								if(IFunction.class.isInstance(jel)){
+								if(jel instanceof IFunction){
 									//name = jel.getElementName() + "()";
 									name = ProposalUtil.createMethodProposalLabel((IFunction)jel);
 								}else{
@@ -193,7 +193,7 @@ public class JSDTJavascriptCompletionProposalComputer implements IJavaCompletion
 								IJavaScriptElement[] jels = tel.getChildren();
 								for(IJavaScriptElement jel:jels){
 									//doc = ProposalUtil.getJavadocHtml(jel);
-									if(IFunction.class.isInstance(jel)){
+									if(jel instanceof IFunction){
 										//name = jel.getElementName() + "()";
 										name = ProposalUtil.createMethodProposalLabel((IFunction)jel);
 									}else{
@@ -260,9 +260,9 @@ public class JSDTJavascriptCompletionProposalComputer implements IJavaCompletion
 	}
 
 	private Image getIcon(IJavaScriptElement jel){
-		if(IFunction.class.isInstance(jel)){
+		if(jel instanceof IFunction){
 			return ImageManager.getImage(ImageManager.IMG_METHOD_PUBLIC_OBJ);
-		}else if(IField.class.isInstance(jel)){
+		}else if(jel instanceof IField){
 			return ImageManager.getImage(ImageManager.IMG_FIELD_PUBLIC_OBJ);
 		}
 		return null;

@@ -180,7 +180,7 @@ public class ProjectJavaScriptLibPage extends PropertyPage {
 		ViewContentProvider<ViewItem> provider = this.getViewContentProvider(viewer);
 		int index = -1;
 		for(Object item:items){
-			if(ViewItem.class.isInstance(item)){
+			if(item instanceof ViewItem){
 				index = provider.indexOf((ViewItem)item);
 				break;
 			}
@@ -377,7 +377,7 @@ public class ProjectJavaScriptLibPage extends PropertyPage {
 
 		dialog.setValidator(new ISelectionValidator(){
 			public String isValid(Object selection) {
-				if(IPath.class.isInstance(selection)){
+				if(selection instanceof IPath){
 					IPath path = (IPath)selection;
 					if(project.getName().equals(path.segment(0))){
 						return null;
@@ -412,7 +412,7 @@ public class ProjectJavaScriptLibPage extends PropertyPage {
 		if(selection==null || selection.isEmpty()){return;}
 		List items = selection.toList();			
 		for(Object item:items){
-			if(ViewItem.class.isInstance(item)){
+			if(item instanceof ViewItem){
 				this.getViewContentProvider(viewer).remove((ViewItem)item);
 			}
 		}
@@ -448,7 +448,7 @@ public class ProjectJavaScriptLibPage extends PropertyPage {
 	private boolean isExist(StructuredViewer  list,String item){
 		List items = this.getViewContentProvider(list).getItemList();	
 		for(Object t:items){
-			if(ViewItem.class.isInstance(t)){
+			if(t instanceof ViewItem){
 				if(((ViewItem)t).getObj().equals(item)){
 					return true;
 				}

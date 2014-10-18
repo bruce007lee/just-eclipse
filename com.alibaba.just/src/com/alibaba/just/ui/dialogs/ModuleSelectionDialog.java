@@ -93,14 +93,14 @@ public class ModuleSelectionDialog extends FilteredItemsSelectionDialog {
 	 */
 	public String getFirstResultString(){
 		Object obj = this.getFirstResult();
-		if(ModuleVO.class.isInstance(obj)){
+		if(obj instanceof ModuleVO){
 			ModuleVO vo = (ModuleVO)obj;
 			if(vo.isUseAlias()){
 				return vo.getCurrentAlias();
 			}else{
 				return vo.getName();
 			}
-		}else if(Module.class.isInstance(obj)){
+		}else if(obj instanceof Module){
 			return ((Module)obj).getName();
 		}else if(obj!=null){
 			return obj.toString();
@@ -111,10 +111,10 @@ public class ModuleSelectionDialog extends FilteredItemsSelectionDialog {
 	public Object getFirstResult() {
 		Object obj = super.getFirstResult();
 		//convert to module
-		if(ViewItem.class.isInstance(obj)){
+		if(obj instanceof ViewItem){
 			ViewItem vi = (ViewItem)obj;
 			obj = vi.getObj();
-			if(Module.class.isInstance(obj)){
+			if(obj instanceof Module){
 				ModuleVO  vo = convertModule((Module)obj);
 				if(ParserUtil.isMatchAlias(vi.getLabel(), vo)){
 					vo.setUseAlias(true);
@@ -122,7 +122,7 @@ public class ModuleSelectionDialog extends FilteredItemsSelectionDialog {
 				}
 				obj = vo;
 			}
-		}else if(Module.class.isInstance(obj)){
+		}else if(obj instanceof Module){
 			obj = convertModule((Module)obj);
 		}
 		return obj;
@@ -163,11 +163,11 @@ public class ModuleSelectionDialog extends FilteredItemsSelectionDialog {
 			}
 
 			public String getText(Object element) {
-				if(Module.class.isInstance(element)){
+				if(element instanceof Module){
 					return((Module)element).getFilePath();
-				}else if(ViewItem.class.isInstance(element)){
+				}else if(element instanceof ViewItem){
 					ViewItem vi = (ViewItem)element;
-					if(Module.class.isInstance(vi.getObj())){
+					if(vi.getObj() instanceof Module){
 						return ((Module)vi.getObj()).getFilePath();
 					}
 				}
@@ -230,9 +230,9 @@ public class ModuleSelectionDialog extends FilteredItemsSelectionDialog {
 	protected ItemsFilter createFilter() {
 		return new ItemsFilter() {
 			public boolean matchItem(Object item) {
-				if(Module.class.isInstance(item)){
+				if(item instanceof Module){
 					return ((Module)item).getName()!=null && matches(((Module)item).getName());
-				}else if(ViewItem.class.isInstance(item)){
+				}else if(item instanceof ViewItem){
 					return((ViewItem)item).getLabel()!=null && matches(((ViewItem)item).getLabel());
 				}	
 				return false;
@@ -250,35 +250,35 @@ public class ModuleSelectionDialog extends FilteredItemsSelectionDialog {
 	protected Comparator getItemsComparator() {
 		return new Comparator() {
 			public int compare(Object arg0, Object arg1) {
-				if(ViewItem.class.isInstance(arg0)){
-					if(!ViewItem.class.isInstance(arg1)){
+				if(arg0 instanceof ViewItem){
+					if(!(arg1 instanceof ViewItem)){
 						return -1;
 					}else if(arg1!=null && ((ViewItem)arg0).getType() > ((ViewItem)arg1).getType()){
 						return -1;
 					}
 				}
 
-				if(ViewItem.class.isInstance(arg1)){
-					if(!ViewItem.class.isInstance(arg0)){
+				if(arg1 instanceof ViewItem){
+					if(!(arg0 instanceof ViewItem)){
 						return 1;
 					}else if(arg1!=null && ((ViewItem)arg1).getType() > ((ViewItem)arg0).getType()){
 						return 1;
 					}
 				}
 
-				if(ViewItem.class.isInstance(arg0)){
+				if(arg0 instanceof ViewItem){
 					arg0 = ((ViewItem)arg0).getLabel();
 
-				}else if(Module.class.isInstance(arg0)){
+				}else if(arg0 instanceof Module){
 					arg0 =  ((Module)arg0).getName();
 				}
-				if(ViewItem.class.isInstance(arg1)){
+				if(arg1 instanceof ViewItem){
 					arg1 = ((ViewItem)arg1).getLabel();
 
-				}else if(Module.class.isInstance(arg1)){
+				}else if(arg1 instanceof Module){
 					arg1 =  ((Module)arg1).getName();
 				}
-				if(String.class.isInstance(arg0) && String.class.isInstance(arg1)){
+				if(arg0 instanceof String && arg1 instanceof String){
 					return ((String)arg0).compareTo((String)arg1);
 				}else{
 					return 0;
@@ -356,9 +356,9 @@ public class ModuleSelectionDialog extends FilteredItemsSelectionDialog {
 	 * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog#getElementName(java.lang.Object)
 	 */
 	public String getElementName(Object item) {
-		if(Module.class.isInstance(item)){
+		if(item instanceof Module){
 			return ((Module)item).getName();
-		}else if(ViewItem.class.isInstance(item)){
+		}else if(item instanceof ViewItem){
 			return((ViewItem)item).getLabel();
 		}
 		return null;
@@ -386,7 +386,7 @@ public class ModuleSelectionDialog extends FilteredItemsSelectionDialog {
 	private class StyledLabelProvider implements IStyledLabelProvider,ILabelProvider{
 
 		public Image getImage(Object element) {
-			if(ViewItem.class.isInstance(element)&& ((ViewItem)element).getIconName()!=null){
+			if(element instanceof ViewItem && ((ViewItem)element).getIconName()!=null){
 				return ImageManager.getImage(((ViewItem)element).getIconName());
 			}else{
 				return ImageManager.getImage(ImageManager.IMG_MODULE_ICON);
@@ -394,9 +394,9 @@ public class ModuleSelectionDialog extends FilteredItemsSelectionDialog {
 		}
 
 		public String getText(Object element) {
-			if(Module.class.isInstance(element)){
+			if(element instanceof Module){
 				return((Module)element).getName();
-			}else if(ViewItem.class.isInstance(element)){
+			}else if(element instanceof  ViewItem){
 				return((ViewItem)element).getLabel();
 			}
 			return null;
@@ -423,7 +423,7 @@ public class ModuleSelectionDialog extends FilteredItemsSelectionDialog {
 		}
 
 		public StyledString getStyledText(Object element) {
-			if(Module.class.isInstance(element)){
+			if(element instanceof Module){
 				String name = ((Module)element).getName();
 				String path = ((Module)element).getFilePath();
 				StyledString ss = new StyledString(name);
@@ -431,9 +431,9 @@ public class ModuleSelectionDialog extends FilteredItemsSelectionDialog {
 					ss.append(new StyledString(SEP + path,StyledString.QUALIFIER_STYLER));
 				}
 				return ss;
-			}if(ViewItem.class.isInstance(element)){				
+			}if(element instanceof ViewItem){				
 				ViewItem vi = (ViewItem)element;
-				if(Module.class.isInstance(vi.getObj())){
+				if(vi.getObj() instanceof Module){
 					Module m = (Module)vi.getObj();
 					String name = vi.getLabel();
 					String path = m.getFilePath();

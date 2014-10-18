@@ -60,7 +60,7 @@ public class OpenModuleDialog extends ModuleSelectionDialog {
 
 	protected void okPressed() {
 		Object module = this.getSelectedResult();
-		if(Module.class.isInstance(module)){
+		if(module instanceof Module){
 			final String filePath = ((Module)module).getFilePath();
 			Display.getDefault().asyncExec(new Runnable() {
 				public void run() {
@@ -77,7 +77,7 @@ public class OpenModuleDialog extends ModuleSelectionDialog {
 							
 							//fix 显示非workspace文件编码问题,目前先使用justeclipse中设置的编码
 							//TODO 需要对lib库添加编码定义配置
-							if(editPart !=null && FileStoreEditorInput.class.isInstance(editPart.getEditorInput())){
+							if(editPart !=null && editPart.getEditorInput() instanceof FileStoreEditorInput){
 								IEncodingSupport encodingSupport= 
 									(IEncodingSupport)editPart.getAdapter(IEncodingSupport.class);
 								if(encodingSupport!=null){

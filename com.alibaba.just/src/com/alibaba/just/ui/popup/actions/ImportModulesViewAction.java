@@ -75,7 +75,7 @@ public class ImportModulesViewAction implements IEditorActionDelegate,IObjectAct
 
 		IEditorInput input = targetEditor.getEditorInput();
 
-		if(FileEditorInput.class.isInstance(input)){
+		if(input instanceof FileEditorInput){
 			Shell shell = UIUtil.getShell();
 			FileEditorInput fileInput = (FileEditorInput)input;
 			try {
@@ -251,7 +251,7 @@ public class ImportModulesViewAction implements IEditorActionDelegate,IObjectAct
 			IFile ifile = null;
 			String content = null;
 			for(IResource res:resources){
-				if(IFile.class.isInstance(res)){
+				if(res instanceof IFile){
 					ifile = (IFile)res;
 					content = FileUtil.getFileContent(ifile.getContents(), ifile.getCharset());
 					if(isMergeFile(content)){

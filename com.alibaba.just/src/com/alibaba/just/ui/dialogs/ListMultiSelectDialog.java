@@ -156,7 +156,7 @@ public class ListMultiSelectDialog extends Dialog {
 	    column = this.createColumn(viewer, "", 200, 0, true, false);
 		column.setLabelProvider(new ColumnLabelProvider() {
 			public String getText(Object element) {				
-				if(ViewItem.class.isInstance(element)){
+				if(element instanceof ViewItem){
 					return ((ViewItem)element).getLabel();
 				}				
 				return super.getText(element);
@@ -194,14 +194,14 @@ public class ListMultiSelectDialog extends Dialog {
 		viewer.setContentProvider(new ViewContentProvider<ViewItem>());
 		viewer.setCheckStateProvider(new ICheckStateProvider(){
 			public boolean isChecked(Object element) {
-				if(ViewItem.class.isInstance(element)){
+				if(element instanceof ViewItem){
 					return ((ViewItem)element).isChecked();
 				}			
 				return false;
 			}
 
 			public boolean isGrayed(Object element) {
-				if(ViewItem.class.isInstance(element)){
+				if(element instanceof ViewItem){
 					return ((ViewItem)element).isGray();
 				}			
 				return false;

@@ -71,7 +71,7 @@ public class PreferenceUtil {
 		try {
 			Object obj = project.getSessionProperty(CONFIG_QUALIFIEDNAME);
 			Document doc = null;
-			if(Document.class.isInstance(obj)){
+			if(obj instanceof Document){
 				doc = (Document)obj;
 			}else{
 				//val = project.getPersistentProperty(new QualifiedName(PluginConstants.QUALIFIED_NAME, key));
@@ -141,7 +141,7 @@ public class PreferenceUtil {
 		List<Node> list = getChildNode(parent,PROPERTY_NAME);
 		Element el = null;
 		for(Node n:list){
-			if(Element.class.isInstance(n)){
+			if(n instanceof Element){
 				el = (Element)n;
 				if(propertyName.equals(el.getAttribute(ATTR_NAME))){
 					return el;
@@ -232,7 +232,7 @@ public class PreferenceUtil {
 			String path = getProjectConfigPath(project);
 			Object obj = project.getSessionProperty(CONFIG_QUALIFIEDNAME);
 			Document doc = null;
-			if(Document.class.isInstance(obj)){
+			if(obj instanceof Document){
 				doc = (Document)obj;
 			}else{
 				//project.setPersistentProperty(new QualifiedName(PluginConstants.QUALIFIED_NAME, key),value);
@@ -444,7 +444,7 @@ public class PreferenceUtil {
 				String path = getProjectConfigPath(project);
 				Object obj = project.getSessionProperty(CONFIG_QUALIFIEDNAME);
 				Document doc = null;
-				if(Document.class.isInstance(obj)){
+				if(obj instanceof Document){
 					doc = (Document)obj;
 				}else{
 					//project.setPersistentProperty(new QualifiedName(PluginConstants.QUALIFIED_NAME, key),value);
@@ -506,7 +506,7 @@ public class PreferenceUtil {
 		try {
 			Object obj = project.getSessionProperty(CONFIG_QUALIFIEDNAME);
 			Document doc = null;
-			if(Document.class.isInstance(obj)){
+			if(obj instanceof Document){
 				doc = (Document)obj;
 			}else{
 				//val = project.getPersistentProperty(new QualifiedName(PluginConstants.QUALIFIED_NAME, key));
@@ -527,7 +527,7 @@ public class PreferenceUtil {
 					AliasInfo info =null;
 					for(int i=0,l=items.getLength();i<l;i++){
 						item = items.item(i);
-						if(Element.class.isInstance(item)){
+						if(item instanceof Element){
 							list.add(convertToAliasInfo((Element)item));
 						}
 					}
