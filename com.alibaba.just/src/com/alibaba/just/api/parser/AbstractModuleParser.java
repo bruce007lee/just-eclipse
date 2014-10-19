@@ -19,7 +19,7 @@ public abstract class AbstractModuleParser implements ModuleParser{
 	protected FileFilter filter = DEFAULT_FILE_FILTER; 
 	private static final int TASK_LIMT = 100000;//用线程池时限制10w个task一次
 	private List<AliasInfo> aliasList = null;		
-	protected int mdType = MD_TYPE_AMD;
+	protected int mdType = MD_TYPE_UMD;
 
 	public AbstractModuleParser(String charset){
 		this.charset = charset;		
@@ -279,7 +279,6 @@ public abstract class AbstractModuleParser implements ModuleParser{
 		return module;
 	}
 
-
 	/* (non-Javadoc)
 	 * @see com.alibaba.just.api.parser.ModuleParser#getModules(java.lang.String, int)
 	 */
@@ -352,7 +351,7 @@ public abstract class AbstractModuleParser implements ModuleParser{
 	public boolean isDisposed(){
 		return isDispose;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see com.alibaba.just.api.parser.ModuleParser#getMdType()
 	 */

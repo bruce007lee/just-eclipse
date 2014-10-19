@@ -10,6 +10,7 @@ import com.alibaba.just.util.FileUtil;
 
 /**
  * 
+ * @deprecated
  * @author bruce.liz
  */
 public class SimpleModuleParser extends AbstractModuleParser{
@@ -96,23 +97,23 @@ public class SimpleModuleParser extends AbstractModuleParser{
 	/*------reg.end-----*/
 
 	private String defineKeyWord=null;
-	
-	public SimpleModuleParser(String charset,String defineKeyWord){
-		if(this.charset!=null){
-		   this.charset = charset;	
+
+	public SimpleModuleParser(ParserOptions options){
+		if(options!=null){
+			if(options.getCharset()!=null){
+				charset = options.getCharset();	
+			}
+			String defineKeyWord = DEFINE_KEY_REG;
+			if(options.getDefineKeyWord()!=null){
+				defineKeyWord = options.getDefineKeyWord();
+			}
+			this.mdType = options.getMdType();
+			this.setDefineKeyWord(defineKeyWord);
 		}
-		if(defineKeyWord==null){
-			defineKeyWord = DEFINE_KEY_REG;
-		}
-		this.setDefineKeyWord(defineKeyWord);
 	}
 
-	public SimpleModuleParser(String charset){
-		this(charset,null);
-	}
-		
 	public SimpleModuleParser(){
-		this(null,null);
+		this(null);
 	}
 
 	/*
@@ -122,7 +123,7 @@ public class SimpleModuleParser extends AbstractModuleParser{
 	public void setDefineKeyWord(String str){
 		if(str!=null && str.length()>0){
 			defineKeyWord = "\\W("+str+")";
-			
+
 			normal_seg = this.defineKeyWord + NORMAL_SEG;
 			anonymous_seg = this.defineKeyWord + ANONYMOUS_SEG;
 			normal_seg_simple = this.defineKeyWord + NORMAL_SEG_SIMPLE;

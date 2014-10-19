@@ -26,28 +26,25 @@ public class RhinoModuleParser extends AbstractModuleParser {
 
 	private String requireKeyWord="^require$";//TODO add setting for CMD mode
 
-	public RhinoModuleParser(String charset,String defineKeyWord){
-		if(this.charset!=null){
-			this.charset = charset;	
+	public RhinoModuleParser(ParserOptions options){
+		if(options!=null){
+			if(options.getCharset()!=null){
+				charset = options.getCharset();	
+			}
+			String defineKeyWord = DEFINE_KEY_REG;
+			if(options.getDefineKeyWord()!=null){
+				defineKeyWord = options.getDefineKeyWord();
+			}
+			this.mdType = options.getMdType();
+			this.setDefineKeyWord(defineKeyWord);
 		}
-		if(defineKeyWord==null){
-			defineKeyWord = DEFINE_KEY_REG;
-		}
-		this.setDefineKeyWord(defineKeyWord);
 	}
 
 	/**
 	 * 
 	 */
 	public RhinoModuleParser() {
-		this(null,null);
-	}
-
-	/**
-	 * @param charset
-	 */
-	public RhinoModuleParser(String charset) {
-		this(charset,null);
+		this(null);
 	}
 
 	/*
@@ -162,6 +159,8 @@ public class RhinoModuleParser extends AbstractModuleParser {
 		private List<Module>  moduleList;
 		private String absPath = null;
 
+		private Module cmdModule = null;//cmd模式一个文件就是一个模块
+
 		ModuleNodeVisitor(String absPath,List<Module>  moduleList,int moduleType){
 			this.moduleType = moduleType;
 			this.moduleList = moduleList;
@@ -171,12 +170,11 @@ public class RhinoModuleParser extends AbstractModuleParser {
 		public void dispose(){
 			moduleList = null;
 			absPath=null;
+			cmdModule=null;
 		}
 
 		public boolean visit(AstNode node) {
 			if(node instanceof  FunctionCall){	
-
-				Module cmdModule = null;
 
 				/*AMD逻辑*/
 				FunctionCall fc = (FunctionCall)node;
@@ -184,7 +182,7 @@ public class RhinoModuleParser extends AbstractModuleParser {
 				AstNode nameNode = fc.getTarget();
 				//System.out.println("NAME:"+n.getIdentifier());	
 				if((mdType== MD_TYPE_AMD || mdType== MD_TYPE_UMD) && Pattern.matches(defineKeyWord,nameNode.toSource().trim())){
-
+					Module module = null;
 					List<AstNode> args = fc.getArguments();
 					//校验3参数普通模块
 					//侦测define("module",["required1","required2"...],function(){...});
@@ -196,7 +194,7 @@ public class RhinoModuleParser extends AbstractModuleParser {
 						if(stringNode instanceof StringLiteral &&
 								arrayNode instanceof ArrayLiteral &&
 								funNode instanceof FunctionNode){
-							Module module = new Module();
+							module = new Module();
 							module.setAnonymous(false);
 							module.setName(((StringLiteral)stringNode).getValue(false));
 							module.getRequiredModuleNames().addAll(getRequiredModules((ArrayLiteral)arrayNode));
@@ -204,9 +202,7 @@ public class RhinoModuleParser extends AbstractModuleParser {
 							updateAlias(module,RhinoModuleParser.this.getAliasList());//update module alias
 							moduleList.add(module);
 						}
-					}
-
-					if(args.size()==2){
+					}else if(args.size()==2){
 						AstNode node1 = args.get(0);
 						AstNode node2 = args.get(1);
 
@@ -214,7 +210,7 @@ public class RhinoModuleParser extends AbstractModuleParser {
 						//侦测define("module",function(){...});
 						if((moduleType == MODULE_TYPE_ALL || moduleType == MODULE_TYPE_NORMAL) && node1 instanceof StringLiteral &&
 								node2 instanceof FunctionNode){
-							Module module = new Module();
+							module = new Module();
 							module.setAnonymous(false);
 							module.setName(((StringLiteral)node1).getValue(false));
 							module.setFilePath(absPath);
@@ -226,31 +222,34 @@ public class RhinoModuleParser extends AbstractModuleParser {
 						//侦测define(["required1","required2"...],function(){...});
 						if((moduleType == MODULE_TYPE_ALL || moduleType == MODULE_TYPE_ANONYMOUS) && node1 instanceof ArrayLiteral &&
 								node2 instanceof FunctionNode){
-							Module module = new Module();
+							module = new Module();
 							module.setAnonymous(true);
 							module.getRequiredModuleNames().addAll(getRequiredModules((ArrayLiteral)node1));
 							module.setFilePath(absPath);
 							moduleList.add(module);
 						}
-					}
+					}else if(args.size()==1 && (moduleType == MODULE_TYPE_ALL || moduleType == MODULE_TYPE_ANONYMOUS)){
+						//校验1参数的匿名模块
+						//侦测define(function(){...});
 
-					//校验1参数的匿名模块
-					//侦测define(function(){...});
-					if(args.size()==1 && (moduleType == MODULE_TYPE_ALL || moduleType == MODULE_TYPE_ANONYMOUS)){
 						AstNode node1 = args.get(0);
 						if(node1 instanceof FunctionNode){
-							Module module = new Module();
+							module = new Module();
 							module.setAnonymous(true);
 							module.setFilePath(absPath);
 							moduleList.add(module);
 						}
 					}
 
+					if(cmdModule==null && module!=null){
+						cmdModule = module;
+					}
+
 				}else if((mdType== MD_TYPE_CMD || mdType== MD_TYPE_UMD) && Pattern.matches(requireKeyWord,nameNode.toSource().trim())){
 					/*CMD逻辑*/
 					List<AstNode> args = fc.getArguments();
-					//校验3参数普通模块
-					//侦测define("module",["required1","required2"...],function(){...});
+					//校验cmd构造形式
+					//侦测require("module");
 					if(args.size()==1){
 						AstNode stringNode = args.get(0);
 
@@ -260,17 +259,14 @@ public class RhinoModuleParser extends AbstractModuleParser {
 								cmdModule.setName(RhinoModuleParser.this.getModuleByFileName(absPath));
 								cmdModule.setAnonymous(false);
 								cmdModule.setFilePath(absPath);
+								updateAlias(cmdModule,RhinoModuleParser.this.getAliasList());//update module alias
+								moduleList.add(cmdModule);
 							}
 							cmdModule.getRequiredModuleNames().add(((StringLiteral)stringNode).getValue(false));
 
 						}
 					}
 
-				}
-
-				if(cmdModule!=null){
-					updateAlias(cmdModule,RhinoModuleParser.this.getAliasList());//update module alias
-					moduleList.add(cmdModule);
 				}
 			}
 			return true;

@@ -26,6 +26,7 @@ import com.alibaba.just.api.bean.Module;
 import com.alibaba.just.api.parser.ModuleParser;
 import com.alibaba.just.api.parser.ParserEvent;
 import com.alibaba.just.api.parser.ParserFactory;
+import com.alibaba.just.api.parser.ParserOptions;
 import com.alibaba.just.ui.cache.CacheElement;
 import com.alibaba.just.ui.cache.ResourceCacheManager;
 import com.alibaba.just.util.FileUtil;
@@ -77,7 +78,11 @@ public class PluginResourceUtil {
 	 * @return 根据当前插件的设置生成ModuleParser
 	 */
 	public static ModuleParser getModuleParser(){
-		return ParserFactory.getModuleParser(PreferenceUtil.getParserEngineType(),PreferenceUtil.getFileCharset(),PreferenceUtil.getDefineKeyWord());
+		ParserOptions opts = new ParserOptions();
+		opts.setMdType(PreferenceUtil.getMDType());
+		opts.setCharset(PreferenceUtil.getFileCharset());
+		opts.setDefineKeyWord(PreferenceUtil.getDefineKeyWord());
+		return ParserFactory.getModuleParser(opts);
 	}
 
 	/**

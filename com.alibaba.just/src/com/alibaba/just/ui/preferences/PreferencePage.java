@@ -57,8 +57,10 @@ public class PreferencePage
 				"C&hoice 2", "choice2" }
 		}, getFieldEditorParent()));*/
 		addField(new StringFieldEditor(PreferenceConstants.P_FILE_CHARSET, "File &Charset:", getFieldEditorParent()));
-		addField(new RadioGroupFieldEditor(PreferenceConstants.P_PARSER_ENGINE,"Choose Module Parser Engine",1,
-				new String[][]{{"RegExp Engine (more fast)","0"},{"Rhino Engine (more strict)","1"}},getFieldEditorParent(),true));
+
+		addField(new RadioGroupFieldEditor(PreferenceConstants.P_MD_TYPE,"Choose Parser Module Definition Type",1,
+				new String[][]{{"AMD (RequireJS)","1"},{"CMD (CommonJS)","2"},{"UMD (AMD && CMD)","3"}},getFieldEditorParent(),true));
+		
 		addField(new BooleanFieldEditor(PreferenceConstants.P_SHOW_LIB_ANONYMOUSE, "Show library's anonymouse module in Module View", getFieldEditorParent()));
 		addField(new BooleanFieldEditor(PreferenceConstants.P_SHOW_MATCH_START, "Show module assist with start string matches.(JSDT require)", getFieldEditorParent()));
 		addField(new BooleanFieldEditor(PreferenceConstants.P_SHOW_MATCH_PARTIAL, "Show module assist with partial matches.(JSDT require)", getFieldEditorParent()));
@@ -91,7 +93,7 @@ public class PreferencePage
 
 	public boolean performOk() {
 		String charset = PreferenceUtil.getFileCharset();
-		int engineType = PreferenceUtil.getParserEngineType();
+		int mdType = PreferenceUtil.getMDType();
 		boolean showAnoyModule = PreferenceUtil.isShowLibAnonymouseModule();
 		String key = PreferenceUtil.getDefineKeyWord();
 		boolean rs =  super.performOk();
@@ -99,7 +101,7 @@ public class PreferencePage
 			return false;
 		}
 		//if module parser config change,clear all cache
-		if(engineType!=PreferenceUtil.getParserEngineType()                                 //engine type change
+		if(mdType!=PreferenceUtil.getMDType()                                 //MD type change
 				|| !charset.equalsIgnoreCase((PreferenceUtil.getFileCharset()))           //charset change
 				|| showAnoyModule != PreferenceUtil.isShowLibAnonymouseModule()    //show lib mode change
 				|| key != PreferenceUtil.getDefineKeyWord() ){                                 //AMD define key word change

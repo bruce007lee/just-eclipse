@@ -564,7 +564,7 @@ public class PreferenceUtil {
 		}
 		return charset;
 	}
-	
+
 	/**
 	 * 
 	 * @return
@@ -582,14 +582,22 @@ public class PreferenceUtil {
 	 * 
 	 * @return
 	 */
-	public static int getParserEngineType(){
-		String type = PreferenceUtil.getPluginPreferenceStore().getString(PreferenceConstants.P_PARSER_ENGINE);
-		if(type==null || type.length()<=0){
-			type = PreferenceConstants.DEFAULT_PARSER_ENGINE;
+	public static int getMDType(){
+		String type = PreferenceUtil.getPluginPreferenceStore().getString(PreferenceConstants.P_MD_TYPE);
+		int md = 1;
+		if(type==null){type=PreferenceConstants.DEFAULT_MD_TYPE;}
+		try{
+			md = Integer.parseInt(type);
+		}catch(Exception e){}
+		if(md==ParserFactory.MD_TYPE_AMD){
+			return md;
+		}else if(md==ParserFactory.MD_TYPE_CMD){
+			return md;
+		}else{
+			return ParserFactory.MD_TYPE_UMD;
 		}
-		return PARSER_ENGINE_TYPE_SIMPLE.equalsIgnoreCase(type)?ParserFactory.TYPE_SIMPLE:ParserFactory.TYPE_RHINO;
 	}
-	
+
 	/**
 	 * 
 	 * @return
@@ -597,7 +605,7 @@ public class PreferenceUtil {
 	public static boolean isShowLibAnonymouseModule(){
 		return PreferenceUtil.getPluginPreferenceStore().getBoolean(PreferenceConstants.P_SHOW_LIB_ANONYMOUSE);
 	}
-	
+
 	/**
 	 * 
 	 * @return
@@ -605,7 +613,7 @@ public class PreferenceUtil {
 	public static boolean isShowMatchStart(){
 		return PreferenceUtil.getPluginPreferenceStore().getBoolean(PreferenceConstants.P_SHOW_MATCH_START);
 	}
-		
+
 	/**
 	 * 
 	 * @return
