@@ -94,7 +94,7 @@ public class RhinoModuleParser extends AbstractModuleParser {
 				AstRoot astRoot = parser.parse(content, null, 0);
 
 				ModuleNodeVisitor visitor = new ModuleNodeVisitor(absPath,moduleList,moduleType);
-				astRoot.visitAll(visitor);
+				astRoot.visit(visitor);
 				visitor.dispose();
 				if(event!=null){
 					event.onParseFileSuccess(this,file,moduleList);
