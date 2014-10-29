@@ -1,5 +1,9 @@
 package com.alibaba.just.api.parser;
 
+import java.util.List;
+
+import com.alibaba.just.api.bean.AliasInfo;
+
 public class ParserOptions {
 
 	private int mdType = ParserFactory.DEFAULT_MD_TYPE;
@@ -7,6 +11,7 @@ public class ParserOptions {
 	private String defineKeyWord;
 	private String requireKeyWord;
 	private boolean isNodeJs=false;
+	private List<AliasInfo> aliasList = null;		
 
 	public int getMdType() {
 		return mdType;
@@ -38,6 +43,11 @@ public class ParserOptions {
 	public void setIsNodeJs(boolean isNodeJs) {
 		this.isNodeJs = isNodeJs;
 	}
-
+	public List<AliasInfo> getAliasList() {
+		return aliasList;
+	}
+	public void setAliasList(List<AliasInfo> aliasList) {
+		this.aliasList = aliasList;
+	}
 
 }

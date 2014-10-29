@@ -77,11 +77,14 @@ public class PluginResourceUtil {
 	 * 插件中获取ModuleParser的方法,一般不直接使用module api中ParserFactory的方法
 	 * @return 根据当前插件的设置生成ModuleParser
 	 */
-	public static ModuleParser getModuleParser(){
+	public static ModuleParser getModuleParser(IProject project){
 		ParserOptions opts = new ParserOptions();
-		opts.setMdType(PreferenceUtil.getMDType());
-		opts.setCharset(PreferenceUtil.getFileCharset());
-		opts.setDefineKeyWord(PreferenceUtil.getDefineKeyWord());
+		opts.setMdType(PreferenceUtil.getMDType(project));
+		opts.setCharset(PreferenceUtil.getFileCharset(project));
+		opts.setDefineKeyWord(PreferenceUtil.getDefineKeyWord(project));
+		opts.setRequireKeyWord(PreferenceUtil.getRequireKeyWord(project));
+		opts.setIsNodeJs(PreferenceUtil.getIsNodeJs(project));
+		opts.setAliasList(PreferenceUtil.getProjectAliasList(project));
 		return ParserFactory.getModuleParser(opts);
 	}
 
@@ -403,11 +406,8 @@ public class PluginResourceUtil {
 		boolean isCreate = false;
 		if(parser==null){
 			isCreate = true;
-			parser = PluginResourceUtil.getModuleParser();
-			parser.setAliasList(getProjectAliasInfo(project));
+			parser = PluginResourceUtil.getModuleParser(project);
 			parser.setThreadPool(UIUtil.getThreadPool());
-			parser.setNameConverter(PreferenceUtil.getNameConvert(project));
-			parser.setIsNodeJs(PreferenceUtil.getIsNodeJs(project));
 		}
 		IWorkspaceRoot  wRoot = ResourcesPlugin.getWorkspace().getRoot();
 		if(progressMonitor!=null){

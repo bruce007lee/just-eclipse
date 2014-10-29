@@ -11,23 +11,47 @@ import java.util.concurrent.ExecutorService;
 import com.alibaba.just.api.bean.AliasInfo;
 import com.alibaba.just.api.bean.Module;
 import com.alibaba.just.api.converter.NameConverter;
+import com.alibaba.just.api.converter.impl.NodeJsNameConverter;
 import com.alibaba.just.api.exception.ModuleParseException;
 
 public abstract class AbstractModuleParser implements ModuleParser{
+	protected static final String DEFINE_KEY_REG = "^(\\w+\\.)*(define)$";
+	protected static final String REQUIRE_KEY_REG = "^require$";
+	protected static final NodeJsNameConverter DEFAULT_CMD_CONVERT = new NodeJsNameConverter();
+	protected static final int TASK_LIMT = 100000;//用线程池时限制10w个task一次
+
 	protected ExecutorService threadPool = null;
 	protected String charset = DEFAULT_CHARSET;
 	protected boolean isDispose = false;
 	protected FileFilter filter = DEFAULT_FILE_FILTER; 
-	private static final int TASK_LIMT = 100000;//用线程池时限制10w个task一次
-	private List<AliasInfo> aliasList = null;		
+	protected List<AliasInfo> aliasList = null;		
 	protected int mdType = MD_TYPE_UMD;
 	protected NameConverter nameConverter = null;
 	protected boolean isNodeJs = false;
-	protected String defineKeyWord=null;
-	protected String requireKeyWord=null;
+	protected String defineKeyWord=DEFINE_KEY_REG;
+	protected String requireKeyWord=REQUIRE_KEY_REG;
 
-	public AbstractModuleParser(String charset){
-		this.charset = charset;		
+	public AbstractModuleParser(ParserOptions options){
+
+		if(options!=null){
+			if(options.getCharset()!=null){
+				this.setCharset(options.getCharset());
+			}
+			String defineKeyWord = DEFINE_KEY_REG;
+			if(options.getDefineKeyWord()!=null){
+				defineKeyWord = options.getDefineKeyWord();
+			}
+			this.setDefineKeyWord(defineKeyWord);
+			String requireKeyWord = REQUIRE_KEY_REG;
+			if(options.getRequireKeyWord()!=null){
+				requireKeyWord = options.getRequireKeyWord();
+			}
+			this.setRequireKeyWord(requireKeyWord);
+			this.setMdType(options.getMdType());
+			this.setIsNodeJs(options.isNodeJs());
+			this.setAliasList(options.getAliasList());
+		}
+
 	}
 
 	public AbstractModuleParser(){}
@@ -443,16 +467,20 @@ public abstract class AbstractModuleParser implements ModuleParser{
 		return defineKeyWord;
 	}
 
-	public void setDefineKeyWord(String defineKeyWord) {
-		this.defineKeyWord = defineKeyWord;
-	}
-
 	public String getRequireKeyWord() {
 		return requireKeyWord;
 	}
 
-	public void setRequireKeyWord(String requireKeyWord) {
-		this.requireKeyWord = requireKeyWord;
+	public void setDefineKeyWord(String defineKeyWord){
+		if(defineKeyWord!=null && defineKeyWord.length()>0){
+			this.defineKeyWord = defineKeyWord;
+		}
+	}
+
+	public void setRequireKeyWord(String requireKeyWord){
+		if(requireKeyWord!=null && requireKeyWord.length()>0){
+			this.requireKeyWord = requireKeyWord;
+		}
 	}
 
 }

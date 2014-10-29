@@ -85,7 +85,7 @@ public class ImportModulesViewAction implements IEditorActionDelegate,IObjectAct
 					return;
 				}
 
-				ModuleParser parser = PluginResourceUtil.getModuleParser();
+				ModuleParser parser = PluginResourceUtil.getModuleParser(ifile.getProject());
 				parser.setThreadPool(UIUtil.getThreadPool());
 				Module module = parser.getModule(path,ModuleParser.MODULE_TYPE_ALL);
 

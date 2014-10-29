@@ -16,60 +16,23 @@ import org.mozilla.javascript.ast.PropertyGet;
 import org.mozilla.javascript.ast.StringLiteral;
 
 import com.alibaba.just.api.bean.Module;
-import com.alibaba.just.api.converter.impl.NodeJsNameConverter;
 import com.alibaba.just.util.FileUtil;
 
 public class RhinoModuleParser extends AbstractModuleParser {
 
-	private static final String DEFINE_KEY_REG = "^(\\w+\\.)*(define)$";
-	private static final String REQUIRE_KEY_REG = "^require$";
-
-	protected String defineKeyWord=DEFINE_KEY_REG;
-	protected String requireKeyWord=REQUIRE_KEY_REG;
-
-	private static final NodeJsNameConverter DEFAULT_CMD_CONVERT = new NodeJsNameConverter();
-
+	/**
+	 * 
+	 * @param options
+	 */
 	public RhinoModuleParser(ParserOptions options){
-		if(options!=null){
-			if(options.getCharset()!=null){
-				charset = options.getCharset();	
-			}
-			String defineKeyWord = DEFINE_KEY_REG;
-			if(options.getDefineKeyWord()!=null){
-				defineKeyWord = options.getDefineKeyWord();
-			}
-			this.setDefineKeyWord(defineKeyWord);
-			String requireKeyWord = REQUIRE_KEY_REG;
-			if(options.getRequireKeyWord()!=null){
-				requireKeyWord = options.getRequireKeyWord();
-			}
-			this.setRequireKeyWord(requireKeyWord);
-			this.mdType = options.getMdType();
-			this.setIsNodeJs(options.isNodeJs());
-		}
+		super(options);
 	}
 
 	/**
 	 * 
 	 */
 	public RhinoModuleParser() {
-		this(null);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see com.alibaba.just.api.parser.ModuleParser#setDefineKeyWord(java.lang.String)
-	 */
-	public void setDefineKeyWord(String str){
-		if(str!=null && str.length()>0){
-			this.defineKeyWord = str;
-		}
-	}
-
-	public void setRequireKeyWord(String str){
-		if(str!=null && str.length()>0){
-			this.requireKeyWord = str;
-		}
+		super();
 	}
 
 	/* (non-Javadoc)
@@ -155,6 +118,22 @@ public class RhinoModuleParser extends AbstractModuleParser {
 		return list;
 	}
 
+	private void appendRequiredModules(Module module,List<String> list){
+		List<String> dest = module.getRequiredModuleNames();
+		for(String item:list){
+			if(!dest.contains(item)){
+				dest.add(item);
+			}
+		}
+	}
+
+	private void appendRequiredModules(Module module,String item){
+		List<String> dest = module.getRequiredModuleNames();
+		if(!dest.contains(item)){
+			dest.add(item);
+		}
+	}
+
 	private Module createCMDModule(String absPath){
 		Module cmdModule = new Module();
 		cmdModule.setFilePath(absPath);
@@ -223,7 +202,7 @@ public class RhinoModuleParser extends AbstractModuleParser {
 							module = new Module();
 							module.setAnonymous(false);
 							module.setName(((StringLiteral)stringNode).getValue(false));
-							module.getRequiredModuleNames().addAll(getRequiredModules((ArrayLiteral)arrayNode));
+							appendRequiredModules(module,getRequiredModules((ArrayLiteral)arrayNode));
 							module.setFilePath(absPath);
 							updateAlias(module,RhinoModuleParser.this.getAliasList());//update module alias
 							moduleList.add(module);
@@ -252,7 +231,7 @@ public class RhinoModuleParser extends AbstractModuleParser {
 								node2 instanceof FunctionNode){
 							module = new Module();
 							module.setAnonymous(true);
-							module.getRequiredModuleNames().addAll(getRequiredModules((ArrayLiteral)node1));
+							appendRequiredModules(module,getRequiredModules((ArrayLiteral)node1));
 							module.setFilePath(absPath);
 							moduleList.add(module);
 							match = true;
@@ -290,7 +269,7 @@ public class RhinoModuleParser extends AbstractModuleParser {
 								cmdModule = createCMDModule(absPath);
 								moduleList.add(cmdModule);
 							}
-							cmdModule.getRequiredModuleNames().add(((StringLiteral)stringNode).getValue(false));
+							appendRequiredModules(cmdModule,((StringLiteral)stringNode).getValue(false));
 						}
 					}
 

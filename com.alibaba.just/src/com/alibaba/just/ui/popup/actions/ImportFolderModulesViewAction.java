@@ -216,7 +216,7 @@ public class ImportFolderModulesViewAction extends ImportModulesViewAction{
 
 	private List<Module> getRequire(List<Module> moduleList,IProject project,IFile file) throws Exception{
 		String path = file.getLocation().toFile().getAbsolutePath();
-		ModuleParser parser = PluginResourceUtil.getModuleParser();
+		ModuleParser parser = PluginResourceUtil.getModuleParser(project);
 		parser.setThreadPool(UIUtil.getThreadPool());
 		Module module = parser.getModule(path,ModuleParser.MODULE_TYPE_ALL);
 		if(module==null){
