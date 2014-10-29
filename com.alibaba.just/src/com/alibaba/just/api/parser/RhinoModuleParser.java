@@ -206,6 +206,7 @@ public class RhinoModuleParser extends AbstractModuleParser {
 				fc = RhinoModuleParser.this.getFirstFunctionCall(fc);
 				AstNode nameNode = fc.getTarget();
 				//System.out.println("NAME:"+n.getIdentifier());	
+				boolean match = false;
 				if((mdType== MD_TYPE_AMD || mdType== MD_TYPE_UMD) && Pattern.matches(defineKeyWord,nameNode.toSource().trim())){
 					Module module = null;
 					List<AstNode> args = fc.getArguments();
@@ -226,6 +227,7 @@ public class RhinoModuleParser extends AbstractModuleParser {
 							module.setFilePath(absPath);
 							updateAlias(module,RhinoModuleParser.this.getAliasList());//update module alias
 							moduleList.add(module);
+							match = true;
 						}
 					}else if(args.size()==2){
 						AstNode node1 = args.get(0);
@@ -241,6 +243,7 @@ public class RhinoModuleParser extends AbstractModuleParser {
 							module.setFilePath(absPath);
 							updateAlias(module,RhinoModuleParser.this.getAliasList());//update module alias
 							moduleList.add(module);
+							match = true;
 						}
 
 						//校验2参数匿名模块
@@ -252,6 +255,7 @@ public class RhinoModuleParser extends AbstractModuleParser {
 							module.getRequiredModuleNames().addAll(getRequiredModules((ArrayLiteral)node1));
 							module.setFilePath(absPath);
 							moduleList.add(module);
+							match = true;
 						}
 					}else if(args.size()==1 && (moduleType == MODULE_TYPE_ALL || moduleType == MODULE_TYPE_ANONYMOUS)){
 						//校验1参数的匿名模块
@@ -263,6 +267,7 @@ public class RhinoModuleParser extends AbstractModuleParser {
 							module.setAnonymous(true);
 							module.setFilePath(absPath);
 							moduleList.add(module);
+							match = true;
 						}
 					}
 
@@ -270,7 +275,9 @@ public class RhinoModuleParser extends AbstractModuleParser {
 						cmdModule = module;
 					}
 
-				}else if((mdType== MD_TYPE_CMD || mdType== MD_TYPE_UMD) && Pattern.matches(requireKeyWord,nameNode.toSource().trim())){
+				}
+
+				if(!match && (mdType== MD_TYPE_CMD || mdType== MD_TYPE_UMD) && Pattern.matches(requireKeyWord,nameNode.toSource().trim())){
 					/*CMD逻辑*/
 					List<AstNode> args = fc.getArguments();
 					//校验cmd构造形式
