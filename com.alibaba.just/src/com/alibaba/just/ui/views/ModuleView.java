@@ -708,6 +708,9 @@ public class ModuleView extends ViewPart {
 					parser = PluginResourceUtil.getModuleParser();
 					parser.setThreadPool(UIUtil.getThreadPool());
 					parser.setAliasList(PluginResourceUtil.getProjectAliasInfo(project));
+					
+					parser.setNameConverter(PreferenceUtil.getNameConvert(project));
+					parser.setIsNodeJs(PreferenceUtil.getIsNodeJs(project));
 					Module module = parser.getModule(filepath,ModuleParser.MODULE_TYPE_ALL);
 
 					if(module==null || project==null){

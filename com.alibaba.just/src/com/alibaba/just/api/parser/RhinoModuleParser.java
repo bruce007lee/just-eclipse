@@ -16,15 +16,18 @@ import org.mozilla.javascript.ast.PropertyGet;
 import org.mozilla.javascript.ast.StringLiteral;
 
 import com.alibaba.just.api.bean.Module;
+import com.alibaba.just.api.converter.impl.NodeJsNameConverter;
 import com.alibaba.just.util.FileUtil;
 
 public class RhinoModuleParser extends AbstractModuleParser {
 
-	//private static final String DEFINE_KEY_REG = "^(\\w+\\.)*(define)$";
+	private static final String DEFINE_KEY_REG = "^(\\w+\\.)*(define)$";
+	private static final String REQUIRE_KEY_REG = "^require$";
 
-	private String defineKeyWord=null;
+	protected String defineKeyWord=DEFINE_KEY_REG;
+	protected String requireKeyWord=REQUIRE_KEY_REG;
 
-	private String requireKeyWord="^require$";//TODO add setting for CMD mode
+	private static final NodeJsNameConverter DEFAULT_CMD_CONVERT = new NodeJsNameConverter();
 
 	public RhinoModuleParser(ParserOptions options){
 		if(options!=null){
@@ -35,8 +38,14 @@ public class RhinoModuleParser extends AbstractModuleParser {
 			if(options.getDefineKeyWord()!=null){
 				defineKeyWord = options.getDefineKeyWord();
 			}
-			this.mdType = options.getMdType();
 			this.setDefineKeyWord(defineKeyWord);
+			String requireKeyWord = REQUIRE_KEY_REG;
+			if(options.getRequireKeyWord()!=null){
+				requireKeyWord = options.getRequireKeyWord();
+			}
+			this.setRequireKeyWord(requireKeyWord);
+			this.mdType = options.getMdType();
+			this.setIsNodeJs(options.isNodeJs());
 		}
 	}
 
@@ -53,20 +62,14 @@ public class RhinoModuleParser extends AbstractModuleParser {
 	 */
 	public void setDefineKeyWord(String str){
 		if(str!=null && str.length()>0){
-			this.defineKeyWord = "^(\\w+\\.)*("+str+")$";
+			this.defineKeyWord = str;
 		}
 	}
 
-	public String getModuleByFileName(String path){
-		if(path!=null){
-			String fn = new File(path).getName();
-			int idx = fn.lastIndexOf(".");
-			if(idx>0){
-				fn = fn.substring(0,idx);
-			}
-			return fn;
+	public void setRequireKeyWord(String str){
+		if(str!=null && str.length()>0){
+			this.requireKeyWord = str;
 		}
-		return null;
 	}
 
 	/* (non-Javadoc)
@@ -95,6 +98,10 @@ public class RhinoModuleParser extends AbstractModuleParser {
 
 				ModuleNodeVisitor visitor = new ModuleNodeVisitor(absPath,moduleList,moduleType);
 				astRoot.visit(visitor);
+				if(isNodeJs && visitor.getCmdModule()==null){
+					//nodejs中每个文件都为模块
+					moduleList.add(createCMDModule(absPath));
+				}
 				visitor.dispose();
 				if(event!=null){
 					event.onParseFileSuccess(this,file,moduleList);
@@ -146,6 +153,24 @@ public class RhinoModuleParser extends AbstractModuleParser {
 			}
 		}
 		return list;
+	}
+
+	private Module createCMDModule(String absPath){
+		Module cmdModule = new Module();
+		cmdModule.setFilePath(absPath);
+		if(isNodeJs){
+			//nodejs 中每个js文件都为模块
+			if(nameConverter!=null){
+				cmdModule.setName(nameConverter.convert(absPath));
+			}else{
+				cmdModule.setName(DEFAULT_CMD_CONVERT.convert(absPath));
+			}
+			cmdModule.setAnonymous(false);
+			updateAlias(cmdModule,RhinoModuleParser.this.getAliasList());//update module alias
+		}else{
+			cmdModule.setAnonymous(true);
+		}
+		return cmdModule;
 	}
 
 
@@ -241,7 +266,7 @@ public class RhinoModuleParser extends AbstractModuleParser {
 						}
 					}
 
-					if(cmdModule==null && module!=null){
+					if(module!=null){
 						cmdModule = module;
 					}
 
@@ -255,21 +280,20 @@ public class RhinoModuleParser extends AbstractModuleParser {
 
 						if(stringNode instanceof StringLiteral){
 							if(cmdModule==null){
-								cmdModule = new Module();
-								cmdModule.setName(RhinoModuleParser.this.getModuleByFileName(absPath));
-								cmdModule.setAnonymous(false);
-								cmdModule.setFilePath(absPath);
-								updateAlias(cmdModule,RhinoModuleParser.this.getAliasList());//update module alias
+								cmdModule = createCMDModule(absPath);
 								moduleList.add(cmdModule);
 							}
 							cmdModule.getRequiredModuleNames().add(((StringLiteral)stringNode).getValue(false));
-
 						}
 					}
 
 				}
 			}
 			return true;
+		}
+
+		public Module getCmdModule() {
+			return cmdModule;
 		}
 
 	}

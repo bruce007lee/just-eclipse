@@ -10,6 +10,7 @@ import java.util.concurrent.ExecutorService;
 
 import com.alibaba.just.api.bean.AliasInfo;
 import com.alibaba.just.api.bean.Module;
+import com.alibaba.just.api.converter.NameConverter;
 import com.alibaba.just.api.exception.ModuleParseException;
 
 public abstract class AbstractModuleParser implements ModuleParser{
@@ -20,6 +21,10 @@ public abstract class AbstractModuleParser implements ModuleParser{
 	private static final int TASK_LIMT = 100000;//用线程池时限制10w个task一次
 	private List<AliasInfo> aliasList = null;		
 	protected int mdType = MD_TYPE_UMD;
+	protected NameConverter nameConverter = null;
+	protected boolean isNodeJs = false;
+	protected String defineKeyWord=null;
+	protected String requireKeyWord=null;
 
 	public AbstractModuleParser(String charset){
 		this.charset = charset;		
@@ -416,6 +421,38 @@ public abstract class AbstractModuleParser implements ModuleParser{
 
 	public void setAliasList(List<AliasInfo> aliasList) {
 		this.aliasList = aliasList;
+	}
+
+	public NameConverter getNameConverter() {
+		return nameConverter;
+	}
+
+	public void setNameConverter(NameConverter nameConverter) {
+		this.nameConverter = nameConverter;
+	}
+
+	public boolean isNodeJs(){
+		return isNodeJs;
+	}
+
+	public void setIsNodeJs(boolean isNodeJs){
+		this.isNodeJs = isNodeJs;
+	}
+
+	public String getDefineKeyWord() {
+		return defineKeyWord;
+	}
+
+	public void setDefineKeyWord(String defineKeyWord) {
+		this.defineKeyWord = defineKeyWord;
+	}
+
+	public String getRequireKeyWord() {
+		return requireKeyWord;
+	}
+
+	public void setRequireKeyWord(String requireKeyWord) {
+		this.requireKeyWord = requireKeyWord;
 	}
 
 }

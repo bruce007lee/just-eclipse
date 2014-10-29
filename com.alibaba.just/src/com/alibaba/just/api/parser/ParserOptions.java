@@ -1,12 +1,13 @@
 package com.alibaba.just.api.parser;
 
 public class ParserOptions {
-	
+
 	private int mdType = ParserFactory.DEFAULT_MD_TYPE;
 	private String charset;
 	private String defineKeyWord;
 	private String requireKeyWord;
-	
+	private boolean isNodeJs=false;
+
 	public int getMdType() {
 		return mdType;
 	}
@@ -31,6 +32,12 @@ public class ParserOptions {
 	public void setRequireKeyWord(String requireKeyWord) {
 		this.requireKeyWord = requireKeyWord;
 	}
-	
-	
+	public boolean isNodeJs() {
+		return isNodeJs;
+	}
+	public void setIsNodeJs(boolean isNodeJs) {
+		this.isNodeJs = isNodeJs;
+	}
+
+
 }

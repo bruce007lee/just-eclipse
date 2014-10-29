@@ -7,6 +7,7 @@ import java.util.concurrent.ExecutorService;
 
 import com.alibaba.just.api.bean.AliasInfo;
 import com.alibaba.just.api.bean.Module;
+import com.alibaba.just.api.converter.NameConverter;
 import com.alibaba.just.api.exception.ModuleParseException;
 
 /**
@@ -21,7 +22,7 @@ public interface ModuleParser {
 	public static final int MODULE_TYPE_NORMAL = 0;
 	public static final int MODULE_TYPE_ANONYMOUS = 1;
 	public static final int MODULE_TYPE_ALL = 2;
-	
+
 	public static final int MD_TYPE_AMD = 1;
 	public static final int MD_TYPE_CMD = 2;
 	public static final int MD_TYPE_UMD = MD_TYPE_AMD | MD_TYPE_CMD;
@@ -132,7 +133,7 @@ public interface ModuleParser {
 	 * @return
 	 */
 	public List<Module> getModules(File file, int moduleType);
-	
+
 	public int getMdType();
 
 	public void setMdType(int mdType);
@@ -141,9 +142,9 @@ public interface ModuleParser {
 	 * 释放资源
 	 */
 	public void dispose();
-	
+
 	public boolean isDisposed();
-	
+
 	public String getCharset();
 
 	public void setCharset(String charset);
@@ -159,7 +160,21 @@ public interface ModuleParser {
 	public ExecutorService getThreadPool();
 
 	public void setThreadPool(ExecutorService threadPool);
-	
+
 	public void setDefineKeyWord(String str);
+
+	public String getDefineKeyWord();
+
+	public void setRequireKeyWord(String str);
+
+	public String getRequireKeyWord();
+
+	public NameConverter getNameConverter();
+
+	public void setNameConverter(NameConverter nameConverter);
+
+	public boolean isNodeJs();
+
+	public void setIsNodeJs(boolean isNodeJs);
 
 }

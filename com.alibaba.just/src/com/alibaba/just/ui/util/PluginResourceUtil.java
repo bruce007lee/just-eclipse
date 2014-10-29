@@ -350,7 +350,6 @@ public class PluginResourceUtil {
 	}
 
 	public static void clearProjectCache(IProject project){
-		List<String> libs = PreferenceUtil.getProjectLibsList(project);
 		IWorkspaceRoot  wRoot = ResourcesPlugin.getWorkspace().getRoot();
 		IPath rootPath = wRoot.getFullPath();
 		IResource res = wRoot.findMember(rootPath);
@@ -405,8 +404,10 @@ public class PluginResourceUtil {
 		if(parser==null){
 			isCreate = true;
 			parser = PluginResourceUtil.getModuleParser();
-			parser.setAliasList(getProjectAliasInfo(project));//Test only
+			parser.setAliasList(getProjectAliasInfo(project));
 			parser.setThreadPool(UIUtil.getThreadPool());
+			parser.setNameConverter(PreferenceUtil.getNameConvert(project));
+			parser.setIsNodeJs(PreferenceUtil.getIsNodeJs(project));
 		}
 		IWorkspaceRoot  wRoot = ResourcesPlugin.getWorkspace().getRoot();
 		if(progressMonitor!=null){

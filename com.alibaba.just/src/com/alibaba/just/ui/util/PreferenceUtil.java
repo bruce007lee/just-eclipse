@@ -17,6 +17,7 @@ import javax.xml.transform.stream.StreamResult;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.w3c.dom.Document;
@@ -27,6 +28,8 @@ import org.w3c.dom.NodeList;
 import com.alibaba.just.Activator;
 import com.alibaba.just.PluginConstants;
 import com.alibaba.just.api.bean.AliasInfo;
+import com.alibaba.just.api.converter.NameConverter;
+import com.alibaba.just.api.converter.impl.NodeJsNameConverter;
 import com.alibaba.just.api.parser.ParserFactory;
 import com.alibaba.just.ui.preferences.PreferenceConstants;
 
@@ -574,7 +577,18 @@ public class PreferenceUtil {
 		if(key==null || key.length()<=0){
 			key = PreferenceConstants.DEFAULT_DEFINE_KEY_WORD;
 		}
-		//key = key.trim();
+		return key;
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public static String getRequireKeyWord(){
+		String key = PreferenceUtil.getPluginPreferenceStore().getString(PreferenceConstants.P_REQUIRE_KEY_WORD);
+		if(key==null || key.length()<=0){
+			key = PreferenceConstants.DEFAULT_REQUIRE_KEY_WORD;
+		}
 		return key;
 	}
 
@@ -583,7 +597,7 @@ public class PreferenceUtil {
 	 * @return
 	 */
 	public static int getMDType(){
-		String type = PreferenceUtil.getPluginPreferenceStore().getString(PreferenceConstants.P_MD_TYPE);
+		String type = getPluginPreferenceStore().getString(PreferenceConstants.P_MD_TYPE);
 		int md = 1;
 		if(type==null){type=PreferenceConstants.DEFAULT_MD_TYPE;}
 		try{
@@ -602,8 +616,16 @@ public class PreferenceUtil {
 	 * 
 	 * @return
 	 */
+	public static boolean isNodeJs(){
+		return getPluginPreferenceStore().getBoolean(PreferenceConstants.P_IS_NODEJS);
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
 	public static boolean isShowLibAnonymouseModule(){
-		return PreferenceUtil.getPluginPreferenceStore().getBoolean(PreferenceConstants.P_SHOW_LIB_ANONYMOUSE);
+		return getPluginPreferenceStore().getBoolean(PreferenceConstants.P_SHOW_LIB_ANONYMOUSE);
 	}
 
 	/**
@@ -611,7 +633,7 @@ public class PreferenceUtil {
 	 * @return
 	 */
 	public static boolean isShowMatchStart(){
-		return PreferenceUtil.getPluginPreferenceStore().getBoolean(PreferenceConstants.P_SHOW_MATCH_START);
+		return getPluginPreferenceStore().getBoolean(PreferenceConstants.P_SHOW_MATCH_START);
 	}
 
 	/**
@@ -619,6 +641,133 @@ public class PreferenceUtil {
 	 * @return
 	 */
 	public static boolean isShowMatchPartial(){
-		return PreferenceUtil.getPluginPreferenceStore().getBoolean(PreferenceConstants.P_SHOW_MATCH_PARTIAL);
+		return getPluginPreferenceStore().getBoolean(PreferenceConstants.P_SHOW_MATCH_PARTIAL);
 	}
+
+	/*--------------project--------------*/
+
+
+
+	/**
+	 * 获取指定project的cmd模块名转换器
+	 * @param project
+	 * @return
+	 */
+	public static NameConverter getNameConvert(IProject project){
+		List<String> patterns = PreferenceUtil.getProjectRootPathList(project);
+		for(int i=0,l=patterns.size();i<l;i++){
+			patterns.set(i, project.getFile(new Path(patterns.get(i))).getLocation().toString()+"/");
+		}
+		return new NodeJsNameConverter(patterns);
+		/*String content = null;
+		try {
+			content = FileUtil.getFileContent(new File("E:/eclipse_3.6/workspace/TestProject/convert.js"), "UTF-8");
+		} catch (Exception e) {}
+		return new CMDJavascriptNameConverter(content);*/
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public static boolean getEnableProjectSetting(IProject project){
+		String enable = getProjectProperty(project, PreferenceConstants.P_ENABLE_PROJECT_SETTING);
+		if(enable==null){
+			return PreferenceConstants.DEFAULT_ENABLE_PROJECT_SETTING;
+		}else if(Boolean.toString(Boolean.TRUE).equals(enable)){
+			return true;
+		}else{
+			return false;
+		}
+	}
+
+	/**
+	 * TODO
+	 * @return
+	 */
+	public static boolean getIsNodeJs(IProject project){
+		if(!getEnableProjectSetting(project)){
+			return isNodeJs();
+		}else{
+			String key = getProjectProperty(project,PreferenceConstants.P_IS_NODEJS);
+			if(key==null){
+				return PreferenceConstants.DEFAULT_IS_NODEJS;
+			}else{
+				return Boolean.TRUE.toString().equals(key);
+			}
+		}
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public static int getMDType(IProject project){
+		if(!getEnableProjectSetting(project)){
+			return getMDType();
+		}else{
+			String type = getProjectProperty(project,PreferenceConstants.P_MD_TYPE);
+			int md = 1;
+			if(type==null){type=PreferenceConstants.DEFAULT_MD_TYPE;}
+			try{
+				md = Integer.parseInt(type);
+			}catch(Exception e){}
+			if(md==ParserFactory.MD_TYPE_AMD){
+				return md;
+			}else if(md==ParserFactory.MD_TYPE_CMD){
+				return md;
+			}else{
+				return ParserFactory.MD_TYPE_UMD;
+			}
+		}
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public static String getFileCharset(IProject project){
+		if(!getEnableProjectSetting(project)){
+			return getFileCharset();
+		}else{
+			String charset = getProjectProperty(project,PreferenceConstants.P_FILE_CHARSET);
+			if(charset==null || charset.length()<=0){
+				charset = PreferenceConstants.DEFAULT_FILE_CHARTSET;
+			}
+			return charset;
+		}
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public static String getDefineKeyWord(IProject project){
+		if(!getEnableProjectSetting(project)){
+			return getDefineKeyWord();
+		}else{
+			String key = getProjectProperty(project,PreferenceConstants.P_DEFINE_KEY_WORD);
+			if(key==null || key.length()<=0){
+				key = PreferenceConstants.DEFAULT_DEFINE_KEY_WORD;
+			}
+			return key;
+		}
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public static String getRequireKeyWord(IProject project){
+		if(!getEnableProjectSetting(project)){
+			return getRequireKeyWord();
+		}else{
+			String key = getProjectProperty(project,PreferenceConstants.P_REQUIRE_KEY_WORD);
+			if(key==null || key.length()<=0){
+				key = PreferenceConstants.DEFAULT_REQUIRE_KEY_WORD;
+			}
+			return key;
+		}
+	}
+
 }
