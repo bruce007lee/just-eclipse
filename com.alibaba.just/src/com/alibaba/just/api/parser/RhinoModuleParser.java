@@ -121,7 +121,7 @@ public class RhinoModuleParser extends AbstractModuleParser {
 	private void appendRequiredModules(Module module,List<String> list){
 		List<String> dest = module.getRequiredModuleNames();
 		for(String item:list){
-			if(!dest.contains(item)){
+			if(!removeDuplicateRequire || !dest.contains(item)){
 				dest.add(item);
 			}
 		}
@@ -129,7 +129,7 @@ public class RhinoModuleParser extends AbstractModuleParser {
 
 	private void appendRequiredModules(Module module,String item){
 		List<String> dest = module.getRequiredModuleNames();
-		if(!dest.contains(item)){
+		if(!removeDuplicateRequire || !dest.contains(item)){
 			dest.add(item);
 		}
 	}

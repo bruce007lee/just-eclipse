@@ -30,6 +30,7 @@ public abstract class AbstractModuleParser implements ModuleParser{
 	protected boolean isNodeJs = false;
 	protected String defineKeyWord=DEFINE_KEY_REG;
 	protected String requireKeyWord=REQUIRE_KEY_REG;
+	protected boolean removeDuplicateRequire=true;
 
 	public AbstractModuleParser(ParserOptions options){
 
@@ -50,6 +51,7 @@ public abstract class AbstractModuleParser implements ModuleParser{
 			this.setMdType(options.getMdType());
 			this.setIsNodeJs(options.isNodeJs());
 			this.setAliasList(options.getAliasList());
+			this.setIsRemoveDuplicateRequire(options.isRemoveDuplicateRequire());
 		}
 
 	}
@@ -481,6 +483,13 @@ public abstract class AbstractModuleParser implements ModuleParser{
 		if(requireKeyWord!=null && requireKeyWord.length()>0){
 			this.requireKeyWord = requireKeyWord;
 		}
+	}
+	
+	public boolean isRemoveDuplicateRequire() {
+		return removeDuplicateRequire;
+	}
+	public void setIsRemoveDuplicateRequire(boolean removeDuplicateRequire) {
+		this.removeDuplicateRequire = removeDuplicateRequire;
 	}
 
 }

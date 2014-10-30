@@ -11,6 +11,7 @@ public class ParserOptions {
 	private String defineKeyWord;
 	private String requireKeyWord;
 	private boolean isNodeJs=false;
+	private boolean removeDuplicateRequire=true;
 	private List<AliasInfo> aliasList = null;		
 
 	public int getMdType() {
@@ -48,6 +49,12 @@ public class ParserOptions {
 	}
 	public void setAliasList(List<AliasInfo> aliasList) {
 		this.aliasList = aliasList;
+	}
+	public boolean isRemoveDuplicateRequire() {
+		return removeDuplicateRequire;
+	}
+	public void setIsRemoveDuplicateRequire(boolean removeDuplicateRequire) {
+		this.removeDuplicateRequire = removeDuplicateRequire;
 	}
 
 }
