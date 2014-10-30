@@ -52,7 +52,7 @@ implements IWorkbenchPreferencePage {
 		});
 
 		addField(new RadioGroupFieldEditor(PreferenceConstants.P_MD_TYPE,"Choose Parser Module Definition Type",1,
-				new String[][]{{"AMD (e.g:RequireJS)","1"},{"CMD (e.g:CommonJS)","2"},{"UMD (AMD && CMD)","3"}},getFieldEditorParent(),true));
+				new String[][]{{"AMD (e.g:RequireJS, lofty)","1"},{"CMD (e.g:CommonJS)","2"},{"UMD (AMD && CMD)","3"}},getFieldEditorParent(),true));
 		addField(new BooleanFieldEditor(PreferenceConstants.P_SHOW_LIB_ANONYMOUSE, "Show library's anonymouse module in Module View", getFieldEditorParent()));
 		addField(new BooleanFieldEditor(PreferenceConstants.P_SHOW_MATCH_START, "Show module assist with start string matches.(JSDT require)", getFieldEditorParent()));
 		addField(new BooleanFieldEditor(PreferenceConstants.P_SHOW_MATCH_PARTIAL, "Show module assist with partial matches.(JSDT require)", getFieldEditorParent()));

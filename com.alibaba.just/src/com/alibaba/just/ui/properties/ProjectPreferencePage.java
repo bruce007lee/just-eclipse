@@ -88,7 +88,7 @@ public class ProjectPreferencePage extends FieldEditorPreferencePage implements 
 		add(item,parent);
 		parent = getFieldEditorParent();
 		item =  new RadioGroupFieldEditor(PreferenceConstants.P_MD_TYPE,"Choose Parser Module Definition Type",1,
-				new String[][]{{"AMD (RequireJS)","1"},{"CMD (CommonJS)","2"},{"UMD (AMD && CMD)","3"}},parent,true);
+				new String[][]{{"AMD (e.g:RequireJS, lofty)","1"},{"CMD (e.g:CommonJS)","2"},{"UMD (AMD && CMD)","3"}},parent,true);
 		addField(item);
 		add(item,parent);
 
