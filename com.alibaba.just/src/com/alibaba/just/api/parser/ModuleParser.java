@@ -176,5 +176,9 @@ public interface ModuleParser {
 	public boolean isNodeJs();
 
 	public void setIsNodeJs(boolean isNodeJs);
+	
+	public boolean isRemoveDuplicateRequire();
+	
+	public void setIsRemoveDuplicateRequire(boolean removeDuplicateRequire);
 
 }

@@ -659,11 +659,6 @@ public class PreferenceUtil {
 			patterns.set(i, project.getFile(new Path(patterns.get(i))).getLocation().toString()+"/");
 		}
 		return new NodeJsNameConverter(patterns);
-		/*String content = null;
-		try {
-			content = FileUtil.getFileContent(new File("E:/eclipse_3.6/workspace/TestProject/convert.js"), "UTF-8");
-		} catch (Exception e) {}
-		return new CMDJavascriptNameConverter(content);*/
 	}
 
 	/**

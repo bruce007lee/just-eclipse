@@ -15,6 +15,7 @@ import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuListener;
@@ -546,9 +547,12 @@ public class ModuleView extends ViewPart {
 
 
 	public void loadModuleRequires(IFile ifile,boolean isAsyncExec) throws Exception{
-		String path = ifile.getLocation().toFile().getAbsolutePath();
-		IProject project = ifile.getProject();
-		this.loadModuleRequires(path, project,isAsyncExec);
+		IPath ipath =  ifile.getLocation();
+		if(ipath!=null){
+			String path = ipath.toFile().getAbsolutePath();
+			IProject project = ifile.getProject();
+			this.loadModuleRequires(path, project,isAsyncExec);
+		}
 	}
 
 	/**

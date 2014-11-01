@@ -14,6 +14,7 @@ import java.util.regex.Pattern;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.IInputValidator;
@@ -80,7 +81,11 @@ public class ImportModulesViewAction implements IEditorActionDelegate,IObjectAct
 			FileEditorInput fileInput = (FileEditorInput)input;
 			try {
 				IFile ifile = fileInput.getFile();
-				String path = ifile.getLocation().toFile().getAbsolutePath();
+				IPath ipath = ifile.getLocation();
+				if(ipath==null){
+					return;
+				}
+				String path = ipath.toFile().getAbsolutePath();
 				if(!VALID_MODULE_EXT.equalsIgnoreCase(ifile.getFileExtension())){
 					return;
 				}

@@ -3,6 +3,7 @@ package com.alibaba.just.api.parser;
 import java.util.List;
 
 import com.alibaba.just.api.bean.AliasInfo;
+import com.alibaba.just.api.converter.NameConverter;
 
 public class ParserOptions {
 
@@ -12,7 +13,8 @@ public class ParserOptions {
 	private String requireKeyWord;
 	private boolean isNodeJs=false;
 	private boolean removeDuplicateRequire=true;
-	private List<AliasInfo> aliasList = null;		
+	private List<AliasInfo> aliasList = null;
+	private NameConverter nameConverter = null;
 
 	public int getMdType() {
 		return mdType;
@@ -57,4 +59,10 @@ public class ParserOptions {
 		this.removeDuplicateRequire = removeDuplicateRequire;
 	}
 
+	public NameConverter getNameConverter() {
+		return nameConverter;
+	}
+	public void setNameConverter(NameConverter nameConverter) {
+		this.nameConverter = nameConverter;
+	}
 }

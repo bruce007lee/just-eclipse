@@ -9,6 +9,7 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
@@ -215,7 +216,11 @@ public class ImportFolderModulesViewAction extends ImportModulesViewAction{
 	}
 
 	private List<Module> getRequire(List<Module> moduleList,IProject project,IFile file) throws Exception{
-		String path = file.getLocation().toFile().getAbsolutePath();
+		IPath ipath = file.getLocation();
+		if(ipath==null){
+			return new ArrayList<Module>(0);
+		}
+		String path = ipath.toFile().getAbsolutePath();
 		ModuleParser parser = PluginResourceUtil.getModuleParser(project);
 		parser.setThreadPool(UIUtil.getThreadPool());
 		Module module = parser.getModule(path,ModuleParser.MODULE_TYPE_ALL);

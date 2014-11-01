@@ -23,6 +23,7 @@ import com.alibaba.just.Activator;
 import com.alibaba.just.PluginConstants;
 import com.alibaba.just.api.bean.AliasInfo;
 import com.alibaba.just.api.bean.Module;
+import com.alibaba.just.api.converter.impl.NodeJsNameConverter;
 import com.alibaba.just.api.parser.ModuleParser;
 import com.alibaba.just.api.parser.ParserEvent;
 import com.alibaba.just.api.parser.ParserFactory;
@@ -85,6 +86,7 @@ public class PluginResourceUtil {
 		opts.setRequireKeyWord(PreferenceUtil.getRequireKeyWord(project));
 		opts.setIsNodeJs(PreferenceUtil.getIsNodeJs(project));
 		opts.setAliasList(PreferenceUtil.getProjectAliasList(project));
+		opts.setNameConverter(PreferenceUtil.getNameConvert(project));
 		return ParserFactory.getModuleParser(opts);
 	}
 
@@ -275,8 +277,8 @@ public class PluginResourceUtil {
 			moduleList.addAll(parser.getAllModules(paths, moduleType,event));
 			paths.clear();
 		}
-
-		if(parser.getFilter()!=null && !parser.getFilter().accept(resource.getLocation().toFile())){
+		IPath ipath = resource.getLocation();
+		if(ipath==null || (parser.getFilter()!=null && !parser.getFilter().accept(ipath.toFile())) ){
 			return moduleList;
 		}
 
@@ -287,37 +289,41 @@ public class PluginResourceUtil {
 				PluginResourceUtil.internalFindModules(members[i],moduleList,paths,parser,moduleType,event,useCache);
 			}
 		}else{
-			File f = resource.getLocation().toFile();
-			String path = f.getAbsolutePath();
 
-			if(useCache){
-				String key = getResourceCacheKey(resource);
-				CacheElement cache = ResourceCacheManager.get(key);
-				if(cache!=null && cache.getStamp()!=null && cache.getStamp().equals(f.lastModified())){
-					Object obj = cache.getValue();
-					if(obj instanceof List){
-						List mlist = (List)obj;
-						Module mm = null;
-						for(Object m:mlist){
-							if(m instanceof Module){
-								mm = (Module)m;
-								if(moduleType==ModuleParser.MODULE_TYPE_NORMAL && mm.isAnonymous()){							
-								}else{
-									moduleList.add(mm);
+			if(ipath!=null){
+				File f = ipath.toFile();
+				String path = f.getAbsolutePath();
+
+				if(useCache){
+					String key = getResourceCacheKey(resource);
+					CacheElement cache = ResourceCacheManager.get(key);
+					if(cache!=null && cache.getStamp()!=null && cache.getStamp().equals(f.lastModified())){
+						Object obj = cache.getValue();
+						if(obj instanceof List){
+							List mlist = (List)obj;
+							Module mm = null;
+							for(Object m:mlist){
+								if(m instanceof Module){
+									mm = (Module)m;
+									if(moduleType==ModuleParser.MODULE_TYPE_NORMAL && mm.isAnonymous()){							
+									}else{
+										moduleList.add(mm);
+									}
 								}
 							}
-						}
-						mm=null;
-					}	
-					obj= null;
+							mm=null;
+						}	
+						obj= null;
+					}else{
+						//System.out.println("未命中："+f.getAbsolutePath());
+						paths.add(path);
+					}
+					f = null;
+					path=null;
 				}else{
-					//System.out.println("未命中："+f.getAbsolutePath());
 					paths.add(path);
 				}
-				f = null;
-				path=null;
-			}else{
-				paths.add(path);
+
 			}
 		}
 		return moduleList;
@@ -373,7 +379,7 @@ public class PluginResourceUtil {
 	}
 
 	private static void clearResourceCache(IResource resource,ModuleParser parser){
-		if(parser.getFilter()!=null && !parser.getFilter().accept(resource.getLocation().toFile())){
+		if(resource.getLocation()==null || (parser.getFilter()!=null && !parser.getFilter().accept(resource.getLocation().toFile()))){
 
 		}else{
 			if(resource instanceof IContainer){
@@ -432,7 +438,7 @@ public class PluginResourceUtil {
 						try{
 							PluginResourceUtil.getModulesByResource(res,moduleList,parser,moduleType);
 						}catch(Exception e){
-							e.printStackTrace();
+							LogUtil.error(e);
 						}
 					}
 
@@ -440,7 +446,7 @@ public class PluginResourceUtil {
 					try {
 						PluginResourceUtil.getModulesByLib(project,lb,moduleList,parser,moduleType);
 					} catch (Exception e) {
-						e.printStackTrace();
+						LogUtil.error(e);
 					}
 				}
 
@@ -491,7 +497,7 @@ public class PluginResourceUtil {
 
 
 	public static String getResourceCacheKey(String prefix ,File file){
-		return (prefix==null?EMPT:prefix)+SEP+file.getAbsolutePath();
+		return (prefix==null?EMPT:prefix)+SEP+(file==null?EMPT:file.getAbsolutePath());
 	}
 
 	public static IWorkspace getWorkspace(){

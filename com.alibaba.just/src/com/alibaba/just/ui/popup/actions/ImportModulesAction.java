@@ -3,6 +3,7 @@ package com.alibaba.just.ui.popup.actions;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
@@ -52,7 +53,11 @@ public class ImportModulesAction extends ImportModulesViewAction{
 		Shell shell = UIUtil.getShell();
 		try {
 			IFile ifile = (IFile) obj;
-			String path = ifile.getLocation().toFile().getAbsolutePath();
+			IPath ipath =  ifile.getLocation();
+			if(ipath==null){
+				return;
+			}
+			String path = ipath.toFile().getAbsolutePath();
 			if(!VALID_MODULE_EXT.equals(ifile.getFileExtension())){
 				return;
 			}

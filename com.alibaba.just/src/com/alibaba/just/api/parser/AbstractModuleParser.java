@@ -52,6 +52,7 @@ public abstract class AbstractModuleParser implements ModuleParser{
 			this.setIsNodeJs(options.isNodeJs());
 			this.setAliasList(options.getAliasList());
 			this.setIsRemoveDuplicateRequire(options.isRemoveDuplicateRequire());
+			this.setNameConverter(options.getNameConverter());
 		}
 
 	}
