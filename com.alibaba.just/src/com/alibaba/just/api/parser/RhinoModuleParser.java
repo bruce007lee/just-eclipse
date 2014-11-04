@@ -20,6 +20,9 @@ import com.alibaba.just.util.FileUtil;
 
 public class RhinoModuleParser extends AbstractModuleParser {
 
+	private static final String CS = "(function(){";
+	private static final String CE = "})();";
+
 	/**
 	 * 
 	 * @param options
@@ -33,6 +36,18 @@ public class RhinoModuleParser extends AbstractModuleParser {
 	 */
 	public RhinoModuleParser() {
 		super();
+	}
+
+	/**
+	 * fix commonjs return value throw a exception issue;
+	 * @param script
+	 * @return
+	 */
+	private String convertContent(String script){
+		if(script!=null){
+			return CS+script+CE;
+		}
+		return script;
 	}
 
 	/* (non-Javadoc)
@@ -51,13 +66,15 @@ public class RhinoModuleParser extends AbstractModuleParser {
 				if(content==null){return null ;}
 
 
-				/*CompilerEnvirons ce = new CompilerEnvirons();
-			ce.setRecordingLocalJsDocComments(true);
-			ce.setRecordingComments(true);
-			Parser  parser = new  Parser(ce);*/	
+				/* 
+				   CompilerEnvirons ce = new CompilerEnvirons();
+			       ce.setRecordingLocalJsDocComments(true);
+			       ce.setRecordingComments(true);
+			       Parser  parser = new  Parser(ce);
+				*/	
 
 				Parser  parser = new Parser();
-				AstRoot astRoot = parser.parse(content, null, 0);
+				AstRoot astRoot = parser.parse(convertContent(content), null, 0);
 
 				ModuleNodeVisitor visitor = new ModuleNodeVisitor(absPath,moduleList,moduleType);
 				astRoot.visit(visitor);
@@ -73,6 +90,7 @@ public class RhinoModuleParser extends AbstractModuleParser {
 
 		}catch(Exception e){
 			//文件解析异常暂时不处理
+			//System.out.println("Failed to parse file ["+absPath+"]:"+(e.getMessage()==null?e.toString():e.getMessage()));			
 			//throw new ModuleParseException("Failed to parse file ["+absPath+"]:"+(e.getMessage()==null?e.toString():e.getMessage()),e);
 		}
 
