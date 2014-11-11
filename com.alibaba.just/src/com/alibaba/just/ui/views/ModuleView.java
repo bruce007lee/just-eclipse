@@ -65,6 +65,7 @@ import com.alibaba.just.ui.util.ImageManager;
 import com.alibaba.just.ui.util.PluginResourceUtil;
 import com.alibaba.just.ui.util.PreferenceUtil;
 import com.alibaba.just.ui.util.UIUtil;
+import com.alibaba.just.util.FileUtil;
 
 /**
  * Module view UI
@@ -130,7 +131,7 @@ public class ModuleView extends ViewPart {
 			this.obj = obj;
 			children = new ArrayList<TreeNode>();
 		}
-		
+
 		public void setName(String name){
 			this.name = name;
 		}
@@ -319,7 +320,7 @@ public class ModuleView extends ViewPart {
 		}
 
 	}
-	
+
 	private String getAliasDisplay(List<String> aliasList){
 		StringBuffer sb = new StringBuffer();
 		for(int i=0,l=aliasList.size();i<l;i++){
@@ -618,7 +619,7 @@ public class ModuleView extends ViewPart {
 		}
 		return tp;
 	}
-	
+
 	private List<TreeNode> getRequiredModulesList(List<TreeNode> list,Module module,List<Module> allImported){
 		return getRequiredModulesList(null, list, module, allImported, false, true);
 	}
@@ -1007,7 +1008,11 @@ public class ModuleView extends ViewPart {
 									IEncodingSupport encodingSupport= 
 										(IEncodingSupport)editPart.getAdapter(IEncodingSupport.class);
 									if(encodingSupport!=null){
-										encodingSupport.setEncoding(PreferenceUtil.getFileCharset());
+										String encode = FileUtil.guessEncoding(fileToOpen);
+										if(encode==null){
+											encode = PreferenceUtil.getFileCharset();
+										}
+										encodingSupport.setEncoding(encode);
 									}
 								}
 

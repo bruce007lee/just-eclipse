@@ -22,6 +22,7 @@ import org.eclipse.ui.ide.IDE;
 
 import com.alibaba.just.api.bean.Module;
 import com.alibaba.just.ui.util.PreferenceUtil;
+import com.alibaba.just.util.FileUtil;
 
 /**
  * @author bruce.liz
@@ -74,14 +75,17 @@ public class OpenModuleDialog extends ModuleSelectionDialog {
 						IFileStore fileStore = EFS.getLocalFileSystem().getStore(fileToOpen.toURI());
 						try {									
 							IEditorPart  editPart = IDE.openEditorOnFileStore(page, fileStore);
-							
+
 							//fix 显示非workspace文件编码问题,目前先使用justeclipse中设置的编码
 							//TODO 需要对lib库添加编码定义配置
 							if(editPart !=null && editPart.getEditorInput() instanceof FileStoreEditorInput){
 								IEncodingSupport encodingSupport= 
 									(IEncodingSupport)editPart.getAdapter(IEncodingSupport.class);
 								if(encodingSupport!=null){
-									encodingSupport.setEncoding(PreferenceUtil.getFileCharset());
+									String encode = FileUtil.guessEncoding(fileToOpen);
+									if(encode==null){
+										encode = PreferenceUtil.getFileCharset();
+									}
 								}
 							}
 						} catch (Exception e ) {
