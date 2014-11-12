@@ -38,9 +38,7 @@ public class FileUtil {
 	/**
 	 * 
 	 * @param file
-	 * @param encode
 	 * @return
-	 * @throws Exception
 	 */
 	public static String guessEncoding(File file){
 		FileInputStream fis = null;
@@ -60,8 +58,8 @@ public class FileUtil {
 	/**
 	 * 
 	 * @param file
+	 * @param content
 	 * @param encode
-	 * @return
 	 * @throws Exception
 	 */
 	public static void saveFileContent(String file,String content,String encode) throws Exception {
@@ -124,7 +122,7 @@ public class FileUtil {
 
 	/**
 	 * 
-	 * @param file
+	 * @param inputStream
 	 * @param encode
 	 * @return
 	 * @throws Exception
