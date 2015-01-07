@@ -6,7 +6,7 @@ package com.alibaba.just.ui.preferences;
 public class PreferenceConstants {
 	public static final String DEFAULT_FILE_CHARTSET = "GBK";
 	public static final String DEFAULT_MD_TYPE = "3";
-	public static final boolean DEFAULT_SHOW_LIB_ANONYMOUSE = false;
+	public static final boolean DEFAULT_SHOW_LIB_ANONYMOUS = false;
 	public static final boolean DEFAULT_SHOW_MATCH_START = true;
 	public static final boolean DEFAULT_SHOW_MATCH_PARTIAL = true;
 	public static final String DEFAULT_DEFINE_KEY_WORD = "^(\\w+\\.)*(define)$";
