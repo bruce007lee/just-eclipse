@@ -168,7 +168,7 @@ public class PluginResourceUtil {
 		String type = PreferenceUtil.getProjectLibType(libStr);
 		int mtype = ModuleParser.MODULE_TYPE_NORMAL;
 		//根据用户的配置决定是否读取并展示lib库中的匿名模块，默认不读取
-		if(PreferenceUtil.isShowLibAnonymouseModule()){
+		if(PreferenceUtil.isShowLibAnonymousModule()){
 			mtype = ModuleParser.MODULE_TYPE_ALL;
 		}
 		if(PreferenceUtil.LIB_TYPE_WORKSPACE_FOLDER.equals(type)){

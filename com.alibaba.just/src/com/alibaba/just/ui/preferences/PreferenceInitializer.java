@@ -19,7 +19,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 		IPreferenceStore store = Activator.getDefault().getPreferenceStore();
 		store.setDefault(PreferenceConstants.P_FILE_CHARSET,PreferenceConstants.DEFAULT_FILE_CHARTSET);
 		store.setDefault(PreferenceConstants.P_MD_TYPE,PreferenceConstants.DEFAULT_MD_TYPE);
-		store.setDefault(PreferenceConstants.P_SHOW_LIB_ANONYMOUSE,PreferenceConstants.DEFAULT_SHOW_LIB_ANONYMOUSE);
+		store.setDefault(PreferenceConstants.P_SHOW_LIB_ANONYMOUS,PreferenceConstants.DEFAULT_SHOW_LIB_ANONYMOUSE);
 		store.setDefault(PreferenceConstants.P_SHOW_MATCH_START,PreferenceConstants.DEFAULT_SHOW_MATCH_START);
 		store.setDefault(PreferenceConstants.P_SHOW_MATCH_PARTIAL,PreferenceConstants.DEFAULT_SHOW_MATCH_PARTIAL);
 		store.setDefault(PreferenceConstants.P_IS_NODEJS,PreferenceConstants.DEFAULT_IS_NODEJS);

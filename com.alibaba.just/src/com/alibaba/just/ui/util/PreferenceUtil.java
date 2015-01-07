@@ -624,8 +624,8 @@ public class PreferenceUtil {
 	 * 
 	 * @return
 	 */
-	public static boolean isShowLibAnonymouseModule(){
-		return getPluginPreferenceStore().getBoolean(PreferenceConstants.P_SHOW_LIB_ANONYMOUSE);
+	public static boolean isShowLibAnonymousModule(){
+		return getPluginPreferenceStore().getBoolean(PreferenceConstants.P_SHOW_LIB_ANONYMOUS);
 	}
 
 	/**

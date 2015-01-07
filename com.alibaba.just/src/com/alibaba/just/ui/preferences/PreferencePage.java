@@ -53,7 +53,7 @@ implements IWorkbenchPreferencePage {
 
 		addField(new RadioGroupFieldEditor(PreferenceConstants.P_MD_TYPE,"Choose Parser Module Definition Type",1,
 				new String[][]{{"AMD (e.g:RequireJS, lofty)","1"},{"CMD (e.g:CommonJS)","2"},{"UMD (AMD && CMD)","3"}},getFieldEditorParent(),true));
-		addField(new BooleanFieldEditor(PreferenceConstants.P_SHOW_LIB_ANONYMOUSE, "Show library's anonymouse module in Module View", getFieldEditorParent()));
+		addField(new BooleanFieldEditor(PreferenceConstants.P_SHOW_LIB_ANONYMOUS, "Show library's anonymouse module in Module View", getFieldEditorParent()));
 		addField(new BooleanFieldEditor(PreferenceConstants.P_SHOW_MATCH_START, "Show module assist with start string matches.(JSDT require)", getFieldEditorParent()));
 		addField(new BooleanFieldEditor(PreferenceConstants.P_SHOW_MATCH_PARTIAL, "Show module assist with partial matches.(JSDT require)", getFieldEditorParent()));
 		//define key word
@@ -133,7 +133,7 @@ implements IWorkbenchPreferencePage {
 		String charset = PreferenceUtil.getFileCharset();
 		int mdType = PreferenceUtil.getMDType();
 		boolean isNodeJs = PreferenceUtil.isNodeJs();
-		boolean showAnoyModule = PreferenceUtil.isShowLibAnonymouseModule();
+		boolean showAnoyModule = PreferenceUtil.isShowLibAnonymousModule();
 		String key1 = PreferenceUtil.getDefineKeyWord();
 		String key2 = PreferenceUtil.getRequireKeyWord();
 		boolean rs =  super.performOk();
@@ -144,7 +144,7 @@ implements IWorkbenchPreferencePage {
 		if(mdType!=PreferenceUtil.getMDType()//MD type change
 				|| isNodeJs != PreferenceUtil.isNodeJs()//is nodejs
 				|| !charset.equalsIgnoreCase((PreferenceUtil.getFileCharset()))//charset change
-				|| showAnoyModule != PreferenceUtil.isShowLibAnonymouseModule()//show lib mode change
+				|| showAnoyModule != PreferenceUtil.isShowLibAnonymousModule()//show lib mode change
 				|| key1 != PreferenceUtil.getDefineKeyWord()//AMD define key word change
 				|| key2 != PreferenceUtil.getRequireKeyWord() ){ //CMD require key word change
 			ResourceCacheManager.removeAll();

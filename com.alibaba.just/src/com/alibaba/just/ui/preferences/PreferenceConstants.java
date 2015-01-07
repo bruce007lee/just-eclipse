@@ -16,7 +16,7 @@ public class PreferenceConstants {
 	
 	public static final String P_FILE_CHARSET= "just_fileCharset";
 	public static final String P_MD_TYPE= "just_md_type";
-	public static final String P_SHOW_LIB_ANONYMOUSE= "just_show_lib_anonymouse";
+	public static final String P_SHOW_LIB_ANONYMOUS= "just_show_lib_anonymous";
 	public static final String P_SHOW_MATCH_START= "just_show_match_start";
 	public static final String P_SHOW_MATCH_PARTIAL= "just_show_match_partial";
 	public static final String P_DEFINE_KEY_WORD= "just_define_key_word_reg";
