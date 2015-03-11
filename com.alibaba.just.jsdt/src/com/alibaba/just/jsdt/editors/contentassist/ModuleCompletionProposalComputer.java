@@ -28,6 +28,7 @@ import com.alibaba.just.jsdt.PluginConstants;
 import com.alibaba.just.jsdt.util.ImageManager;
 import com.alibaba.just.ui.util.PluginResourceUtil;
 import com.alibaba.just.ui.util.PreferenceUtil;
+import com.alibaba.just.ui.util.TemplateUtil;
 
 public class ModuleCompletionProposalComputer implements IJavaCompletionProposalComputer{
 
@@ -55,6 +56,16 @@ public class ModuleCompletionProposalComputer implements IJavaCompletionProposal
 			listCache.clear();
 			listCache=null;
 		}
+	}
+
+	private String getFileName(String name){
+		if(name!=null){
+			int idx = name.lastIndexOf(".");
+			if(idx>=0){
+				return name.substring(0,idx);
+			}
+		}
+		return name;
 	}
 
 	public List computeCompletionProposals(
@@ -133,6 +144,13 @@ public class ModuleCompletionProposalComputer implements IJavaCompletionProposal
 							mpath = mpath.substring(1);
 						}
 						proposals.add(new String[]{mpath,PROPOSALS_PACKAGE_TYPE});
+						String str = getFileName(ifile.getName());
+						String str1 = TemplateUtil.getTemplateUtil().toCamel(str);
+						String str2 = TemplateUtil.getTemplateUtil().toHorLine(str);
+						proposals.add(new String[]{mpath+"/"+str1,PROPOSALS_PACKAGE_TYPE});
+						if(str1!=null && !str1.equals(str2)){
+							proposals.add(new String[]{mpath+"/"+str2,PROPOSALS_PACKAGE_TYPE});
+						}
 					}
 				}
 			}
