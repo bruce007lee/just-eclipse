@@ -85,6 +85,15 @@
          </partition>
       </javaCompletionProposalComputer>
    </extension>
+   
+   <extension point="org.eclipse.ui.workbench.texteditor.hyperlinkDetectors">
+	  <hyperlinkDetector
+	    id="com.alibaba.just.jsdt.editors.hyperlink.HyperLink"
+	    targetId="org.eclipse.wst.jsdt.ui.javaCode"
+	    class="com.alibaba.just.jsdt.editors.hyperlink.HyperLink"
+	    name="Find reference detector">
+	  </hyperlinkDetector>
+   </extension>
 
    <!-- startup -->
    <extension

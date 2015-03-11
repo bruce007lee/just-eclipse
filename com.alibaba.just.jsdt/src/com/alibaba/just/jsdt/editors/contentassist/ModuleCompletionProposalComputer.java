@@ -144,11 +144,13 @@ public class ModuleCompletionProposalComputer implements IJavaCompletionProposal
 			List<String> aliasList = null;
 			for (Iterator<Module> iter = moduleList.iterator(); iter.hasNext();) {
 				tmp = iter.next();
-				proposals.add(new String[]{tmp.getName(),PROPOSALS_NORMAL_TYPE});
-				if(tmp.hasAlias()){
-					aliasList = tmp.getAlias();
-					for(String alias:aliasList){
-						proposals.add(new String[]{alias,PROPOSALS_ALIAS_TYPE});
+				if(tmp.getName()!=null){
+					proposals.add(new String[]{tmp.getName(),PROPOSALS_NORMAL_TYPE});
+					if(tmp.hasAlias()){
+						aliasList = tmp.getAlias();
+						for(String alias:aliasList){
+							proposals.add(new String[]{alias,PROPOSALS_ALIAS_TYPE});
+						}
 					}
 				}
 			}
@@ -171,7 +173,7 @@ public class ModuleCompletionProposalComputer implements IJavaCompletionProposal
 				tmp =  prop[0].toLowerCase();
 				if(prefixStr!=null){
 					prefixLen = prefixStr.length();
-					isPrefixMatch = prefixLen>0 &&  tmp.indexOf((currentText==null ? prefixStr : prefixStr + currentText).toLowerCase())==0;
+					isPrefixMatch = prefixLen>0 &&  tmp.indexOf((currentText==null ? prefixStr : prefixStr + currentText).toLowerCase())>=0;
 				}
 
 				isMatch = isMatch(tmp,currentText);

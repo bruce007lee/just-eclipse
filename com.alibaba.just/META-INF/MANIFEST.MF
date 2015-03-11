@@ -17,6 +17,7 @@ Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Export-Package: com.alibaba.just;uses:="org.eclipse.ui.plugin",
  com.alibaba.just.api.bean,
  com.alibaba.just.api.parser,
+ com.alibaba.just.javascript,
  com.alibaba.just.ui.util;uses:="org.eclipse.core.resources",
  com.alibaba.just.util;uses:="com.alibaba.just.util.bean"
 Bundle-ClassPath: .,
