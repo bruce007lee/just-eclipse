@@ -65,7 +65,6 @@ public class RhinoModuleParser extends AbstractModuleParser {
 
 				if(content==null){return moduleList ;}
 
-
 				/* 
 				   CompilerEnvirons ce = new CompilerEnvirons();
 			       ce.setRecordingLocalJsDocComments(true);
