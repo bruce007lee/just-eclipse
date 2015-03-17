@@ -130,6 +130,8 @@ public class TemplateUtil {
 			int idx = newPath.lastIndexOf("/");
 			if(idx>0){
 				path = path.substring(0,idx+1) + toCamel(path.substring(idx+1,path.length()),isClass,delim);
+			}else{
+				path = toCamel(path,isClass,delim);
 			}
 		}
 		return path;
@@ -174,6 +176,8 @@ public class TemplateUtil {
 			int idx = newPath.lastIndexOf("/");
 			if(idx>0){
 				path = path.substring(0,idx+1) + toHorLine(path.substring(idx+1,path.length()),sep);
+			}else{
+				path = toHorLine(path,sep);
 			}
 		}
 		return path;
