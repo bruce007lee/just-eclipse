@@ -63,7 +63,7 @@ public class RhinoModuleParser extends AbstractModuleParser {
 					content = FileUtil.getFileContent(file, charset);
 				} catch (Exception e) {}
 
-				if(content==null){return null ;}
+				if(content==null){return moduleList ;}
 
 
 				/* 
